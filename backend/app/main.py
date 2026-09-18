@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import Optional, Dict, Any, List
 
 from app.config import settings
-from app.database import engine, Base, get_db
+from app.database import engine, Base, get_db, SessionLocal
 import app.models  # Ensures all SQLAlchemy models are registered
 
 # Import routers
@@ -43,7 +43,8 @@ app = FastAPI(
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=settings.get_cors_origins(),
+    allow_origin_regex=r"^https://.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -70,7 +71,21 @@ app.include_router(notes_router, prefix=settings.API_V1_STR)
 app.include_router(career_router, prefix=settings.API_V1_STR)
 app.include_router(admin_router, prefix=settings.API_V1_STR)
 
+@app.on_event("startup")
+def on_startup():
+    """Auto-seeds fresh database (e.g. newly provisioned Postgres on Vercel) if empty."""
+    try:
+        db = SessionLocal()
+        if db.query(Subject).count() == 0:
+            from seed import seed_database
+            seed_database(reset=False)
+        db.close()
+    except Exception as e:
+        print(f"Startup check notice: {e}")
+
 @app.get("/")
+@app.get("/api")
+@app.get("/api/")
 def root():
     return {
         "app": "CodeOrbit",

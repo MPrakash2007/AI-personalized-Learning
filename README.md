@@ -191,5 +191,71 @@ set PYTHONPATH=backend
 
 ---
 
+## 🌐 Deploying to Vercel (Single Unified Project)
+
+CodeOrbit is architected to deploy as a **single Vercel project** containing both the React + Vite frontend and the FastAPI serverless backend under one unified URL (e.g. `https://my-codeorbit.vercel.app`).
+
+### A. How to Deploy the Repository to Vercel
+1. Push your latest code to your GitHub repository:
+   ```bash
+   git push origin main
+   ```
+2. Go to [Vercel Dashboard](https://vercel.com/dashboard) and click **"Add New..."** → **"Project"**.
+3. Select your repository (`MPrakash2007/AI-personalized-Learning`).
+4. Configure the project settings as described below.
+
+### B. Root Directory
+- **Root Directory**: Leave as `./` (Root directory of the repository).
+- Do **NOT** select `frontend` or `backend` as the root directory. Vercel will build both via `vercel.json`.
+
+### C. Build & Output Settings
+The repository's `vercel.json` and root `package.json` automatically configure these settings. If prompted in the Vercel dashboard:
+- **Framework Preset**: `Vite` (or `Other`)
+- **Build Command**: `cd frontend && npm install && npm run build` (or leave default `npm run build`)
+- **Output Directory**: `frontend/dist`
+- **Install Command**: Leave default
+
+### D. Required Environment Variables
+In the Vercel Project Settings (**Settings** → **Environment Variables**), add:
+
+| Variable Name | Required? | Example Value | Description |
+| :--- | :---: | :--- | :--- |
+| `DATABASE_URL` | **Yes (Prod)** | `postgresql://user:pass@ep-xyz.neon.tech/neondb?sslmode=require` | Managed PostgreSQL connection string (Neon, Supabase, Vercel Postgres). |
+| `JWT_SECRET` | **Yes (Prod)** | `openssl rand -hex 32` | Cryptographic secret key for signing session tokens. |
+| `CORS_ORIGINS` | Optional | `https://my-codeorbit.vercel.app` | Comma-separated custom origins (Vercel preview URLs are allowed automatically). |
+| `AI_PROVIDER` | Optional | `rule-based` | Defaults to `rule-based` (offline, zero API keys required). |
+
+### E. How to Configure the Database
+1. Provision a free PostgreSQL database:
+   - **Neon**: [neon.tech](https://neon.tech) (recommended for instant serverless pooling)
+   - **Supabase**: [supabase.com](https://supabase.com)
+   - **Vercel Postgres**: Integrated via Vercel Marketplace
+2. Copy your connection URI and paste it as `DATABASE_URL` in Vercel.
+   - *Note: Both `postgres://` and `postgresql://` URI schemes are automatically normalized.*
+3. **Automatic Initialization**: On the first request after deployment, CodeOrbit automatically detects an empty database and runs idempotent seeding for all 6 subjects, 74 topics, 12 exam sections per topic, and the demo user!
+
+### F. How to Test the Deployed Application
+1. **Frontend Navigation**:
+   - Open your deployed URL: `https://<your-project>.vercel.app/`
+   - Test direct SPA routes (no 404s): `/learn`, `/practice`, `/ai-tutor`, `/question-bank`, `/placement`, `/profile`.
+2. **Backend API Health**:
+   - Visit: `https://<your-project>.vercel.app/api`
+   - Expected Response:
+     ```json
+     {
+       "app": "CodeOrbit",
+       "description": "AI Personalized Learning Platform for Engineering Students",
+       "version": "1.0.0",
+       "status": "online",
+       "docs": "/docs"
+     }
+     ```
+3. **Authentication & Features**:
+   - Login with demo student: `demo@codeorbit.local` / `Demo@123`.
+   - Open any subject (e.g. DBMS) and test the 12-section masterclass, Quick Reference modal, and topic quiz submission.
+
+---
+
 ## 📜 License
 Educational MIT License — Built for Computer Science & Engineering students worldwide.
+

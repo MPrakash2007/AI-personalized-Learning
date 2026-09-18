@@ -39,6 +39,11 @@ Thumbs.db
 *.swp
 *.swo
 
+# Vercel
+.vercel/
+
 # Environment variables
 .env
-.env.local
+.env.*
+!.env.example
+
