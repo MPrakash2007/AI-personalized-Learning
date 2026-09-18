@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -9,8 +10,23 @@ from app.schemas.ai import ChatMessageRequest, ExplainMistakeRequest, ExplainMis
 from app.auth.deps import get_current_user
 from app.services.ai_service import get_ai_provider
 from app.services.gamification_service import unlock_achievement
+from app.services.retrieval_service import search_educational_knowledge
 
 router = APIRouter(prefix="/ai", tags=["AI Tutor"])
+
+@router.get("/search")
+def search_ai_knowledge(
+    q: Optional[str] = None,
+    query: Optional[str] = None,
+    subject: Optional[str] = None,
+    subject_slug: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Retrieve grounded curriculum context, relevant questions, and source references."""
+    search_query = q or query or ""
+    subj_filter = subject or subject_slug
+    return search_educational_knowledge(db, search_query, subject_slug=subj_filter)
 
 @router.post("/chat")
 def chat_with_tutor(
@@ -26,12 +42,14 @@ def chat_with_tutor(
             ChatSession.user_id == current_user.id
         ).first()
 
+    subject_slug = None
     if not session:
         subject_name = "General CS"
         if req.subject_id:
             subj = db.query(Subject).filter(Subject.id == req.subject_id).first()
             if subj:
                 subject_name = subj.name
+                subject_slug = subj.slug
         session = ChatSession(
             user_id=current_user.id,
             subject_id=req.subject_id,
@@ -40,6 +58,10 @@ def chat_with_tutor(
         db.add(session)
         db.commit()
         db.refresh(session)
+    elif session.subject_id:
+        subj = db.query(Subject).filter(Subject.id == session.subject_id).first()
+        if subj:
+            subject_slug = subj.slug
 
     # Save student message
     student_msg = ChatMessage(
@@ -50,10 +72,15 @@ def chat_with_tutor(
     db.add(student_msg)
     db.commit()
 
-    # Query AI provider
+    # Search local database curriculum content
+    retrieval_data = search_educational_knowledge(db, req.message, subject_slug=subject_slug)
+
+    # Query AI provider with grounded retrieval context
     provider = get_ai_provider()
     context = session.title if session else "Computer Science"
-    ai_reply_text, quick_check_data = provider.chat_tutor(req.message, context=context)
+    ai_reply_text, quick_check_data, sources = provider.chat_tutor(
+        req.message, context=context, retrieval_data=retrieval_data
+    )
 
     # Save AI response
     ai_msg = ChatMessage(
@@ -76,8 +103,10 @@ def chat_with_tutor(
     return {
         "session_id": session.id,
         "message": ai_reply_text,
-        "quick_check": quick_check_data
+        "quick_check": quick_check_data,
+        "sources": sources
     }
+
 
 @router.get("/sessions")
 def get_chat_sessions(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

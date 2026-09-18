@@ -1,7 +1,7 @@
 from app.models.user import User, UserPreferences, LearningStreak, XPTransaction
 from app.models.learning import (
     Subject, Topic, Lesson, LessonStep, Question, QuestionOption,
-    UserQuestionAttempt, TopicProgress, Bookmark
+    UserQuestionAttempt, TopicProgress, Bookmark, PracticeSession, PracticeSessionQuestion
 )
 from app.models.gamification import (
     Achievement, UserAchievement, DailyQuest, UserDailyQuest,
@@ -25,6 +25,8 @@ __all__ = [
     "UserQuestionAttempt",
     "TopicProgress",
     "Bookmark",
+    "PracticeSession",
+    "PracticeSessionQuestion",
     "Achievement",
     "UserAchievement",
     "DailyQuest",
@@ -39,3 +41,4 @@ __all__ = [
     "ChatSession",
     "ChatMessage",
 ]
+

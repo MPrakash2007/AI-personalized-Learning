@@ -68,7 +68,7 @@ export default function InteractiveTask({ question, topicId, onCompleteNext }) {
     setSubmitted(false);
     setResult(null);
     setSimilarQuestion(null);
-    if (onCompleteNext) onCompleteNext();
+    if (onCompleteNext) onCompleteNext(result?.is_correct || false, result?.xp_earned || 0);
   };
 
   const handleTrySimilar = (similarData) => {

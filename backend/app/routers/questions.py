@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.database import get_db
-from app.models.learning import Question, QuestionOption, Bookmark, UserQuestionAttempt, Topic, Subject
+from app.models.learning import Question, QuestionOption, Bookmark, UserQuestionAttempt, Topic, Subject, TopicProgress
 from app.models.user import User
 from app.schemas.learning import QuestionResponse, BookmarkCreate, BookmarkResponse
 from app.auth.deps import get_current_user
@@ -15,15 +15,27 @@ def get_questions(
     topic_id: Optional[int] = None,
     difficulty: Optional[str] = None,
     question_type: Optional[str] = None,
+    question_context: Optional[str] = None,
     is_important: Optional[bool] = None,
     only_bookmarked: Optional[bool] = False,
     only_incorrect: Optional[bool] = False,
-    limit: int = Query(20, ge=1, le=100),
+    completed_only: Optional[bool] = False,
+    search: Optional[str] = None,
+    limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     query = db.query(Question)
+
+    if completed_only:
+        completed_ids = [
+            row[0] for row in db.query(TopicProgress.topic_id).filter(
+                TopicProgress.user_id == current_user.id,
+                TopicProgress.status.in_(["COMPLETED", "MASTERED"])
+            ).all()
+        ]
+        query = query.filter(Question.topic_id.in_(completed_ids))
 
     if topic_id:
         query = query.filter(Question.topic_id == topic_id)
@@ -36,6 +48,9 @@ def get_questions(
 
     if question_type:
         query = query.filter(Question.question_type == question_type)
+
+    if question_context:
+        query = query.filter(Question.question_context == question_context.upper())
 
     if is_important is not None:
         query = query.filter(Question.is_important == is_important)
@@ -51,7 +66,12 @@ def get_questions(
         ).all()]
         query = query.filter(Question.id.in_(wrong_ids))
 
+    if search:
+        s_term = f"%{search.strip().lower()}%"
+        query = query.filter((Question.prompt.ilike(s_term)) | (Question.explanation.ilike(s_term)))
+
     return query.offset(offset).limit(limit).all()
+
 
 @router.get("/bookmarks", response_model=List[BookmarkResponse])
 def get_bookmarks(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

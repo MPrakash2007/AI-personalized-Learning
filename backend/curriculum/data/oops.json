@@ -1,0 +1,1344 @@
+{
+  "oop-fundamentals": {
+    "title": "OOP Fundamentals",
+    "subject": "oops",
+    "exam_definition": "Object-Oriented Programming (OOP) is a software engineering programming paradigm organized around data objects containing attributes (state) and methods (behavior), structured by four foundational pillars: Encapsulation, Abstraction, Inheritance, and Polymorphism.",
+    "remember": "Four Pillars of OOP: Encapsulation (Hiding), Abstraction (Simplifying), Inheritance (Reusing), Polymorphism (Adapting).",
+    "core_concept": "Procedural programming treats code as a sequence of functions modifying global/local state, leading to tight coupling, security vulnerabilities, and maintenance nightmares as codebases scale. OOP models real-world entities as autonomous objects with protected state and well-defined message-passing interfaces. This modularity improves maintainability, code reusability, and software extensibility.",
+    "key_points": [
+      "Encapsulation: Bundles data and methods together while restricting direct access using access specifiers.",
+      "Abstraction: Exposes only essential features to the outside world while hiding complex internal implementations.",
+      "Inheritance: Enables child classes to inherit attributes and methods from parent classes, facilitating code reuse.",
+      "Polymorphism: Allows an entity or method to take multiple forms (compile-time overloading or runtime overriding).",
+      "Message Passing: Objects communicate by invoking methods on each other rather than mutating raw memory directly."
+    ],
+    "classification": {
+      "title": "Programming Paradigms",
+      "items": [
+        {
+          "name": "Procedural Programming",
+          "desc": "Focuses on procedures/functions and step-by-step instructions (e.g. C, Pascal). Data is often exposed globally."
+        },
+        {
+          "name": "Object-Oriented Programming",
+          "desc": "Focuses on objects bundling data and behavior (e.g. Java, C++, Python). Emphasizes data protection."
+        },
+        {
+          "name": "Functional Programming",
+          "desc": "Focuses on pure mathematical functions, immutability, and avoidance of side effects (e.g. Haskell, Lisp)."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "OOP System Design & Object Communication",
+      "steps": [
+        "1. Class Definition: Define blueprint specifying member variables and member functions.",
+        "2. Object Instantiation: Constructor allocates memory on the heap and initializes state.",
+        "3. Encapsulated State Access: External clients interact only via public getters and setters.",
+        "4. Inheritance Hierarchy: Subclasses inherit base functionality and can override specific methods.",
+        "5. Polymorphic Dispatch: Runtime dynamically executes correct method implementation using virtual method tables (vtables)."
+      ],
+      "diagram": "Class Blueprint \u2192 Object Instantiation (Heap Memory) \u2192 Method Invocation (Message Passing)"
+    },
+    "example": {
+      "title": "Bank Account OOP Modeling",
+      "scenario": "A `BankAccount` class holds `accountNumber` and private `balance`. Direct mutation (`account.balance = -1000`) is prevented by private access. `deposit()` and `withdraw()` enforce business validation rules (balance cannot drop below zero).",
+      "code": "public class BankAccount {\n    private String accountNumber;      // Encapsulated state\n    private double balance;\n\n    public BankAccount(String accNo, double initialBalance) {\n        this.accountNumber = accNo;\n        this.balance = Math.max(0, initialBalance);\n    }\n\n    public void withdraw(double amount) {\n        if (amount > 0 && amount <= balance) {\n            balance -= amount;\n        } else {\n            throw new IllegalArgumentException(\"Invalid or insufficient funds\");\n        }\n    }\n    public double getBalance() { return balance; }\n}"
+    },
+    "comparison": {
+      "title": "Procedural Programming vs Object-Oriented Programming",
+      "headers": [
+        "Feature",
+        "Procedural Programming (POP)",
+        "Object-Oriented Programming (OOP)"
+      ],
+      "rows": [
+        [
+          "Primary Focus",
+          "Functions and algorithms (action-oriented)",
+          "Data and objects (data-oriented)"
+        ],
+        [
+          "Data Security",
+          "Low \u2014 global data can be accessed and modified anywhere",
+          "High \u2014 data hiding via private/protected encapsulation"
+        ],
+        [
+          "Approach",
+          "Top-down design",
+          "Bottom-up design"
+        ],
+        [
+          "Code Reusability",
+          "Limited \u2014 requires copying functions or library imports",
+          "High \u2014 facilitated through inheritance and polymorphism"
+        ],
+        [
+          "Examples",
+          "C, Pascal, Fortran",
+          "Java, C++, Python, C#"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "OOP Paradigm Invariant",
+        "formula": "Object = State (Fields) + Behavior (Methods) + Identity (Memory Address)",
+        "explanation": "Every object has distinctive state, callable methods, and unique identity."
+      }
+    ],
+    "exam_tip": "Remember: The four pillars of OOP are Encapsulation (data hiding), Abstraction (implementation hiding), Inheritance (code reuse), and Polymorphism (many forms).",
+    "common_confusion": {
+      "wrong": "Encapsulation and Abstraction are the exact same thing.",
+      "correct": "Encapsulation is data hiding (bundling data and methods into a single capsule and restricting access), whereas Abstraction is implementation hiding (exposing only essential interfaces while concealing complex details).",
+      "explanation": "Access specifiers (private/public) achieve Encapsulation; Abstract classes and Interfaces achieve Abstraction."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is the difference between Encapsulation and Abstraction?",
+        "a": "Encapsulation is the practice of bundling data and methods into a single unit (class) and restricting direct access using access modifiers to protect state. Abstraction is the practice of hiding internal implementation details and showing only the essential interface to the user."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Explain the four pillars of Object-Oriented Programming with brief examples.",
+        "a": "1. Encapsulation: Hiding internal object state using private variables and public getters/setters (e.g. private balance in BankAccount).\n2. Abstraction: Presenting a simplified interface while concealing implementation details via abstract classes or interfaces (e.g. List interface hiding ArrayList array resizing).\n3. Inheritance: Reusing parent class properties in derived child classes via extends/inheritance (e.g. Car extends Vehicle).\n4. Polymorphism: Allowing the same method call to execute different behaviors depending on object type (e.g. Shape.draw() executes Circle.draw() or Square.draw())."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Compare Procedural Programming with Object-Oriented Programming. Detail how OOP enhances software maintainability, security, and scalability.",
+        "a": "1. Comparison: Procedural focuses on algorithms and functions with top-down design and weak data protection; OOP focuses on objects and data protection with bottom-up design.\n2. Maintainability: Modularity ensures changes to a class's internal implementation do not ripple across unrelated modules.\n3. Security: Encapsulation prevents unauthorized external mutation of critical state.\n4. Scalability: Inheritance and polymorphism allow extending systems with new subclasses without modifying existing, tested code (Open/Closed Principle)."
+      }
+    ],
+    "revision_60s": [
+      "4 Pillars: Encapsulation, Abstraction, Inheritance, Polymorphism.",
+      "POP is function-centric (top-down); OOP is data-centric (bottom-up).",
+      "Encapsulation = Data Hiding (private/public).",
+      "Abstraction = Implementation Hiding (interfaces/abstract classes).",
+      "Inheritance = Code reuse (IS-A relationship).",
+      "Polymorphism = Multiple forms (compile-time vs runtime)."
+    ]
+  },
+  "classes-and-objects": {
+    "title": "Classes and Objects",
+    "subject": "oops",
+    "exam_definition": "A Class is a user-defined blueprint or prototype from which objects are created. An Object is a concrete, runtime instance of a class that encapsulates state (attributes), behavior (methods), and a unique identity (memory address on the heap).",
+    "remember": "Class = Blueprint (Compiler/Metadata); Object = Physical Instance (Heap Memory).",
+    "core_concept": "Classes exist at compile-time as structural definitions. Objects exist at runtime in memory. In languages like Java and C++, local object reference variables reside on the Call Stack, while the actual object data and fields are allocated on the Heap. The `new` keyword dynamically allocates heap space and invokes the constructor to initialize object state.",
+    "key_points": [
+      "Class: A logical template defining fields and methods; consumes no heap memory until instantiated.",
+      "Object: A physical instance with allocated heap memory containing actual data values.",
+      "State: Represented by the current values of its instance variables.",
+      "Behavior: Represented by the methods that operate on the instance variables.",
+      "Identity: Unique memory location distinguishing an object from all other objects (even if states are identical).",
+      "`this` Pointer / Reference: Implicit reference to the current object invoking the method."
+    ],
+    "classification": {
+      "title": "Types of Variables in a Class",
+      "items": [
+        {
+          "name": "Instance Variables",
+          "desc": "Non-static variables defined inside class; each object gets its own separate copy on the heap."
+        },
+        {
+          "name": "Static / Class Variables",
+          "desc": "Shared across ALL instances of the class; stored in method area/metaspace; exactly one copy exists."
+        },
+        {
+          "name": "Local Variables",
+          "desc": "Declared inside a method or block; allocated on the stack; destroyed when method exits."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Object Creation and Memory Lifecycle",
+      "steps": [
+        "1. Class Loading: JVM/runtime loads bytecode into Metaspace/Method Area.",
+        "2. Memory Allocation: `new` operator allocates memory on the Heap for all instance variables.",
+        "3. Constructor Execution: Initializes fields with default/parameterized values.",
+        "4. Reference Assignment: Heap memory address is assigned to stack reference variable (e.g. `Student s1`).",
+        "5. Garbage Collection: When reference goes out of scope or is set to null, object becomes eligible for GC."
+      ],
+      "diagram": "Stack: [Ref s1: 0x4A] \u2500\u2500\u25ba Heap Memory: [0x4A: id=101, name='Rahul', gpa=8.9]"
+    },
+    "example": {
+      "title": "Car Class and Multiple Instances",
+      "scenario": "Demonstrating how multiple objects share class methods but hold distinct instance state:",
+      "code": "class Car {\n    String model;         // Instance variable (heap)\n    int speed;\n    static int carCount;  // Static class variable (shared)\n\n    Car(String model) {\n        this.model = model;\n        this.speed = 0;\n        carCount++;       // Increments shared count\n    }\n    void accelerate(int delta) { this.speed += delta; }\n}\n// Car c1 = new Car(\"Tesla\"); Car c2 = new Car(\"BMW\");"
+    },
+    "comparison": {
+      "title": "Class vs Object",
+      "headers": [
+        "Feature",
+        "Class",
+        "Object"
+      ],
+      "rows": [
+        [
+          "Definition",
+          "Template or blueprint for creating objects",
+          "Instance of a class containing real data"
+        ],
+        [
+          "Memory",
+          "Does not allocate heap memory for fields",
+          "Allocates physical heap memory when created"
+        ],
+        [
+          "Existence",
+          "Exists at compile time",
+          "Created and destroyed dynamically at runtime"
+        ],
+        [
+          "Count",
+          "Declared once in source code",
+          "Can instantiate unlimited objects from one class"
+        ],
+        [
+          "Analogy",
+          "Architectural blueprint of a house",
+          "The physical house built from the blueprint"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Object Identity Equality",
+        "formula": "o1 == o2 \u27fa Memory_Address(o1) = Memory_Address(o2)",
+        "explanation": "Double-equals tests reference identity; .equals() tests value equality."
+      }
+    ],
+    "exam_tip": "Remember: Instance variables are allocated on the Heap for every object, while Local variables are allocated on the Call Stack and destroyed when the method terminates.",
+    "common_confusion": {
+      "wrong": "`==` and `.equals()` do the exact same thing in Java.",
+      "correct": "`==` compares memory addresses (reference identity), whereas `.equals()` compares logical content (if overridden by the class).",
+      "explanation": "Two different Student objects with identical names will evaluate to FALSE with `==` but TRUE with a properly overridden `.equals()`."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is the difference between a Class and an Object?",
+        "a": "A Class is a compile-time blueprint or user-defined data type that defines attributes and methods without allocating heap memory. An Object is a runtime instance of a class that occupies physical heap memory and contains actual values for the attributes."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Explain the memory allocation of objects in Java (Stack vs Heap).",
+        "a": "1. Stack Memory: Stores primitive local variables and object reference variables (pointers). Stack allocation is fast and follows strict LIFO order.\n2. Heap Memory: Stores all created objects and their instance variables. Memory is dynamically allocated at runtime via `new`.\nWhen executing `Student s = new Student(\"Amit\");`, the reference `s` is stored on the Stack, pointing to the `Student` object allocated on the Heap."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Explain instance variables, static variables, and the role of the 'this' keyword with memory diagrams.",
+        "a": "1. Instance Variables: Defined inside class without static keyword. Every instantiated object receives its own independent copy stored in the heap.\n2. Static Variables: Declared with `static`. Shared across all instances of the class, stored in the Metaspace/Method Area. Modifying a static variable from one instance updates it for all instances.\n3. 'this' Keyword: A reference variable that refers to the current object. Used to: (a) Resolve name shadowing between instance variables and constructor parameters (`this.id = id`), (b) Chain constructors (`this()`), (c) Pass the current object as a parameter to other methods."
+      }
+    ],
+    "revision_60s": [
+      "Class = Blueprint; Object = Instance.",
+      "Object components: State (fields), Behavior (methods), Identity (address).",
+      "Stack holds reference pointers; Heap holds actual object data.",
+      "Static variables belong to the class (one copy shared by all).",
+      "Instance variables belong to each object.",
+      "'this' keyword refers to the current invoking instance."
+    ]
+  },
+  "constructors": {
+    "title": "Constructors",
+    "subject": "oops",
+    "exam_definition": "A Constructor is a special member function of a class that is automatically invoked when an object is instantiated, having the same name as the class, no return type, and primary purpose of initializing object state.",
+    "remember": "Constructor initializes objects. Destructor cleans up resources. Constructor has NO return type.",
+    "core_concept": "When memory is allocated for an object, attributes hold zero/null garbage unless initialized. Constructors guarantee that objects start life in a valid, consistent state. If no constructor is written, the compiler provides an invisible default no-arg constructor. Once any custom constructor is defined, the compiler removes the default constructor. Constructors can be overloaded to provide multiple initialization options.",
+    "key_points": [
+      "Same Name: Must have the exact same name as the enclosing class.",
+      "No Return Type: Cannot specify a return type (not even void).",
+      "Automatic Invocation: Called automatically upon `new ClassName()`.",
+      "Constructor Overloading: A class can define multiple constructors with differing parameter lists.",
+      "Shallow Copy vs Deep Copy: Crucial exam distinction when copying objects with dynamic pointers.",
+      "Destructors (C++): Preceded by tilde `~ClassName()`, invoked when object goes out of scope to release memory."
+    ],
+    "classification": {
+      "title": "Types of Constructors",
+      "items": [
+        {
+          "name": "Default / No-Argument Constructor",
+          "desc": "Takes no parameters; provided by compiler if no constructor is explicitly written."
+        },
+        {
+          "name": "Parameterized Constructor",
+          "desc": "Accepts parameters to initialize fields with custom values at creation time."
+        },
+        {
+          "name": "Copy Constructor",
+          "desc": "Initializes an object using attributes of another existing object of the same class."
+        },
+        {
+          "name": "Private Constructor",
+          "desc": "Prevents direct instantiation from outside; used in Singleton design pattern."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Constructor Chaining & Invocation Order",
+      "steps": [
+        "1. Superclass Constructor Call: First line of constructor implicitly calls `super()` to initialize parent state.",
+        "2. Instance Variable Initialization: Instance field initializers execute in source order.",
+        "3. Constructor Body Execution: Statements inside constructor body run.",
+        "4. Chaining via this(): A constructor can call another constructor in the same class using `this(args)` as first statement."
+      ],
+      "diagram": "Subclass Constructor \u2192 super() \u2192 Base Class Constructor \u2192 Base Init \u2192 Subclass Init"
+    },
+    "example": {
+      "title": "Constructor Overloading and Copy Constructor",
+      "scenario": "Creating points with default, parameterized, and copy constructors:",
+      "code": "class Point {\n    int x, y;\n\n    // 1. Default constructor\n    Point() { this(0, 0); }\n\n    // 2. Parameterized constructor\n    Point(int x, int y) {\n        this.x = x;\n        this.y = y;\n    }\n\n    // 3. Copy constructor (Deep copy)\n    Point(Point other) {\n        this.x = other.x;\n        this.y = other.y;\n    }\n}"
+    },
+    "comparison": {
+      "title": "Shallow Copy vs Deep Copy",
+      "headers": [
+        "Feature",
+        "Shallow Copy",
+        "Deep Copy"
+      ],
+      "rows": [
+        [
+          "Field Copying",
+          "Copies primitive values and pointer/reference addresses directly",
+          "Recursively clones nested objects and creates new heap copies"
+        ],
+        [
+          "Memory",
+          "Both objects reference the SAME underlying nested object",
+          "Objects point to completely INDEPENDENT heap allocations"
+        ],
+        [
+          "Side Effects",
+          "Mutating nested object in copy changes original object!",
+          "Mutations in copy have ZERO impact on original object"
+        ],
+        [
+          "Speed",
+          "Fast (bitwise copy)",
+          "Slower (allocates new memory for all nested objects)"
+        ],
+        [
+          "Safety",
+          "Dangerous for objects with mutable reference fields",
+          "Completely safe and isolated"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Constructor Chaining Rule",
+        "formula": "super() OR this() must be the VERY FIRST statement in a constructor",
+        "explanation": "Ensures parent or alternative constructor runs before local initialization."
+      }
+    ],
+    "exam_tip": "Remember: If you declare ANY custom constructor in a class, the compiler will NOT generate the default no-arg constructor! You must explicitly write a no-arg constructor if needed.",
+    "common_confusion": {
+      "wrong": "A constructor can return `void`.",
+      "correct": "A constructor CANNOT have any return type, not even `void`. If you write `void Student()`, it is treated as a regular method, NOT a constructor!",
+      "explanation": "Exam trick: `class Test { void Test() {} }` defines a regular method named Test, not a constructor."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is a Copy Constructor and why is it used?",
+        "a": "A Copy Constructor is a constructor that initializes a new object using an existing object of the same class as a parameter. It is used to create an exact duplicate of an object, performing deep copying of heap resources."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Explain the difference between Shallow Copy and Deep Copy with a diagram.",
+        "a": "1. Shallow Copy copies member values directly. For reference fields, it copies only the memory address, meaning both objects point to the same nested heap memory. Modifying nested data in one reflects in the other.\n2. Deep Copy allocates new memory for nested objects and copies values recursively. Both objects are completely independent.\nDiagram: Shallow: ObjA & ObjB \u2500\u2500\u25ba [Shared Nested Array]. Deep: ObjA \u2500\u2500\u25ba [Array 1], ObjB \u2500\u2500\u25ba [Array 2]."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Explain Constructor Chaining in Java using 'this()' and 'super()'. What happens during object instantiation in an inheritance hierarchy?",
+        "a": "1. Constructor Chaining is the process of calling one constructor from another constructor in succession.\n- `this()` calls another overloaded constructor within the same class.\n- `super()` calls the constructor of the direct parent class.\nRule: Either `this()` or `super()` must be the first statement in a constructor body.\n2. Instantiation order in inheritance:\n(a) Base class static initializers run.\n(b) Derived class static initializers run.\n(c) Base class constructor runs (via super()).\n(d) Derived class instance initializers and constructor body run.\nThis guarantees the base class is fully initialized before the derived class accesses inherited fields."
+      }
+    ],
+    "revision_60s": [
+      "Constructor name must match class name; NO return type.",
+      "Invoked automatically during object creation via `new`.",
+      "Compiler provides default constructor ONLY if no constructor is defined.",
+      "Overloaded constructors differentiate by parameter types/count.",
+      "`super()` or `this()` must be the very first line.",
+      "Shallow copy shares references; Deep copy duplicates nested heap objects."
+    ]
+  },
+  "encapsulation": {
+    "title": "Encapsulation",
+    "subject": "oops",
+    "exam_definition": "Encapsulation is the object-oriented principle of wrapping data (attributes) and code (methods) into a single unit (class) and restricting direct access to internal components using access modifiers to prevent unauthorized mutation and enforce data integrity.",
+    "remember": "Encapsulation = Data Hiding + Controlled Access via Getters & Setters.",
+    "core_concept": "Exposing class fields publicly allows client code to assign invalid data (e.g. `age = -50`). Encapsulation declares attributes as `private` and provides public getter and setter methods. Setters enforce validation logic, invariant checks, and read-only/write-only permissions, making software robust against invalid state transitions.",
+    "key_points": [
+      "Data Hiding: Internal state is invisible to external classes.",
+      "Access Modifiers: private, default (package-private), protected, public.",
+      "Getters & Setters: Controlled access points that validate inputs before mutation.",
+      "Read-Only Fields: Provide getter without setter.",
+      "Write-Only Fields: Provide setter without getter.",
+      "Loose Coupling: Internal field types can change without altering external caller APIs."
+    ],
+    "classification": {
+      "title": "Access Modifiers Matrix",
+      "items": [
+        {
+          "name": "private",
+          "desc": "Accessible ONLY within the declaring class."
+        },
+        {
+          "name": "default (package-private)",
+          "desc": "Accessible by classes in the SAME package."
+        },
+        {
+          "name": "protected",
+          "desc": "Accessible in the SAME package AND by subclasses in other packages."
+        },
+        {
+          "name": "public",
+          "desc": "Accessible from ANY class everywhere."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Encapsulated State Mutation Flow",
+      "steps": [
+        "1. Client code calls `setSalary(newSalary)`.",
+        "2. Setter method validates business invariants (e.g. `newSalary > currentSalary * 0.5`).",
+        "3. If validation succeeds, private field is mutated; if invalid, exception is thrown or rejected.",
+        "4. Internal storage representation can be refactored without breaking client code."
+      ],
+      "diagram": "Client Code \u2500\u2500\u25ba [Public Setter (Validation)] \u2500\u2500\u25ba [Private Variable (Protected)]"
+    },
+    "example": {
+      "title": "Secure Student Enrollment Class",
+      "scenario": "Restricting student GPA between 0.0 and 4.0 using encapsulation:",
+      "code": "public class Student {\n    private String name;\n    private double gpa; // Protected from negative values\n\n    public void setGpa(double gpa) {\n        if (gpa >= 0.0 && gpa <= 4.0) {\n            this.gpa = gpa;\n        } else {\n            throw new IllegalArgumentException(\"GPA must be between 0.0 and 4.0\");\n        }\n    }\n    public double getGpa() { return this.gpa; }\n}"
+    },
+    "comparison": {
+      "title": "Access Modifiers Visibility Comparison",
+      "headers": [
+        "Access Modifier",
+        "Same Class",
+        "Same Package",
+        "Subclass (Different Pkg)",
+        "Different Pkg"
+      ],
+      "rows": [
+        [
+          "private",
+          "Yes",
+          "No",
+          "No",
+          "No"
+        ],
+        [
+          "default (no modifier)",
+          "Yes",
+          "Yes",
+          "No",
+          "No"
+        ],
+        [
+          "protected",
+          "Yes",
+          "Yes",
+          "Yes",
+          "No"
+        ],
+        [
+          "public",
+          "Yes",
+          "Yes",
+          "Yes",
+          "Yes"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Access Specifier Scope",
+        "formula": "private < default < protected < public",
+        "explanation": "Strictness decreases from private (most restrictive) to public."
+      }
+    ],
+    "exam_tip": "Remember: The `protected` access modifier allows access within the same package AND by subclasses in different packages through inheritance.",
+    "common_confusion": {
+      "wrong": "Encapsulation is simply writing getters and setters for all private fields.",
+      "correct": "Encapsulation is data protection. If a setter blindly sets any value without validation, data hiding is achieved, but encapsulation's purpose (invariant protection) is defeated.",
+      "explanation": "True encapsulation guards the integrity of the object's internal state."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is Encapsulation and how is it achieved in OOP?",
+        "a": "Encapsulation is the mechanism of wrapping variables and methods into a single unit (class) and restricting direct access to variables. It is achieved by: (1) Declaring class fields as `private`, and (2) Providing public getter and setter methods to access and modify values."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Explain the four access modifiers in Java with their visibility scopes.",
+        "a": "1. private: Accessible only within the same class.\n2. default (package-private): Accessible only within the same package.\n3. protected: Accessible within the same package and by derived subclasses in different packages.\n4. public: Accessible from any class across all packages."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Why is Encapsulation essential for large-scale software engineering? Explain with examples of code maintainability and data validation.",
+        "a": "1. Data Validation: Direct variable access allows invalid data entry (e.g. `age = -5`). Encapsulation forces changes through setters that validate invariants.\n2. Maintainability & Decoupling: Changing internal data structures (e.g. changing `birthDate` from String to `LocalDate`) does not break external client code because getters and setters maintain the public contract.\n3. Read-only and Write-only capabilities: Classes can selectively expose getters or setters.\n4. Thread Safety: Synchronized setters ensure safe concurrent mutations without race conditions."
+      }
+    ],
+    "revision_60s": [
+      "Encapsulation bundles data and methods; restricts access.",
+      "Variables = private; Access = public getters and setters.",
+      "private (class only) < default (package) < protected (+subclasses) < public (world).",
+      "Provides data validation, read/write restrictions, and flexibility.",
+      "Protects invariants from external corruption."
+    ]
+  },
+  "inheritance": {
+    "title": "Inheritance",
+    "subject": "oops",
+    "exam_definition": "Inheritance is an object-oriented mechanism where a new class (derived/subclass) derives properties and behaviors from an existing class (base/superclass), establishing an 'IS-A' relationship and promoting code reuse.",
+    "remember": "Inheritance = 'IS-A' relationship (e.g. Dog IS-A Animal). Promotes code reuse.",
+    "core_concept": "Rather than writing common code repeatedly across classes, a base class encapsulates shared fields and methods. Subclasses inherit these features and can add specialized fields or override methods. Java does not support multiple inheritance with classes to avoid the Diamond Problem, but supports it through Interfaces.",
+    "key_points": [
+      "IS-A Relationship: Established via `extends` keyword (e.g. `Manager extends Employee`).",
+      "Superclass & Subclass: Parent class is superclass; child is subclass.",
+      "Code Reusability: Subclasses inherit non-private members of the superclass.",
+      "Method Overriding: Subclass provides specific implementation of inherited superclass method.",
+      "Diamond Problem: Ambiguity in multiple inheritance when a class inherits from two classes sharing a common ancestor.",
+      "`super` Keyword: Refers to immediate parent class members and constructors."
+    ],
+    "classification": {
+      "title": "Types of Inheritance",
+      "items": [
+        {
+          "name": "Single Inheritance",
+          "desc": "One subclass derives from one superclass (A \u2192 B)."
+        },
+        {
+          "name": "Multilevel Inheritance",
+          "desc": "Subclass acts as base class for another subclass (A \u2192 B \u2192 C)."
+        },
+        {
+          "name": "Hierarchical Inheritance",
+          "desc": "Multiple subclasses derive from one superclass (A \u2192 B, A \u2192 C)."
+        },
+        {
+          "name": "Multiple Inheritance",
+          "desc": "One subclass derives from multiple superclasses (A, B \u2192 C). Not supported with classes in Java to prevent diamond ambiguity."
+        },
+        {
+          "name": "Hybrid Inheritance",
+          "desc": "Combination of two or more inheritance types."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "The Diamond Problem & Resolution",
+      "steps": [
+        "1. Class A defines method `display()`.",
+        "2. Class B and Class C both inherit from A and override `display()`.",
+        "3. Class D inherits from both B and C (Multiple Inheritance).",
+        "4. Client calls `d.display()`. Compiler cannot determine whether to call B's or C's version (Ambiguity!).",
+        "5. Java/C# avoids this by forbidding multiple inheritance with classes, allowing it only with Interfaces."
+      ],
+      "diagram": "Diamond: Class A \u2500\u2500\u25ba Class B & Class C \u2500\u2500\u25ba Class D (Ambiguity!)"
+    },
+    "example": {
+      "title": "Employee & Manager Hierarchy",
+      "scenario": "Manager inherits base Employee fields and overrides bonus calculation:",
+      "code": "class Employee {\n    String name;\n    double baseSalary;\n\n    Employee(String name, double salary) {\n        this.name = name;\n        this.baseSalary = salary;\n    }\n    double calculateBonus() { return baseSalary * 0.10; }\n}\n\nclass Manager extends Employee {\n    int teamSize;\n\n    Manager(String name, double salary, int teamSize) {\n        super(name, salary); // Calls parent constructor\n        this.teamSize = teamSize;\n    }\n    @Override\n    double calculateBonus() {\n        return super.calculateBonus() + (teamSize * 500); // Extends parent method\n    }\n}"
+    },
+    "comparison": {
+      "title": "Inheritance (IS-A) vs Composition (HAS-A)",
+      "headers": [
+        "Feature",
+        "Inheritance (IS-A)",
+        "Composition (HAS-A)"
+      ],
+      "rows": [
+        [
+          "Relationship",
+          "Class B IS-A Class A (e.g. Sparrow IS-A Bird)",
+          "Class B HAS-A Class A (e.g. Car HAS-A Engine)"
+        ],
+        [
+          "Coupling",
+          "Tight coupling (changes in base class directly affect subclass)",
+          "Loose coupling (components can be swapped dynamically)"
+        ],
+        [
+          "Syntax",
+          "`class B extends A`",
+          "`class B { private A a; }`"
+        ],
+        [
+          "Design Rule",
+          "Use when derived class shares true conceptual identity",
+          "'Favor composition over inheritance' for flexibility"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Subclass Instantiation",
+        "formula": "super(args) executes before subclass fields initialize",
+        "explanation": "Ensures parent invariants exist before child executes."
+      }
+    ],
+    "exam_tip": "Remember: Java does NOT support Multiple Inheritance with classes to prevent the Diamond Problem, but supports Multiple Inheritance with Interfaces!",
+    "common_confusion": {
+      "wrong": "Private members of a superclass are inherited by the subclass.",
+      "correct": "Private members are NOT directly accessible by the subclass. However, they can be accessed indirectly through inherited public or protected getter/setter methods.",
+      "explanation": "Exam trick: `class B extends A` cannot directly access `private int x` from A."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is the Diamond Problem in Inheritance?",
+        "a": "The Diamond Problem occurs in multiple inheritance when a class D inherits from two classes B and C, both of which inherit from a common base class A. If B and C override a method from A, class D does not know which version to inherit, creating ambiguity."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Why does Java not support multiple inheritance with classes, and how is it achieved?",
+        "a": "Java avoids multiple inheritance with classes to eliminate the ambiguity of the Diamond Problem and simplify runtime memory structures (like vtables). Instead, Java supports multiple inheritance through Interfaces, where a class can implement multiple interfaces because interfaces specify method contracts without conflicting instance state."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Explain the different types of inheritance with diagrams. Compare 'IS-A' (Inheritance) with 'HAS-A' (Composition).",
+        "a": "1. Types: Single (A\u2192B), Multilevel (A\u2192B\u2192C), Hierarchical (A\u2192B, A\u2192C), Multiple (A,B\u2192C), Hybrid.\n2. Comparison:\n- IS-A (Inheritance): Tightly coupled; used when subclass is genuinely a specialized type of parent.\n- HAS-A (Composition): Loosely coupled; object contains references to other objects (e.g. Car has Engine).\nDesign Best Practice: 'Favor object composition over class inheritance' to prevent rigid inheritance trees."
+      }
+    ],
+    "revision_60s": [
+      "Inheritance = IS-A relationship via `extends`.",
+      "Types: Single, Multilevel, Hierarchical, Multiple, Hybrid.",
+      "Java does NOT allow multiple class inheritance (avoids Diamond Problem).",
+      "Multiple inheritance is achieved via Interfaces.",
+      "`super` invokes parent constructor/methods.",
+      "Composition (HAS-A) provides looser coupling than inheritance."
+    ]
+  },
+  "polymorphism": {
+    "title": "Polymorphism",
+    "subject": "oops",
+    "exam_definition": "Polymorphism is the ability of a message, function, or object to take multiple forms, divided into Compile-Time (Static) Polymorphism achieved via Method Overloading, and Runtime (Dynamic) Polymorphism achieved via Method Overriding using Dynamic Method Dispatch.",
+    "remember": "Overloading = Same method name, different signatures (Compile-Time). Overriding = Same method name & signature, subclass body (Runtime).",
+    "core_concept": "Polymorphism allows code to work with general abstractions while executing specific subclass behaviors. In Method Overloading, the compiler selects the target method based on argument types and count. In Method Overriding, the runtime determines which method to execute based on the actual object on the heap, using virtual method tables (vtables).",
+    "key_points": [
+      "Compile-Time Polymorphism: Method Overloading & Operator Overloading. Resolved by compiler (Early Binding).",
+      "Runtime Polymorphism: Method Overriding. Resolved by JVM/runtime at execution time (Late / Dynamic Binding).",
+      "Method Signature: Method name + parameter count and types. Return type is NOT part of method signature.",
+      "Dynamic Method Dispatch: Mechanism by which a call to an overridden method is resolved at runtime based on the heap object.",
+      "Virtual Function Table (vtable): Compiler-generated table of function pointers enabling dynamic dispatch."
+    ],
+    "classification": {
+      "title": "Types of Polymorphism",
+      "items": [
+        {
+          "name": "Compile-Time / Static Polymorphism",
+          "desc": "Method Overloading (same name, different params) within same class. Bound at compile time."
+        },
+        {
+          "name": "Runtime / Dynamic Polymorphism",
+          "desc": "Method Overriding in inheritance hierarchy. Resolved at runtime based on heap object."
+        },
+        {
+          "name": "Parametric Polymorphism",
+          "desc": "Generics/Templates allowing algorithms to work over arbitrary types without code duplication."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Virtual Table (vtable) and Dynamic Dispatch",
+      "steps": [
+        "1. Each class with virtual/overridden methods has a compiler-generated `vtable` of function pointers.",
+        "2. Each object instance holds an invisible pointer (`vptr`) pointing to its class's vtable.",
+        "3. When calling `parentRef.draw()`, runtime follows `vptr` of the actual heap object to its vtable.",
+        "4. Resolves the function pointer for `draw()` corresponding to the concrete subclass and jumps to its code."
+      ],
+      "diagram": "Reference: Animal a = new Dog() \u2500\u2500\u25ba Heap: Dog Object [vptr] \u2500\u2500\u25ba Dog vtable \u2500\u2500\u25ba Dog.sound()"
+    },
+    "example": {
+      "title": "Dynamic Method Dispatch Demonstration",
+      "scenario": "Superclass reference pointing to various subclass instances:",
+      "code": "class Shape {\n    void draw() { System.out.println(\"Drawing generic shape\"); }\n}\nclass Circle extends Shape {\n    @Override\n    void draw() { System.out.println(\"Drawing Circle\"); }\n}\nclass Square extends Shape {\n    @Override\n    void draw() { System.out.println(\"Drawing Square\"); }\n}\n// Usage:\nShape s = new Circle();\ns.draw(); // Prints: Drawing Circle (Resolved dynamically at runtime!)"
+    },
+    "comparison": {
+      "title": "Method Overloading vs Method Overriding",
+      "headers": [
+        "Feature",
+        "Method Overloading",
+        "Method Overriding"
+      ],
+      "rows": [
+        [
+          "Type",
+          "Compile-Time (Static) Polymorphism",
+          "Runtime (Dynamic) Polymorphism"
+        ],
+        [
+          "Location",
+          "Within the SAME class",
+          "Between Superclass and Subclass (Inheritance)"
+        ],
+        [
+          "Method Signature",
+          "MUST differ (parameter types, count, or order)",
+          "MUST be IDENTICAL (name, params, return type)"
+        ],
+        [
+          "Return Type",
+          "Can be different or same",
+          "Must be identical or covariant (subtype)"
+        ],
+        [
+          "Binding",
+          "Early binding (compiler)",
+          "Late / Dynamic binding (runtime via vtable)"
+        ],
+        [
+          "Private/Static Methods",
+          "Can overload private and static methods",
+          "CANNOT override private or static methods"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Dynamic Dispatch Rule",
+        "formula": "Reference determines what can be accessed; Heap Object determines which implementation runs",
+        "explanation": "Compiler checks methods on Parent class; Runtime executes child override."
+      }
+    ],
+    "exam_tip": "Remember: Static methods CANNOT be overridden! If a subclass defines a static method with the same signature, it is Method Hiding, NOT overriding.",
+    "common_confusion": {
+      "wrong": "You can overload methods simply by changing their return types.",
+      "correct": "Changing only the return type does NOT overload a method and causes a compiler error! The parameter list (types, number, or order) MUST differ.",
+      "explanation": "e.g. `int add(int a)` and `double add(int a)` cannot coexist in the same class."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is Dynamic Method Dispatch?",
+        "a": "Dynamic Method Dispatch is the mechanism by which a call to an overridden method is resolved at runtime rather than compile time. It occurs when a superclass reference variable refers to a subclass object, and the subclass version of the method is executed."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Compare Method Overloading and Method Overriding with suitable code examples.",
+        "a": "1. Overloading: Same method name with different parameters in the same class (Compile-time).\nExample: `add(int a, int b)` and `add(int a, int b, int c)`.\n2. Overriding: Subclass provides a specific implementation of an inherited method with the exact same signature (Runtime).\nExample: `Animal.sound()` overridden by `Dog.sound()`."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Explain how runtime polymorphism is implemented internally using vtables and vptrs. Why can static and final methods not be overridden?",
+        "a": "1. vtable and vptr Implementation:\n- The compiler creates a virtual method table (vtable) for each class containing virtual/overridden methods, listing addresses of function pointers.\n- Every instantiated object has an invisible pointer (vptr) pointing to its class's vtable.\n- When an overridden method is called through a base reference, runtime uses `vptr` to look up the method address in the actual object's vtable.\n2. Why static methods cannot be overridden: Static methods belong to the class, not instances. They are resolved at compile-time using the reference type (Method Hiding).\n3. Why final methods cannot be overridden: The `final` keyword explicitly tells the compiler that the method implementation cannot be modified by subclasses, allowing early compile-time inlining."
+      }
+    ],
+    "revision_60s": [
+      "Overloading = Compile-time; Overriding = Runtime.",
+      "Overloading requires different parameters; return type alone is NOT enough.",
+      "Overriding requires exact same signature in subclass.",
+      "Dynamic Dispatch executes child method using parent reference.",
+      "vtable stores function pointers; vptr points to object's vtable.",
+      "static, private, and final methods CANNOT be overridden."
+    ]
+  },
+  "abstraction": {
+    "title": "Abstraction",
+    "subject": "oops",
+    "exam_definition": "Abstraction is the process of hiding complex internal implementation details and exposing only the essential features and interfaces to user applications, achieved via Abstract Classes and Interfaces.",
+    "remember": "Abstraction = What it does, not How it does it. Abstract classes cannot be instantiated.",
+    "core_concept": "When driving a car, you use the accelerator pedal (interface) without needing to understand fuel injection timings or transmission gear ratios (implementation). In OOP, Abstract classes define template interfaces with zero or more incomplete abstract methods. Concrete subclasses must implement these abstract methods, guaranteeing a unified contract across different subclasses.",
+    "key_points": [
+      "Abstract Class: Declared with `abstract` keyword; CANNOT be instantiated directly with `new`.",
+      "Abstract Method: Method declared with signature but NO body (`abstract void calculate();`).",
+      "Concrete Subclass: Must implement all inherited abstract methods or declare itself abstract.",
+      "Can have Constructors: Abstract classes can have constructors invoked via `super()`.",
+      "Can have Concrete Methods: Unlike pure interfaces, abstract classes can mix implemented and abstract methods."
+    ],
+    "classification": {
+      "title": "Abstraction Levels in OOP",
+      "items": [
+        {
+          "name": "0% Abstraction",
+          "desc": "Regular concrete class with all methods fully implemented."
+        },
+        {
+          "name": "Partial Abstraction (1\u201399%)",
+          "desc": "Abstract class containing both implemented concrete methods and unimplemented abstract methods."
+        },
+        {
+          "name": "100% Abstraction",
+          "desc": "Pure Interfaces containing only method signatures and no instance state."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Abstract Class Lifecycle & Template Pattern",
+      "steps": [
+        "1. Declare abstract base class with common fields and abstract method signatures.",
+        "2. Concrete subclass extends abstract class using `extends`.",
+        "3. Subclass overrides and provides body for every abstract method.",
+        "4. Client programs against the abstract type reference (e.g. `Vehicle v = new Car();`)."
+      ],
+      "diagram": "Abstract Class [Vehicle] (abstract start()) \u2500\u2500\u25ba Concrete [Car] (implements start())"
+    },
+    "example": {
+      "title": "Payment Processing Abstraction",
+      "scenario": "PaymentGateway defines abstract `processPayment()`; CreditCard and UPI implement specific logic:",
+      "code": "abstract class PaymentGateway {\n    String merchantId;\n\n    PaymentGateway(String id) { this.merchantId = id; } // Constructor allowed!\n\n    // Concrete method shared by all gateways\n    void logTransaction(double amount) {\n        System.out.println(\"Logging payment: \" + amount);\n    }\n\n    // Abstract method: must be implemented by subclasses\n    abstract boolean processPayment(double amount);\n}\n\nclass CreditCardPayment extends PaymentGateway {\n    CreditCardPayment(String id) { super(id); }\n    @Override\n    boolean processPayment(double amount) {\n        // Specific credit card validation logic\n        return true;\n    }\n}"
+    },
+    "comparison": {
+      "title": "Abstract Class vs Concrete Class",
+      "headers": [
+        "Feature",
+        "Abstract Class",
+        "Concrete Class"
+      ],
+      "rows": [
+        [
+          "Instantiation",
+          "CANNOT be instantiated with new",
+          "Can be instantiated directly"
+        ],
+        [
+          "Abstract Methods",
+          "Can contain abstract methods",
+          "Cannot contain abstract methods"
+        ],
+        [
+          "Keyword",
+          "Declared with `abstract`",
+          "Standard class declaration"
+        ],
+        [
+          "Purpose",
+          "Provide common template for subclasses",
+          "Provide complete operational implementation"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Abstract Method Invariant",
+        "formula": "If a class contains even ONE abstract method, the class MUST be declared abstract",
+        "explanation": "Compiler rejects concrete classes with unimplemented methods."
+      }
+    ],
+    "exam_tip": "Remember: An abstract class CAN have a constructor! Even though you cannot instantiate it with `new AbstractClass()`, its constructor is called via `super()` when a subclass is instantiated.",
+    "common_confusion": {
+      "wrong": "An abstract class must contain at least one abstract method.",
+      "correct": "An abstract class can contain ZERO abstract methods! Declaring a class `abstract` simply prevents it from being instantiated directly.",
+      "explanation": "You can declare a class abstract purely to prevent instantiation."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "Can an abstract class have a constructor?",
+        "a": "Yes, an abstract class can have constructors. Although it cannot be instantiated directly using the `new` keyword, its constructor is executed when a concrete subclass object is created via the `super()` call."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Why can an abstract class not be final in Java?",
+        "a": "The `abstract` keyword means the class is incomplete and must be extended by subclasses to provide method implementations. The `final` keyword prevents a class from being extended. Therefore, `abstract` and `final` are mutually contradictory and cause a compiler error."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Explain Abstraction with the Template Method design pattern. How does it enforce architectural contracts across engineering modules?",
+        "a": "1. Abstraction enforces architectural contracts by defining method signatures that subclasses MUST implement, guaranteeing uniform behavior.\n2. Template Method Pattern:\n- An abstract class defines a final skeleton algorithm method (e.g. `processOrder()`).\n- Steps within the algorithm call abstract methods (e.g. `validatePayment()`, `shipItem()`).\n- Subclasses implement the individual steps without altering the overarching algorithm workflow.\n3. Benefits: Reduces duplicate boilerplate, enforces execution sequence, and guarantees extensibility."
+      }
+    ],
+    "revision_60s": [
+      "Abstraction hides implementation; shows interface.",
+      "Abstract class cannot be instantiated directly.",
+      "Abstract methods have no body (must be overridden).",
+      "Abstract classes CAN have constructors (invoked via `super()`).",
+      "A class with even one abstract method MUST be declared abstract.",
+      "An abstract class cannot be declared `final`."
+    ]
+  },
+  "interfaces": {
+    "title": "Interfaces",
+    "subject": "oops",
+    "exam_definition": "An Interface in OOP is a completely abstract type that defines a contract of method signatures that implementing classes must fulfill, enabling multiple inheritance of type and loose coupling.",
+    "remember": "Interface = 100% Contract ('CAN-DO' capability). Variables are public static final.",
+    "core_concept": "While abstract classes share code through inheritance, interfaces specify pure behavioral contracts. A class can implement multiple interfaces (e.g. `implements Serializable, Cloneable, Comparable`), achieving multiple inheritance without diamond state ambiguity. In modern Java (Java 8+), interfaces can also include `default` and `static` methods with bodies.",
+    "key_points": [
+      "Multiple Implementation: A class can implement multiple interfaces (`implements A, B, C`).",
+      "Fields: All variables declared in an interface are implicitly `public static final` (constants).",
+      "Methods: Methods are implicitly `public abstract` (unless declared default or static).",
+      "Loose Coupling: Callers depend on the interface rather than concrete implementation classes.",
+      "Marker Interface: An empty interface with zero methods used to tag metadata (e.g. `Serializable`).",
+      "Functional Interface: Interface with exactly ONE abstract method; used with Lambda expressions."
+    ],
+    "classification": {
+      "title": "Types of Interfaces",
+      "items": [
+        {
+          "name": "Standard Interface",
+          "desc": "Contains multiple abstract method signatures representing a contract."
+        },
+        {
+          "name": "Functional Interface (@FunctionalInterface)",
+          "desc": "Contains exactly ONE abstract method (e.g. Runnable, Callable, Consumer)."
+        },
+        {
+          "name": "Marker Interface",
+          "desc": "Contains zero methods or constants; informs compiler/runtime of object capability (e.g. Cloneable)."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Interface Implementation & Polymorphic Dependency",
+      "steps": [
+        "1. Declare interface with method signatures (`interface Flyable { void fly(); }`).",
+        "2. Class implements interface using `implements` keyword.",
+        "3. Class must provide `public` implementation of all abstract methods.",
+        "4. Client code references interface type: `Flyable f = new Airplane();`."
+      ],
+      "diagram": "Interface [PaymentGateway] \u25c4\u2500\u2500 implements \u2500\u2500 [PaypalGateway], [StripeGateway]"
+    },
+    "example": {
+      "title": "Multiple Interface Implementation",
+      "scenario": "Smartphone implementing multiple behavioral contracts:",
+      "code": "interface Camera { void takePhoto(); }\ninterface GPS { void locate(); }\n\nclass SmartPhone implements Camera, GPS {\n    public void takePhoto() {\n        System.out.println(\"Photo captured via 48MP sensor\");\n    }\n    public void locate() {\n        System.out.println(\"Coordinates: 28.6139\u00b0 N, 77.2090\u00b0 E\");\n    }\n}"
+    },
+    "comparison": {
+      "title": "Abstract Class vs Interface",
+      "headers": [
+        "Feature",
+        "Abstract Class",
+        "Interface"
+      ],
+      "rows": [
+        [
+          "Multiple Inheritance",
+          "No \u2014 a class can extend only ONE abstract class",
+          "Yes \u2014 a class can implement MULTIPLE interfaces"
+        ],
+        [
+          "Methods",
+          "Can have abstract and concrete methods",
+          "Historically only abstract; Java 8+ allows default and static"
+        ],
+        [
+          "Variables",
+          "Can have instance variables (mutable)",
+          "All variables are implicitly `public static final` constants"
+        ],
+        [
+          "Speed",
+          "Faster (direct vtable lookup)",
+          "Slightly slower (requires search across interface tables)"
+        ],
+        [
+          "Relationship",
+          "'IS-A' relationship (e.g. Dog IS-A Animal)",
+          "'CAN-DO' capability (e.g. Bird CAN-DO Flyable)"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Interface Fields Invariant",
+        "formula": "int X = 10; \u2261 public static final int X = 10;",
+        "explanation": "Interface fields are always immutable constants."
+      }
+    ],
+    "exam_tip": "Remember: A class can extend only ONE class, but can implement MULTIPLE interfaces. All interface methods implemented in a class must be declared `public`!",
+    "common_confusion": {
+      "wrong": "Interfaces cannot have any method bodies in modern Java.",
+      "correct": "Since Java 8, interfaces CAN have method bodies using the `default` and `static` keywords, and Java 9 added `private` helper methods.",
+      "explanation": "Default methods enable adding new methods to interfaces without breaking existing implementing classes."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is a Functional Interface in Java?",
+        "a": "A Functional Interface is an interface that contains exactly one abstract method. It can contain any number of default or static methods. It is designated with the `@FunctionalInterface` annotation and serves as the foundation for Lambda expressions."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Compare Abstract Classes and Interfaces in Java.",
+        "a": "1. Inheritance: A class can extend only one abstract class, but can implement multiple interfaces.\n2. State: Abstract classes can have instance variables and state; interface variables are strictly `public static final` constants.\n3. Constructors: Abstract classes can have constructors; interfaces cannot.\n4. Design purpose: Abstract class models 'IS-A' identity; Interface models 'CAN-DO' capability."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Explain Default Methods in interfaces. How does Java resolve conflicts when a class implements two interfaces with identical default methods?",
+        "a": "1. Default Methods: Introduced in Java 8 with the `default` keyword to allow interfaces to define concrete methods, enabling library evolution without breaking existing implementations.\n2. Conflict Resolution Rules:\n- Rule 1 (Class wins): A concrete method in a superclass always takes precedence over any interface default method.\n- Rule 2 (Sub-interface wins): If interface B extends interface A and both define default `hello()`, B's implementation takes precedence.\n- Rule 3 (Ambiguity Resolution): If class C implements independent interfaces A and B that both define default `hello()`, the compiler reports an error. Class C MUST override the method explicitly and choose: `A.super.hello()` or provide its own body."
+      }
+    ],
+    "revision_60s": [
+      "Interface defines a pure contract of methods.",
+      "A class can implement multiple interfaces (`implements A, B`).",
+      "Fields are always `public static final`.",
+      "Java 8+ allows `default` and `static` methods with bodies.",
+      "Functional Interface = exactly 1 abstract method.",
+      "Marker Interface = 0 methods (e.g. `Serializable`)."
+    ]
+  },
+  "exception-handling": {
+    "title": "Exception Handling",
+    "subject": "oops",
+    "exam_definition": "Exception Handling is an OOP runtime error-management mechanism that transfers control from the point where an exceptional condition occurs to an exception handler, maintaining normal application flow using try, catch, finally, throw, and throws blocks.",
+    "remember": "try (monitor) \u2192 catch (handle) \u2192 finally (always cleanup). Checked = Compile-time; Unchecked = Runtime.",
+    "core_concept": "Traditional error codes (e.g. returning -1 on error) clutter business logic and are easily ignored. Exception handling separates error-handling code from normal execution paths. When an error occurs, an exception object encapsulating type, message, and call-stack trace is instantiated and thrown. The runtime unwinds the call stack until an appropriate matching catch block is located.",
+    "key_points": [
+      "Throwable: Root class of the entire Java exception hierarchy.",
+      "Error: Serious system issues (OutOfMemoryError, StackOverflowError) that applications should NOT catch.",
+      "Exception: Conditions that reasonable applications can anticipate and catch.",
+      "Checked Exceptions: Checked at compile-time (e.g. IOException, SQLException); MUST be caught or declared.",
+      "Unchecked Exceptions (RuntimeException): Occur at runtime due to programming bugs (NullPointerException, ArrayIndexOutOfBounds).",
+      "finally Block: Guaranteed to execute regardless of whether an exception was thrown or caught (used for resource cleanup)."
+    ],
+    "classification": {
+      "title": "Exception Hierarchy Tree",
+      "items": [
+        {
+          "name": "Throwable",
+          "desc": "Root class of all exceptions and errors."
+        },
+        {
+          "name": "Error",
+          "desc": "Fatal JVM/hardware failures (OutOfMemory, StackOverflow). Not recoverable."
+        },
+        {
+          "name": "Exception (Checked)",
+          "desc": "Compile-time checked exceptions; compiler forces handling."
+        },
+        {
+          "name": "RuntimeException (Unchecked)",
+          "desc": "Programming errors (NullPointer, Arithmetic, IndexOutOfBounds)."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Call Stack Unwinding & Catch Resolution",
+      "steps": [
+        "1. Exception occurs inside a deeply nested method.",
+        "2. Runtime creates exception object with stack trace.",
+        "3. Runtime searches the current method for an enclosing `try-catch` block.",
+        "4. If absent, runtime pops current method off Call Stack and inspects caller method.",
+        "5. Repeats stack unwinding until matching handler is found; if none found, default uncaught exception handler terminates thread."
+      ],
+      "diagram": "throw Exception \u2192 Unwind Stack Frame 3 \u2192 Frame 2 \u2192 Matching Catch in Frame 1"
+    },
+    "example": {
+      "title": "File Resource Handling with Try-Catch-Finally",
+      "scenario": "Handling file reading errors and ensuring file handles close:",
+      "code": "public void readFile(String path) {\n    BufferedReader reader = null;\n    try {\n        reader = new BufferedReader(new FileReader(path));\n        String line = reader.readLine();\n    } catch (FileNotFoundException e) {\n        System.err.println(\"File not found: \" + e.getMessage());\n    } catch (IOException e) {\n        System.err.println(\"I/O Error: \" + e.getMessage());\n    } finally {\n        // Always executes even if exception occurred!\n        try { if (reader != null) reader.close(); }\n        catch (IOException ex) { /* suppress */ }\n    }\n}"
+    },
+    "comparison": {
+      "title": "Checked Exception vs Unchecked Exception",
+      "headers": [
+        "Feature",
+        "Checked Exception",
+        "Unchecked Exception"
+      ],
+      "rows": [
+        [
+          "Verification Time",
+          "Checked by compiler at compile time",
+          "Occurs and verified only at runtime"
+        ],
+        [
+          "Parent Class",
+          "Directly extends `java.lang.Exception`",
+          "Extends `java.lang.RuntimeException`"
+        ],
+        [
+          "Compiler Enforcement",
+          "MANDATORY: Must handle with try-catch or declare with `throws`",
+          "Optional: Compiler does not force handling"
+        ],
+        [
+          "Typical Cause",
+          "External environment failures (Missing file, network drop)",
+          "Programming logic bugs (Null pointers, array bounds)"
+        ],
+        [
+          "Examples",
+          "IOException, SQLException, ClassNotFoundException",
+          "NullPointerException, ArithmeticException, IndexOutOfBoundsException"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Catch Ordering Invariant",
+        "formula": "catch(SpecificException) MUST precede catch(GenericException)",
+        "explanation": "Placing catch(Exception) first causes unreachable code error for subsequent catches."
+      }
+    ],
+    "exam_tip": "Remember: The `finally` block ALWAYS executes, even if there is a `return` statement in the `try` or `catch` block! The only time finally does not run is if `System.exit(0)` is executed.",
+    "common_confusion": {
+      "wrong": "throw and throws are the exact same keyword.",
+      "correct": "`throw` is used inside a method body to explicitly trigger an exception object (`throw new Exception()`), while `throws` is used in a method signature to declare that a method may cause checked exceptions (`void run() throws IOException`).",
+      "explanation": "`throw` is an action; `throws` is a signature declaration."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is the difference between 'throw' and 'throws' in Java?",
+        "a": "`throw` is used inside a method body to explicitly throw an exception object. `throws` is used in the method signature to declare that the method might throw one or more exceptions, delegating handling to the caller."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Differentiate between Checked and Unchecked exceptions with examples.",
+        "a": "1. Checked Exceptions: Inherit from `Exception` (excluding RuntimeException). The compiler forces developers to either catch them or declare them using `throws`. Represent recoverable environmental errors (e.g. IOException, SQLException).\n2. Unchecked Exceptions: Inherit from `RuntimeException`. Not checked by the compiler. Represent programming flaws (e.g. NullPointerException, ArithmeticException)."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Explain the role of the 'finally' block. Under what conditions will a 'finally' block fail to execute?",
+        "a": "1. Role of finally: Used to execute essential cleanup operations (closing file streams, database connections, socket handles) regardless of whether an exception occurred or was handled.\n2. Execution guarantees: Runs even if `try` or `catch` contains a `return` statement.\n3. Conditions when finally does NOT execute:\n(a) If `System.exit(0)` or `Runtime.getRuntime().halt()` is invoked.\n(b) If fatal JVM crashes or power failure occurs.\n(c) If the thread executing the try block is interrupted or killed.\n(d) Infinite loop in try or catch block."
+      }
+    ],
+    "revision_60s": [
+      "try (monitors code), catch (handles error), finally (cleanup).",
+      "Throwable is root; Error is fatal; Exception is application-level.",
+      "Checked exceptions (IOException) enforced at compile-time.",
+      "Unchecked exceptions (RuntimeException) happen at runtime.",
+      "`throw` raises an exception; `throws` declares in signature.",
+      "`finally` block always executes (unless System.exit() called)."
+    ]
+  },
+  "generics": {
+    "title": "Generics",
+    "subject": "oops",
+    "exam_definition": "Generics in OOP enable types (classes and interfaces) to act as parameters when defining classes, interfaces, and methods, providing compile-time type safety and eliminating explicit type casting.",
+    "remember": "Generics = Compile-time type safety. Eliminates ClassCastException at runtime.",
+    "core_concept": "Before Generics (Java 1.4), collections stored raw `Object` references, requiring manual casting (`(String) list.get(0)`) and risking runtime `ClassCastException`. Generics parameterize types (`List<String>`), allowing the compiler to detect type mismatches during compilation. At compile time, Type Erasure strips generic metadata to maintain backward compatibility with older JVM runtimes.",
+    "key_points": [
+      "Compile-Time Type Safety: Catches type errors at compile time rather than runtime.",
+      "Eliminates Casting: Compiler automatically casts return values to the parameterized type.",
+      "Type Erasure: The compiler replaces type parameters with their bounds (or `Object`) and inserts casts.",
+      "Generic Classes: `class Box<T> { T item; }`.",
+      "Generic Methods: `public <E> void printArray(E[] array)`.",
+      "Wildcards: `?` (unbounded), `? extends T` (upper bounded), `? super T` (lower bounded)."
+    ],
+    "classification": {
+      "title": "Wildcard Types in Generics",
+      "items": [
+        {
+          "name": "Unbounded Wildcard (?)",
+          "desc": "Represents any type (e.g. `List<?>`). Read-only."
+        },
+        {
+          "name": "Upper Bounded (? extends T)",
+          "desc": "Restricts unknown type to T or a subtype of T (Covariant). Used for reading data (Producer Extends)."
+        },
+        {
+          "name": "Lower Bounded (? super T)",
+          "desc": "Restricts unknown type to T or a supertype of T (Contravariant). Used for writing data (Consumer Super)."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Type Erasure Mechanics in Java Compiler",
+      "steps": [
+        "1. Source Code with Generics: Developer writes `List<String> list = new ArrayList<>()`.",
+        "2. Compile-Time Type Checking: Compiler ensures only `String` instances are added.",
+        "3. Type Erasure: Compiler replaces `<String>` with raw `Object` and inserts casts at retrieval points.",
+        "4. Bytecode Output: Resulting bytecode contains standard non-generic bytecode compatible with legacy JVMs."
+      ],
+      "diagram": "Source: List<String> \u2500\u2500(Compiler Check & Erasure)\u2500\u2500\u25ba Bytecode: List + (String) casts"
+    },
+    "example": {
+      "title": "Generic Key-Value Pair Class",
+      "scenario": "A reusable generic class storing pairs of any two types:",
+      "code": "public class Pair<K, V> {\n    private K key;\n    private V value;\n\n    public Pair(K key, V value) {\n        this.key = key;\n        this.value = value;\n    }\n    public K getKey() { return key; }\n    public V getValue() { return value; }\n}\n// Pair<String, Integer> p = new Pair<>(\"RollNo\", 101);"
+    },
+    "comparison": {
+      "title": "Generics vs Raw Types",
+      "headers": [
+        "Feature",
+        "Generics (List<String>)",
+        "Raw Types (List)"
+      ],
+      "rows": [
+        [
+          "Type Safety",
+          "Strict compile-time type verification",
+          "None \u2014 allows inserting any object type"
+        ],
+        [
+          "Explicit Casting",
+          "Not required (handled by compiler)",
+          "Mandatory: `(String) list.get(0)`"
+        ],
+        [
+          "Runtime Error Risk",
+          "Zero `ClassCastException`",
+          "High probability of `ClassCastException`"
+        ],
+        [
+          "Modern Best Practice",
+          "Standard required practice",
+          "Deprecated legacy code"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "PECS Principle",
+        "formula": "Producer Extends, Consumer Super",
+        "explanation": "Use `? extends T` if collection produces items; use `? super T` if collection consumes items."
+      }
+    ],
+    "exam_tip": "Remember: The PECS rule: Producer Extends, Consumer Super. If your method reads from a generic collection, use `? extends T`. If it writes to a collection, use `? super T`.",
+    "common_confusion": {
+      "wrong": "Because Integer is a subclass of Number, `List<Integer>` is a subclass of `List<Number>`.",
+      "correct": "Generics are INVARIANT! `List<Integer>` is NOT a subtype of `List<Number>`. You cannot assign `List<Integer>` to a `List<Number>` reference.",
+      "explanation": "If it were allowed, you could insert a `Double` into a list intended only for Integers."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is Type Erasure in Java Generics?",
+        "a": "Type Erasure is the process enforced by the Java compiler where all generic type parameters are removed and replaced with their bounds or `Object` during compilation. This ensures backward compatibility with bytecode created prior to generics."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Explain the PECS principle in Java Generics with examples.",
+        "a": "PECS stands for Producer Extends, Consumer Super:\n1. Producer Extends (`? extends T`): Used when you only READ elements from a collection. E.g. `double sum(List<? extends Number> list)`.\n2. Consumer Super (`? super T`): Used when you only WRITE/ADD elements into a collection. E.g. `void addNumbers(List<? super Integer> list)`."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Why were Generics introduced in Java? Detail the limitations of generics caused by Type Erasure.",
+        "a": "1. Why introduced: (a) Compile-time type safety, (b) Elimination of manual type casting, (c) Reusable generic algorithms.\n2. Limitations due to Type Erasure:\n- Cannot instantiate generic types with primitives (e.g. `List<int>` is invalid; must use wrapper `List<Integer>`).\n- Cannot create instances of type parameters directly (`new T()` is illegal).\n- Cannot declare static fields of type T in a generic class.\n- Cannot create arrays of parameterized types (`new List<String>[10]` is illegal).\n- Cannot use `instanceof` with parameterized types (`if (obj instanceof List<String>)` is illegal)."
+      }
+    ],
+    "revision_60s": [
+      "Generics provide compile-time type safety.",
+      "Eliminates manual explicit type casting.",
+      "Type Erasure strips generic syntax into raw Object bytecode.",
+      "Generics are invariant: List<Integer> is NOT a List<Number>.",
+      "PECS: Producer Extends, Consumer Super.",
+      "Cannot use primitives directly in generics (`List<int>` is invalid)."
+    ]
+  },
+  "solid-principles": {
+    "title": "SOLID Principles",
+    "subject": "oops",
+    "exam_definition": "SOLID is an acronym for five core object-oriented design principles introduced by Robert C. Martin (Uncle Bob) that guide engineers to build maintainable, understandable, flexible, and robust software architectures.",
+    "remember": "S: Single Responsibility, O: Open/Closed, L: Liskov Substitution, I: Interface Segregation, D: Dependency Inversion.",
+    "core_concept": "Poorly architected OOP code becomes brittle (changes in one place break unrelated modules) and rigid (hard to extend). The five SOLID principles address these architectural code smells: each class does one thing (SRP), is extensible without code modification (OCP), subclasses substitute parents cleanly without breaking behavior (LSP), interfaces are granular (ISP), and high-level modules depend on abstractions rather than concrete classes (DIP).",
+    "key_points": [
+      "S - Single Responsibility Principle (SRP): A class should have one, and only one, reason to change.",
+      "O - Open/Closed Principle (OCP): Software entities should be open for extension, but closed for modification.",
+      "L - Liskov Substitution Principle (LSP): Subtypes must be substitutable for their base types without altering program correctness.",
+      "I - Interface Segregation Principle (ISP): Clients should not be forced to depend upon interfaces that they do not use.",
+      "D - Dependency Inversion Principle (DIP): High-level modules should not depend on low-level modules; both should depend on abstractions."
+    ],
+    "classification": {
+      "title": "The Five SOLID Principles",
+      "items": [
+        {
+          "name": "Single Responsibility (SRP)",
+          "desc": "One responsibility per class. Separates business logic from persistence/reporting."
+        },
+        {
+          "name": "Open/Closed (OCP)",
+          "desc": "Add new features by creating new subclasses/implementations rather than editing existing source code."
+        },
+        {
+          "name": "Liskov Substitution (LSP)",
+          "desc": "Inheritance must preserve behavioral invariants. The classic Square-Rectangle violation."
+        },
+        {
+          "name": "Interface Segregation (ISP)",
+          "desc": "Break bloated interfaces into small, cohesive, role-specific interfaces."
+        },
+        {
+          "name": "Dependency Inversion (DIP)",
+          "desc": "Invert control using interfaces/dependency injection. High-level policy decoupled from low-level details."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Applying Dependency Inversion & Open/Closed in Architecture",
+      "steps": [
+        "1. Identify volatile low-level details (e.g. MySQL, PostgreSQL, Stripe, PayPal).",
+        "2. Define a stable high-level Abstraction/Interface (e.g. `PaymentProcessor`, `UserRepository`).",
+        "3. High-level services inject the abstraction via constructors (Dependency Injection).",
+        "4. When adding a new payment provider, write a new class implementing the interface without modifying the high-level service (OCP)."
+      ],
+      "diagram": "High-Level Service \u2500\u2500\u25ba [Interface Contract] \u25c4\u2500\u2500 Low-Level Concrete Driver"
+    },
+    "example": {
+      "title": "Liskov Substitution Violation & Fix (Square vs Rectangle)",
+      "scenario": "If `Square extends Rectangle`, setting width independently of height in Rectangle breaks Square invariants where width must equal height! Violates LSP.\nFix: Both Rectangle and Square should independently implement a common `Shape` interface with `getArea()`.",
+      "code": "// Correct LSP architecture\ninterface Shape {\n    int getArea();\n}\nclass Rectangle implements Shape {\n    int width, height;\n    public int getArea() { return width * height; }\n}\nclass Square implements Shape {\n    int side;\n    public int getArea() { return side * side; }\n}"
+    },
+    "comparison": {
+      "title": "SOLID Design Summary Matrix",
+      "headers": [
+        "Principle",
+        "Core Violation Symptom",
+        "Architectural Solution"
+      ],
+      "rows": [
+        [
+          "Single Responsibility",
+          "God-class doing DB queries, business rules, and UI logging",
+          "Separate into Service, Repository, and Controller classes"
+        ],
+        [
+          "Open/Closed",
+          "Modifying existing switch-case code every time a new type is added",
+          "Use Polymorphism and Interfaces"
+        ],
+        [
+          "Liskov Substitution",
+          "Subclass throws UnsupportedOperationException for inherited method",
+          "Reorganize inheritance hierarchy or use composition"
+        ],
+        [
+          "Interface Segregation",
+          "Implementing classes leaving unused interface methods empty",
+          "Split fat interface into small focused interfaces"
+        ],
+        [
+          "Dependency Inversion",
+          "Business service instantiates concrete `new MySQLDatabase()`",
+          "Inject interface `DatabaseConnection` via constructor"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "DIP Invariant",
+        "formula": "High_Level_Modules \u2500\u2500\u25ba Abstraction \u25c4\u2500\u2500 Low_Level_Modules",
+        "explanation": "Decouples business policy from I/O mechanisms."
+      }
+    ],
+    "exam_tip": "Remember: The classic violation of the Liskov Substitution Principle is the 'Square extends Rectangle' problem, where setting width independently breaks square invariants.",
+    "common_confusion": {
+      "wrong": "Open/Closed means you can never edit existing code under any circumstances.",
+      "correct": "Open/Closed means core business logic should not need to be rewritten to add new features or plugins. Bug fixes and refactoring of course still modify existing code.",
+      "explanation": "New features should be added via new classes implementing existing interfaces."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "State the Single Responsibility Principle.",
+        "a": "The Single Responsibility Principle (SRP) states that a class should have one, and only one, reason to change. This means a class should be focused entirely on a single functional aspect of the application."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Explain the Liskov Substitution Principle (LSP) and describe the Square-Rectangle problem.",
+        "a": "The Liskov Substitution Principle states that objects of a superclass should be replaceable with objects of its subclasses without breaking application correctness.\nThe Square-Rectangle problem: In geometry, a square is a rectangle. But if `Square extends Rectangle`, modifying `setWidth()` must also modify height. Any client code assuming `rect.setWidth(5); rect.setHeight(4); assert(rect.getArea() == 20);` fails when passed a Square. Therefore, Square cannot cleanly substitute Rectangle."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Explain all five SOLID principles with concise practical software engineering examples.",
+        "a": "1. SRP: Separate Invoice generation from Invoice DB persistence.\n2. OCP: Calculate areas using `Shape.getArea()` polymorphism instead of modifying an `if-else` block for every new shape.\n3. LSP: Subclasses must fulfill parent contracts without throwing unexpected exceptions or breaking mathematical invariants.\n4. ISP: Instead of one huge `Worker` interface with `work()` and `eat()`, split into `Workable` and `Feedable` interfaces so robots don't have to implement `eat()`.\n5. DIP: An `OrderService` should depend on a `PaymentProcessor` interface rather than directly instantiating `new PayPalProcessor()`."
+      }
+    ],
+    "revision_60s": [
+      "S: Single Responsibility \u2014 1 reason to change.",
+      "O: Open/Closed \u2014 Open for extension, closed for modification.",
+      "L: Liskov Substitution \u2014 Subclasses must substitute base classes cleanly.",
+      "I: Interface Segregation \u2014 Small focused interfaces over fat interfaces.",
+      "D: Dependency Inversion \u2014 Depend on abstractions, not concretions.",
+      "Avoids rigid, fragile, and immobile codebase architectures."
+    ]
+  }
+}

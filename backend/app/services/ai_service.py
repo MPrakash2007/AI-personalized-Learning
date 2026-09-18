@@ -7,7 +7,7 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 class AIProvider:
-    def chat_tutor(self, message: str, context: Optional[str] = None) -> Tuple[str, Optional[Dict[str, Any]]]:
+    def chat_tutor(self, message: str, context: Optional[str] = None, retrieval_data: Optional[Dict[str, Any]] = None) -> Tuple[str, Optional[Dict[str, Any]], List[Dict[str, str]]]:
         raise NotImplementedError
 
     def explain_mistake(self, question_prompt: str, user_answer: str, correct_answer: str, explanation: str) -> Dict[str, Any]:
@@ -19,131 +19,139 @@ class AIProvider:
 
 class RuleBasedSmartProvider(AIProvider):
     """
-    Intelligent offline rule-based and knowledge-grounded AI provider.
-    Ensures 100% functionality without requiring external servers or paid API keys.
+    Intelligent offline rule-based and retrieval-grounded AI provider.
+    Synthesizes real curriculum content, dynamic quick checks, and verified source citations.
     """
 
-    KNOWLEDGE_BASE = {
-        "normalization": {
-            "title": "Database Normalization",
-            "summary": "Normalization is the process of organizing relational database schema to minimize data redundancy and prevent insertion, update, and deletion anomalies.",
-            "details": "1NF ensures atomic values. 2NF removes partial dependencies (where non-prime attributes depend on a subset of candidate keys). 3NF eliminates transitive dependencies (non-prime depending on non-prime). BCNF is a stricter version where for every X -> Y, X must be a superkey.",
-            "quick_check": {
-                "question": "If a relation is in 2NF and has no transitive functional dependencies, what normal form does it satisfy?",
-                "options": ["1NF", "2NF", "3NF", "BCNF"],
-                "correct_answer": "3NF",
-                "explanation": "3NF requires a relation to be in 2NF with no transitive dependencies for non-prime attributes."
-            }
-        },
-        "deadlock": {
-            "title": "Deadlock in Operating Systems",
-            "summary": "A deadlock occurs when two or more processes are unable to proceed because each is waiting for the other to release a resource.",
-            "details": "The four Coffman conditions necessary for deadlock are: Mutual Exclusion, Hold & Wait, No Preemption, and Circular Wait. Prevention involves denying at least one condition. Avoidance uses algorithms like Banker's Algorithm with safe states.",
-            "quick_check": {
-                "question": "Which Coffman condition is denied when resources are preempted and forcibly deallocated from a waiting process?",
-                "options": ["Mutual Exclusion", "Hold and Wait", "No Preemption", "Circular Wait"],
-                "correct_answer": "No Preemption",
-                "explanation": "Preempting resources means allowing the operating system to forcibly reclaim allocated resources, directly violating the 'No Preemption' condition."
-            }
-        },
-        "polymorphism": {
-            "title": "Polymorphism in OOP",
-            "summary": "Polymorphism means 'many forms'. It allows a single interface or method signature to have different underlying implementations.",
-            "details": "Compile-time polymorphism is achieved via method overloading and operator overloading. Runtime polymorphism is achieved via method overriding using virtual functions or interface implementations resolved at execution time via vtables.",
-            "quick_check": {
-                "question": "How is runtime (dynamic) polymorphism implemented in languages like C++ and Java?",
-                "options": ["Method Overloading", "Method Overriding with dynamic dispatch", "Inline functions", "Static keyword"],
-                "correct_answer": "Method Overriding with dynamic dispatch",
-                "explanation": "Runtime polymorphism relies on method overriding and dynamic method dispatch (vtables) to resolve calls at execution time."
-            }
-        },
-        "binary search": {
-            "title": "Binary Search Algorithm",
-            "summary": "Binary Search is an efficient algorithm for finding an item from a sorted list of items with O(log n) time complexity.",
-            "details": "It works by repeatedly dividing in half the portion of the list that could contain the item, comparing the target against the middle element.",
-            "quick_check": {
-                "question": "What is the prerequisite condition before applying Binary Search on an array?",
-                "options": ["The array must be unique", "The array must be sorted", "The array size must be a power of 2", "The array must be a Linked List"],
-                "correct_answer": "The array must be sorted",
-                "explanation": "Binary search relies on monotonic ordering; dividing the search space requires sorted elements."
-            }
-        },
-        "tcp vs udp": {
-            "title": "TCP vs UDP",
-            "summary": "TCP is a connection-oriented, reliable protocol providing ordering and error checking; UDP is connectionless, lightweight, and fast.",
-            "details": "TCP uses a 3-way handshake (SYN, SYN-ACK, ACK), flow control (sliding window), and congestion control. UDP sends datagrams without establishing a connection, ideal for DNS, gaming, and real-time streaming.",
-            "quick_check": {
-                "question": "Which transport protocol guarantees in-order delivery of packets with sequence numbers?",
-                "options": ["UDP", "TCP", "IP", "ICMP"],
-                "correct_answer": "TCP",
-                "explanation": "TCP tracks byte sequence numbers and acknowledges segments, retransmitting lost packets to ensure strict in-order delivery."
-            }
-        },
-        "knn": {
-            "title": "K-Nearest Neighbors (KNN)",
-            "summary": "KNN is a non-parametric, lazy learning algorithm used for both classification and regression based on proximity.",
-            "details": "It classifies a new data point based on the majority class among its 'k' nearest neighbors in feature space, typically measured using Euclidean, Manhattan, or Minkowski distance.",
-            "quick_check": {
-                "question": "Why is KNN commonly referred to as a 'Lazy Learner'?",
-                "options": ["It requires excessive GPU power", "It stores training data and postpones computation until query time", "It drops half the dataset", "It trains deep neural networks"],
-                "correct_answer": "It stores training data and postpones computation until query time",
-                "explanation": "KNN does not build an explicit generalized model during training; it simply memorizes the training instances and calculates distances at inference time."
-            }
-        },
-        "placement": {
-            "title": "Engineering Placement Strategy",
-            "summary": "A successful placement preparation strategy blends core Data Structures & Algorithms, OS/DBMS/CN fundamentals, and structured behavioral responses.",
-            "details": "Recommended priority:\n1. Master DSA (Arrays, Hash Maps, Two Pointers, Trees, Graphs, DP)\n2. SQL & Database design (Joins, Indexing, Transactions)\n3. OS core concepts (Concurrency, Scheduling, Virtual Memory)\n4. System Design basics (Load balancers, Caching, Scaling)\n5. Behavioral answers structured using the STAR method (Situation, Task, Action, Result).",
-            "quick_check": {
-                "question": "What framework is universally recommended for answering behavioral interview questions?",
-                "options": ["SOLID", "ACID", "STAR", "REST"],
-                "correct_answer": "STAR",
-                "explanation": "The STAR method (Situation, Task, Action, Result) helps deliver concise, structured, and impactful behavioral stories."
-            }
-        }
-    }
+    def chat_tutor(self, message: str, context: Optional[str] = None, retrieval_data: Optional[Dict[str, Any]] = None) -> Tuple[str, Optional[Dict[str, Any]], List[Dict[str, str]]]:
+        msg_clean = message.strip()
+        sources = retrieval_data.get("sources", []) if retrieval_data else []
+        quick_check = retrieval_data.get("quick_check") if retrieval_data else None
 
-    def chat_tutor(self, message: str, context: Optional[str] = None) -> Tuple[str, Optional[Dict[str, Any]]]:
-        msg_lower = message.lower()
-        matched_topic = None
+        # 1. Grounded academic dataset from curriculum (Highest Fidelity)
+        academic_data = retrieval_data.get("academic_data") if retrieval_data else None
+        if academic_data and isinstance(academic_data, dict):
+            topic_title = academic_data.get("title", msg_clean.title())
+            definition = academic_data.get("exam_definition", "")
+            remember = academic_data.get("remember", "")
+            core_concept = academic_data.get("core_concept", "")
+            key_points = academic_data.get("key_points", [])
+            student_example = academic_data.get("example", {})
+            exam_tip = academic_data.get("exam_tip", "")
+            common_confusion = academic_data.get("common_confusion", {})
+            faqs = academic_data.get("faqs", [])
 
-        for key, data in self.KNOWLEDGE_BASE.items():
-            if key in msg_lower:
-                matched_topic = data
-                break
+            parts = [
+                f"### 🎯 {topic_title} — Exam Prep Breakdown\n",
+                f"#### 📖 1. Concept Definition\n{definition}\n",
+            ]
+            if remember:
+                parts.append(f"**💡 What to Remember in Exam**: {remember}\n")
 
-        if matched_topic:
-            response_text = (
-                f"### {matched_topic['title']}\n\n"
-                f"{matched_topic['summary']}\n\n"
-                f"**Key Concepts to Remember:**\n"
-                f"{matched_topic['details']}\n\n"
-                f"Let's verify your grasp with a quick checkpoint below!"
+            if core_concept:
+                parts.append(f"#### 💡 2. Core Mechanism\n{core_concept}\n")
+
+            if key_points:
+                parts.append("#### 🔑 3. Key High-Scoring Points")
+                for kp in key_points:
+                    if isinstance(kp, dict):
+                        parts.append(f"- **{kp.get('title', '')}**: {kp.get('description', '')}")
+                    else:
+                        parts.append(f"- {kp}")
+                parts.append("")
+
+            if student_example and (student_example.get("code") or student_example.get("scenario")):
+                parts.append("#### 💻 4. Code & Walkthrough")
+                if student_example.get("scenario"):
+                    parts.append(f"*{student_example['scenario']}*\n")
+                if student_example.get("code"):
+                    parts.append(f"```text\n{student_example['code']}\n```")
+
+            if exam_tip:
+                parts.append(f"#### 🎯 5. Exam Tip\n> **University Tip**: {exam_tip}\n")
+
+            if common_confusion and common_confusion.get("wrong"):
+                parts.append(
+                    f"#### ⚠️ 6. Common Confusion\n"
+                    f"- ❌ **Mistake**: {common_confusion.get('wrong')}\n"
+                    f"- ✅ **Clarification**: {common_confusion.get('correct')}\n"
+                )
+
+            if faqs:
+                faq_item = faqs[0]
+                parts.append(
+                    f"#### ❓ 7. Frequently Asked Exam Question ({faq_item.get('marks', '2-Mark')})\n"
+                    f"**Q: {faq_item.get('q', '')}**\n"
+                    f"**Answer**: {faq_item.get('a', '')}\n"
+                )
+
+            if sources:
+                parts.append("#### 📚 Verified Academic References")
+                for s in sources:
+                    parts.append(f"- [{s['source_name']}: {s['title']}]({s['source_url']})")
+
+            return "\n".join(parts), quick_check, sources
+
+        # 2. If retrieval service found matching DB topics or sections
+        if retrieval_data and retrieval_data.get("has_content"):
+            topics = retrieval_data.get("matching_topics", [])
+            primary_topic = topics[0]["title"] if topics else msg_clean.title()
+            context_str = retrieval_data.get("context_str", "")
+
+            response_parts = [
+                f"### 🧠 {primary_topic}\n",
+                f"Here is a comprehensive breakdown based on the **CodeOrbit Engineering Curriculum**:\n"
+            ]
+
+            if context_str:
+                response_parts.append(f"{context_str}\n")
+            else:
+                response_parts.append(
+                    f"**Core Concept**: {primary_topic} is a foundational building block in computer science engineering. "
+                    f"It enforces architectural invariants and optimizes algorithmic complexity.\n"
+                )
+
+            response_parts.append(
+                "**Key Engineering Takeaways:**\n"
+                "- Understand the problem definition and theoretical mechanics.\n"
+                "- Analyze time and space complexity trade-offs.\n"
+                "- Verify understanding using the checkpoint question below.\n"
             )
-            return response_text, matched_topic["quick_check"]
 
-        # General Engineering Academic response
+            if sources:
+                response_parts.append("\n**📚 Verified Academic References:**")
+                for s in sources:
+                    response_parts.append(f"- [{s['source_name']}: {s['title']}]({s['source_url']})")
+
+            response_text = "\n".join(response_parts)
+            return response_text, quick_check, sources
+
+        # 3. General Engineering Academic response (Clean, zero filler)
         response_text = (
-            f"Great question about **{message.strip()}**!\n\n"
-            f"In computer science engineering, mastering this concept requires breaking it into three phases:\n"
-            f"1. **Conceptual Intuition**: Understand what problem this concept was invented to solve.\n"
-            f"2. **Implementation & Invariants**: Learn the underlying data structures, algorithms, or protocol exchanges.\n"
-            f"3. **Trade-offs**: Compare time complexity, space complexity, latency, and hardware constraints.\n\n"
-            f"Would you like me to walk through a concrete example with sample code or a diagram breakdown?"
+            f"### 💡 {msg_clean.title()}\n\n"
+            f"In computer science engineering, analyzing **{msg_clean}** requires evaluating three core dimensions:\n\n"
+            f"1. **Conceptual Definition**: How is the concept formally defined in university syllabus and standards?\n"
+            f"2. **Internal Mechanics**: How does the algorithm, kernel structure, protocol, or schema maintain correctness?\n"
+            f"3. **Practical Trade-offs**: What are the trade-offs in throughput, latency, memory consumption, and concurrency?\n\n"
+            f"Ask me about any specific topic in **DBMS, OOPS, OS, DS, ML, CN**, or technical campus interviews!"
         )
         generic_quick_check = {
-            "question": "In computational complexity, which asymptotic notation describes the tightest bound (both upper and lower)?",
-            "options": ["Big-O (O)", "Big-Omega (Ω)", "Big-Theta (Θ)", "Little-o (o)"],
-            "correct_answer": "Big-Theta (Θ)",
-            "explanation": "Big-Theta denotes an asymptotically tight bound where f(n) is bounded both from above and below by constant multiples."
+            "question": "In computer systems architecture, what design principle ensures components communicate solely through well-defined interfaces?",
+            "options": ["Abstraction / Modularity", "Tight Coupling", "Global State Mutation", "Unconstrained Inheritance"],
+            "correct_answer": "Abstraction / Modularity",
+            "explanation": "Abstraction and modular encapsulation isolate implementation details and preserve system invariants across component boundaries."
         }
-        return response_text, generic_quick_check
+        fallback_sources = [
+            {"source_name": "GeeksforGeeks", "source_url": "https://www.geeksforgeeks.org/computer-science-projects/", "title": "Computer Science Reference Library"},
+            {"source_name": "TutorialsPoint", "source_url": "https://www.tutorialspoint.com/computer_science_tutorials.htm", "title": "TutorialsPoint Computer Science"}
+        ]
+        return response_text, generic_quick_check, fallback_sources
 
     def explain_mistake(self, question_prompt: str, user_answer: str, correct_answer: str, explanation: str) -> Dict[str, Any]:
         return {
-            "why_wrong": f"You selected '{user_answer}'. This is a common misconception because that choice corresponds to a related but distinct phase or condition.",
-            "core_concept": f"The correct answer is '{correct_answer}'. {explanation}",
-            "real_world_example": "Think of it like compiling code: syntactic validation must pass before semantic type checking can occur. Similarly, in relational theory or protocol handshakes, each layer guarantees a specific invariant before advancing.",
+            "why_wrong": f"You selected '{user_answer}'. While common, this choice does not satisfy the necessary conditions or represents an earlier/different architectural stage.",
+            "core_concept": f"The verified correct answer is '{correct_answer}'. {explanation}",
+            "real_world_example": "Consider a database transaction or pipeline handshake: state transitions must adhere to strict invariant validation. If an invariant is violated, the transition is rejected.",
             "similar_question": {
                 "prompt": f"Related Concept Check: {question_prompt[:90]}...",
                 "options": [
@@ -159,7 +167,6 @@ class RuleBasedSmartProvider(AIProvider):
     def review_interview_answer(self, prompt: str, student_answer: str) -> Dict[str, Any]:
         word_count = len(student_answer.split())
         
-        # Determine depth and score based on substance
         if word_count < 25:
             score = 55
             clarity = "Brief and somewhat abrupt. Consider providing more context."
@@ -194,7 +201,7 @@ class RuleBasedSmartProvider(AIProvider):
 
 
 class OllamaProvider(AIProvider):
-    """Integrates with local Ollama instance if available."""
+    """Integrates with local Ollama instance if available, with retrieval grounding."""
 
     def __init__(self, base_url: str, model: str):
         self.base_url = base_url.rstrip("/")
@@ -208,28 +215,32 @@ class OllamaProvider(AIProvider):
         except Exception:
             return False
 
-    def chat_tutor(self, message: str, context: Optional[str] = None) -> Tuple[str, Optional[Dict[str, Any]]]:
+    def chat_tutor(self, message: str, context: Optional[str] = None, retrieval_data: Optional[Dict[str, Any]] = None) -> Tuple[str, Optional[Dict[str, Any]], List[Dict[str, str]]]:
         if not self._is_healthy():
-            return self.fallback.chat_tutor(message, context)
+            return self.fallback.chat_tutor(message, context, retrieval_data)
 
         try:
+            grounding = retrieval_data.get("context_str", "") if retrieval_data else ""
             system_prompt = (
                 "You are CodeOrbit AI Tutor, an engineering and computer science professor. "
-                "Provide an educational, concise answer for a student. At the end, formulate a 1-question Quick Check."
+                "Ground your answer strictly in the provided curriculum context when available. "
+                "Provide an educational, concise answer formatted with markdown headings, key takeaways, and code/diagrams if relevant."
             )
             payload = {
                 "model": self.model,
-                "prompt": f"{system_prompt}\nStudent Context: {context or 'General'}\nStudent Question: {message}",
+                "prompt": f"{system_prompt}\nAcademic Context: {grounding}\nStudent Context: {context or 'General'}\nStudent Question: {message}",
                 "stream": False
             }
             res = requests.post(f"{self.base_url}/api/generate", json=payload, timeout=12)
             if res.status_code == 200:
                 text = res.json().get("response", "")
-                return text, self.fallback.KNOWLEDGE_BASE.get("normalization", {})["quick_check"]
+                sources = retrieval_data.get("sources", []) if retrieval_data else []
+                quick_check = retrieval_data.get("quick_check") if retrieval_data else None
+                return text, quick_check, sources
         except Exception as e:
             logger.warning(f"Ollama request failed: {e}. Using fallback.")
 
-        return self.fallback.chat_tutor(message, context)
+        return self.fallback.chat_tutor(message, context, retrieval_data)
 
     def explain_mistake(self, question_prompt: str, user_answer: str, correct_answer: str, explanation: str) -> Dict[str, Any]:
         return self.fallback.explain_mistake(question_prompt, user_answer, correct_answer, explanation)
@@ -245,3 +256,4 @@ def get_ai_provider() -> AIProvider:
         if provider._is_healthy():
             return provider
     return RuleBasedSmartProvider()
+

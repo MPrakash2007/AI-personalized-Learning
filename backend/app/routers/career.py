@@ -22,8 +22,20 @@ def get_career_questions(
     current_user: User = Depends(get_current_user)
 ):
     query = db.query(CareerQuestion)
-    if category:
-        query = query.filter(CareerQuestion.category == category)
+    if category and category != "ALL":
+        cat_lower = category.lower()
+        if cat_lower == "dsa":
+            query = query.filter(CareerQuestion.category.in_(["dsa", "coding"]))
+        elif cat_lower == "core_cs":
+            query = query.filter(CareerQuestion.category.in_(["dbms", "os", "cn", "oops", "sql", "c_cpp"]))
+        elif cat_lower in ["system_design", "system design"]:
+            query = query.filter(CareerQuestion.category.in_(["interview_tech", "interview_project", "company_prep"]))
+        elif cat_lower in ["hr", "hr & behavioral", "behavioral"]:
+            query = query.filter(CareerQuestion.category.in_(["interview_hr", "interview_behavioral"]))
+        elif cat_lower in ["aptitude", "aptitude & logical"]:
+            query = query.filter(CareerQuestion.category.in_(["aptitude"]))
+        else:
+            query = query.filter(CareerQuestion.category.ilike(f"%{category}%"))
     if sub_topic:
         query = query.filter(CareerQuestion.sub_topic.ilike(f"%{sub_topic}%"))
     if difficulty:

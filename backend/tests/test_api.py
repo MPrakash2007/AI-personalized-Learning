@@ -137,3 +137,66 @@ def test_career_questions_and_companies():
     comp_res = client.get("/api/career/companies", headers=headers)
     assert comp_res.status_code == 200
     assert len(comp_res.json()) >= 4
+
+def test_topic_learn_questions_20():
+    login_res = client.post("/api/auth/login", json={
+        "email": "demo@codeorbit.local",
+        "password": "Demo@123"
+    })
+    token = login_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Fetch 20 questions for DBMS fundamentals
+    res = client.get("/api/topics/dbms-fundamentals/learn-questions", headers=headers)
+    assert res.status_code == 200
+    questions = res.json()["questions"]
+    assert len(questions) == 20
+    for q in questions:
+        assert q["question_context"] == "LEARN"
+        assert len(q["options"]) >= 2
+        assert q["explanation"] is not None
+
+def test_practice_arena_subject_isolation_and_completed():
+    login_res = client.post("/api/auth/login", json={
+        "email": "demo@codeorbit.local",
+        "password": "Demo@123"
+    })
+    token = login_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Demo user has completed topics in DBMS
+    dbms_practice = client.get("/api/practice/questions?subject_slug=dbms&limit=10", headers=headers)
+    assert dbms_practice.status_code == 200
+    data = dbms_practice.json()
+    assert data["can_practice"] is True
+    assert len(data["completed_topics"]) > 0
+    assert len(data["questions"]) > 0
+    # Every question must belong to DBMS completed topics and have PRACTICE context
+    for q in data["questions"]:
+        assert q["question_context"] == "PRACTICE"
+        assert q["topic_id"] in [t["id"] for t in data["completed_topics"]]
+
+    # Demo user has 0 completed topics in ML
+    ml_practice = client.get("/api/practice/questions?subject_slug=ml&limit=10", headers=headers)
+    assert ml_practice.status_code == 200
+    ml_data = ml_practice.json()
+    assert ml_data["can_practice"] is False
+    assert len(ml_data["questions"]) == 0
+    assert "Complete a" in ml_data["message"]
+
+def test_ai_tutor_search_rag():
+    login_res = client.post("/api/auth/login", json={
+        "email": "demo@codeorbit.local",
+        "password": "Demo@123"
+    })
+    token = login_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    res = client.get("/api/ai/search?query=ACID+transactions&subject_slug=dbms", headers=headers)
+    assert res.status_code == 200
+    data = res.json()
+    assert "context_str" in data
+    assert len(data["context_str"]) > 0
+    assert "sources" in data
+    assert len(data["matching_topics"]) > 0
+

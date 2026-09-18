@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
-  Bot, Send, Sparkles, User, HelpCircle, CheckCircle2, XCircle, ArrowRight, Loader2
+  Bot, Send, Sparkles, User, HelpCircle, CheckCircle2, XCircle, ArrowRight,
+  Loader2, BookMarked, ExternalLink, Filter, BookOpen
 } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -9,11 +11,18 @@ import { useToast } from '../context/ToastContext';
 export default function AITutorPage() {
   const { user } = useAuth();
   const toast = useToast();
+  const [searchParams] = useSearchParams();
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState(null);
+  const [subjects, setSubjects] = useState([]);
+  const [selectedSubjectId, setSelectedSubjectId] = useState('');
   const messagesEndRef = useRef(null);
+
+  const initialSubjectParam = searchParams.get('subject') || '';
+  const initialTopicParam = searchParams.get('topic') || '';
 
   const quickPrompts = [
     'What is normalization and why 3NF?',
@@ -26,6 +35,15 @@ export default function AITutorPage() {
   ];
 
   useEffect(() => {
+    // Load subjects for selector
+    api.get('/subjects').then((res) => {
+      setSubjects(res.data);
+      if (initialSubjectParam) {
+        const found = res.data.find(s => s.slug === initialSubjectParam || String(s.id) === initialSubjectParam);
+        if (found) setSelectedSubjectId(String(found.id));
+      }
+    }).catch(console.error);
+
     // Load past session history or welcome greeting
     api.get('/ai/sessions')
       .then((res) => {
@@ -39,8 +57,9 @@ export default function AITutorPage() {
             {
               id: 1,
               sender: 'ai',
-              message: `Hello ${user?.full_name?.split(' ')[0] || 'Student'}! 👋 I am your CodeOrbit AI Tutor.\n\nAsk me any computer science concept, design pattern, or placement strategy question. Every explanation comes with a quick interactive concept check!`,
+              message: `Hello ${user?.full_name?.split(' ')[0] || 'Student'}! 👋 I am your CodeOrbit AI Tutor.\n\nAsk me any computer science concept, design pattern, or placement strategy question. Every explanation is grounded in curriculum topics with verified reference links and interactive concept checks!`,
               quick_check: null,
+              sources: [],
             },
           ]);
         }
@@ -48,7 +67,7 @@ export default function AITutorPage() {
       .catch((err) => {
         console.error('Error fetching sessions:', err);
       });
-  }, []);
+  }, [initialSubjectParam]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -64,15 +83,21 @@ export default function AITutorPage() {
       sender: 'student',
       message: query,
       quick_check: null,
+      sources: [],
     };
     setMessages((prev) => [...prev, studentMsg]);
     setLoading(true);
 
     try {
-      const res = await api.post('/ai/chat', {
+      const payload = {
         message: query,
         session_id: sessionId,
-      });
+      };
+      if (selectedSubjectId) {
+        payload.subject_id = parseInt(selectedSubjectId, 10);
+      }
+
+      const res = await api.post('/ai/chat', payload);
 
       setSessionId(res.data.session_id);
       const aiMsg = {
@@ -80,6 +105,7 @@ export default function AITutorPage() {
         sender: 'ai',
         message: res.data.message,
         quick_check: res.data.quick_check,
+        sources: res.data.sources || [],
       };
       setMessages((prev) => [...prev, aiMsg]);
     } catch (err) {
@@ -93,6 +119,7 @@ export default function AITutorPage() {
           message:
             'I encountered a network timeout, but remember: in engineering, every robust distributed protocol implements retries and circuit breakers! Try rephrasing your question.',
           quick_check: null,
+          sources: [],
         },
       ]);
     } finally {
@@ -102,10 +129,10 @@ export default function AITutorPage() {
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col h-[calc(100vh-8.5rem)] animate-in fade-in duration-200">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-purple-500/15">
+      {/* Header with Subject Context Filter */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-purple-500/15 gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 via-purple-600 to-cyan-400 p-[1.5px] shadow-lg shadow-purple-600/30">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 via-purple-600 to-cyan-400 p-[1.5px] shadow-lg shadow-purple-600/30 shrink-0">
             <div className="w-full h-full bg-[#0e0824] rounded-[10px] flex items-center justify-center text-white">
               <Bot className="w-5 h-5 text-pink-400" />
             </div>
@@ -114,11 +141,28 @@ export default function AITutorPage() {
             <h1 className="text-xl font-bold text-white flex items-center gap-2">
               CodeOrbit AI Tutor
               <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
-                Online
+                Local RAG Grounded
               </span>
             </h1>
-            <p className="text-xs text-purple-300/60">Your personal engineering study companion</p>
+            <p className="text-xs text-purple-300/60">Grounded in database topics, code snippets & citations</p>
           </div>
+        </div>
+
+        {/* Subject Context Selector */}
+        <div className="flex items-center gap-2">
+          <Filter className="w-3.5 h-3.5 text-cyan-400" />
+          <select
+            value={selectedSubjectId}
+            onChange={(e) => setSelectedSubjectId(e.target.value)}
+            className="px-3 py-1.5 rounded-xl bg-purple-950/50 border border-purple-500/30 text-xs text-slate-200 focus:outline-none focus:border-cyan-400"
+          >
+            <option value="">All Curriculums (General CS)</option>
+            {subjects.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.icon} {s.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -152,6 +196,30 @@ export default function AITutorPage() {
                   }`}
                 >
                   <p className="whitespace-pre-line">{m.message}</p>
+
+                  {/* Grounded Source References */}
+                  {isAI && m.sources && m.sources.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-purple-500/20 space-y-1.5">
+                      <div className="text-[10px] font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1">
+                        <BookMarked className="w-3 h-3 text-cyan-400" />
+                        <span>Curriculum & Documentation Sources</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {m.sources.map((src, idx) => (
+                          <a
+                            key={idx}
+                            href={src.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2 py-0.5 rounded-lg bg-purple-950/60 border border-purple-500/30 text-[10px] text-cyan-300 hover:text-cyan-200 hover:border-cyan-400 flex items-center gap-1 transition-colors"
+                          >
+                            <span>{src.name}</span>
+                            <ExternalLink className="w-2.5 h-2.5 opacity-70" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Optional Interactive Quick Check Component */}
@@ -170,7 +238,7 @@ export default function AITutorPage() {
             </div>
             <div className="flex items-center gap-2">
               <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
-              <span>Analyzing academic concepts & formulating response...</span>
+              <span>Retrieving curriculum knowledge & generating grounded response...</span>
             </div>
           </div>
         )}

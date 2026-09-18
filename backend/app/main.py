@@ -26,6 +26,7 @@ from app.routers.planner import router as planner_router
 from app.routers.notes import router as notes_router
 from app.routers.career import router as career_router
 from app.routers.admin import router as admin_router
+from app.routers.practice import router as practice_router
 
 from app.models.learning import Subject, Topic, Question
 from app.models.career import CareerQuestion
@@ -54,6 +55,7 @@ app.include_router(subjects_router, prefix=settings.API_V1_STR)
 app.include_router(topics_router, prefix=settings.API_V1_STR)
 app.include_router(lessons_router, prefix=settings.API_V1_STR)
 app.include_router(questions_router, prefix=settings.API_V1_STR)
+app.include_router(practice_router, prefix=settings.API_V1_STR)
 app.include_router(attempts_router, prefix=settings.API_V1_STR)
 app.include_router(progress_router, prefix=settings.API_V1_STR)
 app.include_router(recommendations_router, prefix=settings.API_V1_STR)

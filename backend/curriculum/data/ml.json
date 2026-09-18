@@ -1,0 +1,1406 @@
+{
+  "ml-fundamentals": {
+    "title": "Machine Learning Fundamentals & Paradigms",
+    "subject": "ml",
+    "exam_definition": "Machine Learning (ML) is a subfield of Artificial Intelligence defined by Tom Mitchell: 'A computer program is said to learn from experience $E$ with respect to some class of tasks $T$ and performance measure $P$, if its performance at tasks in $T$, as measured by $P$, improves with experience $E$.'",
+    "remember": "Tom Mitchell's ML Definition: Task (T), Experience (E), Performance Measure (P). P must improve on T with E.",
+    "core_concept": "Traditional rule-based programming feeds input data and handcrafted code into a computer to produce outputs. Machine Learning inverts this paradigm: it feeds input data and observed outputs into algorithms to automatically learn the underlying mapping rules. The bias-variance tradeoff governs generalization error.",
+    "key_points": [
+      "Mitchell's Formalism: Task (T), Experience (E), Performance (P). Example: Spam filtering (T = classify email, E = labeled inbox, P = accuracy).",
+      "Supervised Learning: Trained on labeled datasets $(X, y)$ to perform Regression (continuous target) or Classification (discrete target).",
+      "Unsupervised Learning: Discovers latent patterns, groupings, or representations in unlabeled data $X$ (Clustering, Dimensionality Reduction).",
+      "Reinforcement Learning: An agent interacts with an environment, learning an optimal policy $\\pi$ to maximize cumulative reward via trial and error.",
+      "Generalization: Ability of a model to perform accurately on previously unseen test distributions rather than memorizing training data.",
+      "Bias-Variance Tradeoff: Total Error = $\\text{Bias}^2 + \\text{Variance} + \\text{Irreducible Noise}$."
+    ],
+    "classification": {
+      "title": "Core Machine Learning Paradigms",
+      "items": [
+        {
+          "name": "Supervised Learning",
+          "desc": "Trained on input-output pairs (X, y) to predict outputs for new inputs (e.g. Linear/Logistic Regression, Random Forest, SVM)."
+        },
+        {
+          "name": "Unsupervised Learning",
+          "desc": "Trained on unlabeled data X to uncover intrinsic structures (e.g. K-Means, PCA, Hierarchical Clustering)."
+        },
+        {
+          "name": "Semi-Supervised Learning",
+          "desc": "Combines a small amount of labeled data with a large volume of unlabeled data to reduce annotation costs."
+        },
+        {
+          "name": "Reinforcement Learning",
+          "desc": "Agent learns behavioral policy through state observations, actions, rewards, and punishments (Q-Learning, Policy Gradients)."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "The Machine Learning Pipeline Flow",
+      "steps": [
+        "1. Problem Formulation: Define Task T, target variable y, and evaluation metric P.",
+        "2. Data Ingestion & Exploration: Collect dataset, inspect distributions, detect anomalies.",
+        "3. Preprocessing & Feature Engineering: Handle missing values, scale numerical features, encode categorical variables.",
+        "4. Train-Validation-Test Split: Split data to prevent data leakage (e.g. 70% Train, 15% Validation, 15% Test).",
+        "5. Model Training & Hyperparameter Tuning: Fit parameters via optimization (e.g. Gradient Descent) and tune hyperparameters using K-Fold Cross-Validation.",
+        "6. Final Evaluation & Deployment: Evaluate generalized performance on held-out Test set and deploy pipeline."
+      ],
+      "diagram": "Raw Data ──> Preprocessing ──> Train/Test Split ──> Model Training ──> Validation Tuning ──> Test Evaluation ──> Deployment"
+    },
+    "example": {
+      "title": "Supervised Learning Pipeline in Python (scikit-learn)",
+      "scenario": "A basic supervised classification pipeline training on Iris dataset.",
+      "code": "from sklearn.datasets import load_iris\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestClassifier\nfrom sklearn.metrics import accuracy_score\n\n# 1. Load labeled dataset (Experience E)\niris = load_iris()\nX, y = iris.data, iris.target\n\n# 2. Split into Train and Test\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n\n# 3. Train Model on Task T\nclf = RandomForestClassifier(n_estimators=100, random_state=42)\nclf.fit(X_train, y_train)\n\n# 4. Measure Performance P\npredictions = clf.predict(X_test)\naccuracy = accuracy_score(y_test, predictions)\nprint(f'Test Accuracy: {accuracy * 100:.2f}%')"
+    },
+    "comparison": {
+      "title": "Supervised vs Unsupervised vs Reinforcement Learning",
+      "headers": [
+        "Dimension",
+        "Supervised Learning",
+        "Unsupervised Learning",
+        "Reinforcement Learning"
+      ],
+      "rows": [
+        [
+          "Training Data",
+          "Labeled pairs $(X, y)$ with ground truth",
+          "Unlabeled features $X$ only",
+          "No static dataset; dynamic state-action feedback"
+        ],
+        [
+          "Primary Goal",
+          "Predict target output for new inputs",
+          "Discover hidden patterns/clusters",
+          "Learn optimal decision policy $\\pi(a|s)$"
+        ],
+        [
+          "Feedback Mechanism",
+          "Direct error signal against ground truth label",
+          "No feedback; evaluates cluster separation or reconstruction error",
+          "Delayed scalar reward/penalty from environment"
+        ],
+        [
+          "Standard Algorithms",
+          "Linear Regression, SVM, Decision Trees",
+          "K-Means, PCA, DBSCAN, Autoencoders",
+          "Q-Learning, SARSA, Deep Q-Networks (DQN)"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Bias-Variance Decomposition",
+        "formula": "E[(y - f_hat(x))^2] = Bias(f_hat(x))^2 + Var(f_hat(x)) + sigma^2",
+        "explanation": "Total prediction error decomposes into squared bias, variance, and irreducible noise sigma^2."
+      }
+    ],
+    "exam_tip": "When asked to define Machine Learning in university exams, write Tom Mitchell's exact 1997 definition (Task T, Experience E, Performance P). Give a concrete 3-part example (e.g. Handwritten Digit Recognition: T = recognizing digits, E = database of labeled digits, P = percentage of digits correctly classified).",
+    "common_confusion": {
+      "wrong": "High accuracy on the training set means the machine learning model is excellent.",
+      "correct": "High training accuracy with low test accuracy indicates OVERFITTING (memorizing noise in training data). True performance is judged solely on unseen test data.",
+      "explanation": "A lookup table has 100% training accuracy but zero generalization capability."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "State Tom Mitchell's formal definition of Machine Learning.",
+        "a": "A computer program is said to learn from experience $E$ with respect to some class of tasks $T$ and performance measure $P$, if its performance at tasks in $T$, as measured by $P$, improves with experience $E$."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Explain the Bias-Variance Tradeoff with its mathematical decomposition and curve diagram.",
+        "a": "1. Bias: Error introduced by approximating a complex real-world problem with an overly simplistic model (Underfitting). High bias causes high training and test error.\n2. Variance: Model's sensitivity to small fluctuations/noise in the training set (Overfitting). High variance causes low training error but high test error.\n3. Mathematical Decomposition: $\\text{Total Expected Error} = \\text{Bias}^2 + \\text{Variance} + \\sigma^2$ (irreducible noise).\n4. Tradeoff: As model complexity increases, bias decreases while variance increases. The optimal model complexity minimizes the sum of bias and variance."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Differentiate between Supervised, Unsupervised, and Reinforcement Learning. Describe the complete lifecycle of an industrial Machine Learning project.",
+        "a": "1. Paradigms Comparison:\n   - Supervised: Learns mapping from inputs $X$ to known labels $y$ (Regression, Classification).\n   - Unsupervised: Discovers internal representations and clusters in unlabeled data $X$ without teacher guidance.\n   - Reinforcement: Learns policy through state transitions, actions, and environmental rewards.\n2. Machine Learning Project Lifecycle:\n   - Step 1: Problem Definition & KPI alignment (mapping business goal to ML task).\n   - Step 2: Data Acquisition & EDA (detecting missingness, outliers, correlations).\n   - Step 3: Data Preprocessing (imputation, scaling, one-hot encoding, train-val-test split).\n   - Step 4: Feature Engineering & Selection (domain transformations, PCA, mutual information).\n   - Step 5: Model Selection & Baseline Training (linear models, tree ensembles).\n   - Step 6: Hyperparameter Tuning (Grid Search, Random Search with K-Fold CV).\n   - Step 7: Model Evaluation (Confusion matrix, ROC-AUC, RMSE on held-out test data).\n   - Step 8: Deployment & Monitoring (API serving, drift detection, model retraining)."
+      }
+    ],
+    "revision_60s": [
+      "ML: Programs that improve at Task T with Experience E measured by Performance P.",
+      "Supervised = labeled (X, y); Unsupervised = unlabeled X; RL = trial-and-error reward.",
+      "Total Error = Bias^2 + Variance + Irreducible Noise.",
+      "High Bias = Underfitting; High Variance = Overfitting.",
+      "Generalization is performance on unseen test data, not training data."
+    ]
+  },
+  "data-preprocessing": {
+    "title": "Data Preprocessing & Feature Engineering",
+    "subject": "ml",
+    "exam_definition": "Data Preprocessing is the data preparation phase that transforms raw, noisy real-world data into clean, formatted numerical matrices via Missing Value Imputation, Outlier Handling, Categorical Encoding (One-Hot / Label), and Feature Scaling (Normalization / Standardization).",
+    "remember": "Standardization (Z-score): z = (x - mu) / sigma (mean=0, std=1). Normalization (Min-Max): x_norm = (x - min) / (max - min) in [0, 1].",
+    "core_concept": "Real-world data is dirty: incomplete (missing values), noisy (outliers), unstructured (categorical text), and disparate in scale. Distance-based models (KNN, SVM, K-Means) and gradient descent algorithms fail completely when features have vastly different numeric scales. Crucially, all scaling transformations must be fit strictly on the Training set and only applied to the Test set to prevent Data Leakage.",
+    "key_points": [
+      "Missing Value Handling: Mean/Median imputation (numerical), Mode/Constant imputation (categorical), or advanced KNN/MICE iterative imputation.",
+      "Outlier Detection: Z-score method ($|z| > 3$) or IQR method ($x < Q1 - 1.5 \\cdot IQR$ or $x > Q3 + 1.5 \\cdot IQR$).",
+      "One-Hot Encoding: Creates binary indicator columns for nominal categorical variables; beware of Dummy Variable Trap (multicollinearity).",
+      "Label / Ordinal Encoding: Assigns integers ($0, 1, 2, \\dots$) preserving natural rank order (e.g. Small < Medium < Large).",
+      "Min-Max Normalization: Rescales features to $[0, 1]$: $x_{\\text{norm}} = \\frac{x - x_{\\min}}{x_{\\max} - x_{\\min}}$. Highly sensitive to outliers.",
+      "Standardization (Z-Score): Centers features at mean 0 with unit variance: $z = \\frac{x - \\mu}{\\sigma}$. Robust to outliers.",
+      "Data Leakage: Fitting scalers on the entire dataset prior to train/test split leaks test distribution parameters $(\\mu, \\sigma)$ into training."
+    ],
+    "classification": {
+      "title": "Feature Scaling Techniques",
+      "items": [
+        {
+          "name": "Standardization (StandardScaler)",
+          "desc": "Transforms data to mean = 0 and standard deviation = 1: z = (x - mu) / sigma. Assumes normal distribution."
+        },
+        {
+          "name": "Min-Max Normalization (MinMaxScaler)",
+          "desc": "Binds values between [0, 1] or [-1, 1]. Sensitive to extreme outliers."
+        },
+        {
+          "name": "Robust Scaling (RobustScaler)",
+          "desc": "Removes median and scales according to IQR (Q3 - Q1), making it robust to heavy outliers."
+        },
+        {
+          "name": "Log Transformation",
+          "desc": "Applies log(1 + x) to compress heavy right-skewed power-law distributions into bell curves."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Preventing Data Leakage during Preprocessing",
+      "steps": [
+        "1. Perform Train/Test split BEFORE any preprocessing transformation.",
+        "2. Instantiate scaler: `scaler = StandardScaler()`.",
+        "3. Fit scaler ONLY on Training data: `scaler.fit(X_train)` (computes $\\mu_{\\text{train}}$ and $\\sigma_{\\text{train}}$).",
+        "4. Transform Training data: `X_train_scaled = scaler.transform(X_train)`.",
+        "5. Transform Test data using training parameters: `X_test_scaled = scaler.transform(X_test)` (NEVER call fit() on test data!).",
+        "6. Train model strictly on `X_train_scaled`."
+      ],
+      "diagram": "Dataset ──> Split ──┬──> X_train ──> scaler.fit_transform() ──> [Learned mu, sigma]\n                    └──> X_test  ──> scaler.transform(using train mu, sigma) ──> Test Set"
+    },
+    "example": {
+      "title": "Safe Preprocessing Pipeline using scikit-learn",
+      "scenario": "Imputing missing values and standardizing features within a ColumnTransformer.",
+      "code": "from sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler, OneHotEncoder\nfrom sklearn.compose import ColumnTransformer\n\nnum_pipeline = Pipeline([\n    ('imputer', SimpleImputer(strategy='median')),\n    ('scaler', StandardScaler())\n])\n\ncat_pipeline = Pipeline([\n    ('imputer', SimpleImputer(strategy='most_frequent')),\n    ('encoder', OneHotEncoder(drop='first')) # Drop first prevents dummy trap\n])\n\npreprocessor = ColumnTransformer(transformers=[\n    ('num', num_pipeline, ['age', 'salary']),\n    ('cat', cat_pipeline, ['gender', 'city'])\n])"
+    },
+    "comparison": {
+      "title": "Standardization vs Min-Max Normalization",
+      "headers": [
+        "Attribute",
+        "Standardization (Z-Score)",
+        "Min-Max Normalization"
+      ],
+      "rows": [
+        [
+          "Formula",
+          "$z = (x - \\mu) / \\sigma$",
+          "$x_{\\text{norm}} = (x - x_{\\min}) / (x_{\\max} - x_{\\min})$"
+        ],
+        [
+          "Resulting Range",
+          "Unbounded (typically $[-3, +3]$)",
+          "Strictly bounded between $[0, 1]$"
+        ],
+        [
+          "Mean & Variance",
+          "Mean = 0, Variance = 1",
+          "Variable"
+        ],
+        [
+          "Outlier Sensitivity",
+          "Robust — outliers do not compress the rest of the data",
+          "Extremely sensitive — single outlier compresses non-outliers into narrow band"
+        ],
+        [
+          "Best Used For",
+          "Gradient Descent, SVM, Logistic Regression, PCA",
+          "Image pixel normalization (0-255 -> 0-1), Neural Networks, KNN"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Standardization Formula",
+        "formula": "z = (x - mu) / sigma",
+        "explanation": "mu is mean, sigma is standard deviation."
+      },
+      {
+        "name": "IQR Outlier Fence",
+        "formula": "IQR = Q3 - Q1 | Lower = Q1 - 1.5 * IQR | Upper = Q3 + 1.5 * IQR",
+        "explanation": "Points outside fences are classified as statistical outliers."
+      }
+    ],
+    "exam_tip": "In numerical questions on IQR: Always calculate $Q1$ (25th percentile), $Q3$ (75th percentile), and $IQR = Q3 - Q1$. The outlier fences are $Q1 - 1.5 \\times IQR$ and $Q3 + 1.5 \\times IQR$.",
+    "common_confusion": {
+      "wrong": "Tree-based models (Decision Trees, Random Forest) require feature scaling.",
+      "correct": "Decision trees are completely invariant to monotonic feature scaling because split points are based on element rank order, not geometric distance.",
+      "explanation": "Scaling salary from $10,000-$100,000 to 0.1-1.0 does not change the tree split threshold decision."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is the Dummy Variable Trap in One-Hot Encoding?",
+        "a": "The Dummy Variable Trap occurs when dummy indicator variables are multicollinear—meaning one variable can be predicted perfectly from the others (e.g. knowing Male=0 implies Female=1). This causes singularity in linear model matrix inversion $(X^T X)^{-1}$, resolved by dropping one dummy column (`drop='first'`)."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "What is Data Leakage in Machine Learning and how is it prevented during preprocessing?",
+        "a": "1. Definition: Data Leakage occurs when information from outside the training dataset (such as test set statistics) is used to create or train the model, resulting in overly optimistic evaluation scores that fail in production.\n2. Common Mistake: Calling `scaler.fit_transform(X)` on the combined dataset before splitting into train and test.\n3. Prevention: Split data first. Call `scaler.fit(X_train)` and `scaler.transform(X_train)` on the training set. Then call `scaler.transform(X_test)` using the pre-computed training parameters."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Given feature vector: [10, 20, 30, 40, 50, 1000]. Compute: (a) Min-Max Normalization, (b) Z-score standardization. Explain why an outlier affects normalization more severely than standardization.",
+        "a": "1. (a) Min-Max Normalization ($x_{\\min} = 10, x_{\\max} = 1000$):\n   - Formula: $x_{\\text{norm}} = (x - 10) / 990$\n   - 10 -> 0.000\n   - 20 -> 10/990 = 0.010\n   - 30 -> 20/990 = 0.020\n   - 40 -> 30/990 = 0.030\n   - 50 -> 40/990 = 0.040\n   - 1000 -> 990/990 = 1.000\n   - Result: Notice that the genuine variation across 10-50 is squashed into the tiny band [0.00, 0.04]!\n2. (b) Z-score Standardization:\n   - Mean $\\mu = (10 + 20 + 30 + 40 + 50 + 1000) / 6 = 1150 / 6 = 191.67$\n   - Outlier 1000 shifts the mean upward, but the values remain unbounded and preserve comparative variances.\n3. Outlier Impact: Min-Max normalization depends strictly on extreme values $x_{\\min}$ and $x_{\\max}$. A single outlier drastically expands the denominator, destroying resolution for normal data points."
+      }
+    ],
+    "revision_60s": [
+      "Missing values: Impute with Median (numerical) or Mode (categorical).",
+      "Outliers: IQR method = Q1 - 1.5*IQR to Q3 + 1.5*IQR.",
+      "Standardization: z = (x - mu) / sigma (mean 0, std 1).",
+      "Min-Max: (x - min) / (max - min) scales to [0, 1].",
+      "Always fit scaler on Train only and transform Test to prevent Data Leakage."
+    ]
+  },
+  "linear-regression": {
+    "title": "Linear Regression, Cost Function & Regularization",
+    "subject": "ml",
+    "exam_definition": "Linear Regression is a fundamental supervised parametric regression algorithm that models the linear relationship between continuous dependent variable $y$ and independent features $X$ by minimizing Mean Squared Error (MSE), optimized via Gradient Descent or the Normal Equation, regularized using Ridge (L2) and Lasso (L1).",
+    "remember": "Linear Regression Hypothesis: y_hat = w^T * x + b. Normal Equation: w = (X^T * X)^(-1) * X^T * y.",
+    "core_concept": "Linear regression assumes the target value is a linear combination of input features plus Gaussian error. The parameters $\\mathbf{w}$ and $b$ are learned by minimizing the Ordinary Least Squares (OLS) cost function. When features are correlated or outnumber samples ($p > n$), OLS overfits. Regularization adds a penalty to the loss function: Ridge ($L_2$) shrinks weights smoothly, while Lasso ($L_1$) drives non-essential weights to exactly zero for feature selection.",
+    "key_points": [
+      "Hypothesis: $\\hat{y} = w_0 + w_1 x_1 + \\dots + w_n x_n = \\mathbf{w}^T \\mathbf{x}$.",
+      "Mean Squared Error (MSE): $J(\\mathbf{w}) = \\frac{1}{2m} \\sum_{i=1}^m (\\hat{y}^{(i)} - y^{(i)})^2$.",
+      "Gradient Descent Update: $w_j := w_j - \\alpha \\frac{\\partial J}{\\partial w_j} = w_j - \\frac{\\alpha}{m} \\sum_{i=1}^m (\\hat{y}^{(i)} - y^{(i)}) x_j^{(i)}$.",
+      "Normal Equation (Analytical Solution): $\\mathbf{w} = (X^T X)^{-1} X^T \\mathbf{y}$. Time complexity $O(n^3)$ due to matrix inversion.",
+      "Assumptions of OLS: Linearity, Independence of errors, Homoscedasticity (constant error variance), Normality of residuals, No multicollinearity.",
+      "Ridge Regression ($L_2$): Penalty $\\lambda \\sum w_j^2$. Prevents overfitting; cannot zero out weights.",
+      "Lasso Regression ($L_1$): Penalty $\\lambda \\sum |w_j|$. Enforces diamond-shaped constraint boundaries, causing exact feature selection (sparse weights)."
+    ],
+    "classification": {
+      "title": "Linear Regression Regularization Schemes",
+      "items": [
+        {
+          "name": "Ordinary Least Squares (OLS)",
+          "desc": "Standard unregularized regression. Vulnerable to multicollinearity and overfitting when p is large."
+        },
+        {
+          "name": "Ridge Regression (L2)",
+          "desc": "Adds squared magnitude weight penalty lambda * sum(w_j^2). Shrinks weights toward zero; keeps all features."
+        },
+        {
+          "name": "Lasso Regression (L1)",
+          "desc": "Adds absolute weight penalty lambda * sum(|w_j|). Drives irrelevant coefficients to exactly 0 (built-in feature selection)."
+        },
+        {
+          "name": "ElasticNet",
+          "desc": "Convex linear combination of L1 and L2 penalties: r * L1 + (1-r) * L2. Ideal for correlated feature groups."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Batch Gradient Descent Parameter Optimization",
+      "steps": [
+        "1. Initialize weights $\\mathbf{w} = \\mathbf{0}$ and bias $b = 0$.",
+        "2. Forward Pass: Compute predictions $\\hat{y}^{(i)} = \\mathbf{w}^T \\mathbf{x}^{(i)} + b$ for all $m$ training instances.",
+        "3. Compute Error: $e^{(i)} = \\hat{y}^{(i)} - y^{(i)}$.",
+        "4. Compute Gradients: $\\frac{\\partial J}{\\partial w_j} = \\frac{1}{m} \\sum_{i=1}^m e^{(i)} x_j^{(i)}$, and $\\frac{\\partial J}{\\partial b} = \\frac{1}{m} \\sum_{i=1}^m e^{(i)}$.",
+        "5. Parameter Update: $\\mathbf{w} := \\mathbf{w} - \\alpha \\nabla_{\\mathbf{w}} J$ and $b := b - \\alpha \\nabla_b J$, where $\\alpha$ is the learning rate.",
+        "6. Repeat until convergence ($|J_{t} - J_{t-1}| < \\epsilon$)."
+      ],
+      "diagram": "Cost Function J(w) [Convex Bowl] ──> Step opposite to gradient: w := w - alpha * grad(J) ──> Reaches Global Minimum"
+    },
+    "example": {
+      "title": "Ridge and Lasso Regression in Python",
+      "scenario": "Demonstrating L1 vs L2 regularization on a synthetic regression dataset.",
+      "code": "from sklearn.linear_model import LinearRegression, Ridge, Lasso\nfrom sklearn.datasets import make_regression\n\nX, y = make_regression(n_samples=100, n_features=10, n_informative=3, noise=10, random_state=42)\n\n# 1. OLS\nols = LinearRegression().fit(X, y)\n# 2. Ridge (L2)\nridge = Ridge(alpha=1.0).fit(X, y)\n# 3. Lasso (L1) - forces non-informative feature weights to 0.0\nlasso = Lasso(alpha=0.5).fit(X, y)\n\nprint('OLS weights non-zero:', sum(ols.coef_ != 0))   # 10\nprint('Ridge weights non-zero:', sum(ridge.coef_ != 0)) # 10 (shrunk)\nprint('Lasso weights non-zero:', sum(lasso.coef_ != 0)) # 3 (feature selection!)"
+    },
+    "comparison": {
+      "title": "Ridge (L2) vs Lasso (L1) Regularization",
+      "headers": [
+        "Feature",
+        "Ridge Regression (L2)",
+        "Lasso Regression (L1)"
+      ],
+      "rows": [
+        [
+          "Penalty Term",
+          "$\\lambda \\sum_{j=1}^p w_j^2$ (Squared Euclidean norm)",
+          "$\\lambda \\sum_{j=1}^p |w_j|$ (Taxicab / Manhattan norm)"
+        ],
+        [
+          "Geometry of Constraint",
+          "Hypersphere (Circular / Smooth)",
+          "Hypercube (Diamond / Sharp corners at axes)"
+        ],
+        [
+          "Weight Shrinkage",
+          "Shrinks coefficients asymptotically toward zero; never exactly 0",
+          "Shrinks coefficients and truncates non-essential weights to exactly 0"
+        ],
+        [
+          "Feature Selection",
+          "No feature selection (all $p$ features retained)",
+          "Automatic feature selection (creates sparse models)"
+        ],
+        [
+          "Analytical Solution",
+          "Closed-form: $\\mathbf{w} = (X^T X + \\lambda I)^{-1} X^T \\mathbf{y}$",
+          "No closed-form solution (requires subgradient or coordinate descent)"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Normal Equation",
+        "formula": "w = (X^T * X)^(-1) * X^T * y",
+        "explanation": "Solves for optimal OLS weights directly without iterations."
+      },
+      {
+        "name": "R-squared (Coefficient of Determination)",
+        "formula": "R^2 = 1 - (SS_res / SS_tot) = 1 - (sum(y - y_hat)^2 / sum(y - y_mean)^2)",
+        "explanation": "Proportion of target variance explained by model features."
+      }
+    ],
+    "exam_tip": "Why does Lasso yield sparse weights (zeros) while Ridge does not? Explain via the geometry: The L1 constraint boundary is a diamond with sharp corners situated on the coordinate axes. The circular contours of the MSE cost function intersect this diamond at its corners where coordinates are zero. The L2 constraint is a smooth circle, where intersections rarely occur on axes.",
+    "common_confusion": {
+      "wrong": "R^2 can never be negative.",
+      "correct": "R^2 CAN be negative on test data if the model performs worse than a simple horizontal line predicting the mean value y_mean.",
+      "explanation": "If SS_res > SS_tot, then R^2 = 1 - (SS_res / SS_tot) < 0."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is the primary difference between Ridge (L2) and Lasso (L1) regression?",
+        "a": "Ridge regression penalizes the sum of squared coefficients ($\\lambda \\sum w_j^2$), shrinking weights toward zero while retaining all features. Lasso regression penalizes the sum of absolute coefficients ($\\lambda \\sum |w_j|$), driving non-informative feature weights to exactly zero, thus performing automated feature selection."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "State the five foundational assumptions of Ordinary Least Squares (OLS) Linear Regression.",
+        "a": "1. Linearity: The relationship between the independent features $X$ and the dependent variable $y$ is linear in parameters.\n2. Independence of Errors: Observations and residual errors are independent with zero autocorrelation.\n3. Homoscedasticity: The variance of residual error terms $\\epsilon$ is constant across all values of $X$.\n4. Normality of Residuals: Error terms are normally distributed: $\\epsilon \\sim \\mathcal{N}(0, \\sigma^2)$.\n5. No Multicollinearity: Independent features are not perfectly linearly correlated ($X^T X$ is full rank and invertible)."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Derive the Normal Equation for Linear Regression: w = (X^T X)^(-1) X^T y. Discuss its computational complexity compared to Gradient Descent for large datasets.",
+        "a": "1. Matrix Formulation of Cost Function:\n   - Hypothesis: $\\hat{\\mathbf{y}} = X \\mathbf{w}$.\n   - Cost function: $J(\\mathbf{w}) = \\frac{1}{2} (X \\mathbf{w} - \\mathbf{y})^T (X \\mathbf{w} - \\mathbf{y}) = \\frac{1}{2} (\\mathbf{w}^T X^T X \\mathbf{w} - 2 \\mathbf{y}^T X \\mathbf{w} + \\mathbf{y}^T \\mathbf{y})$.\n2. Differentiating with respect to $\\mathbf{w}$:\n   - $\\nabla_{\\mathbf{w}} J = X^T X \\mathbf{w} - X^T \\mathbf{y}$.\n3. Setting Gradient to Zero for Minimum:\n   - $X^T X \\mathbf{w} - X^T \\mathbf{y} = 0 \\implies X^T X \\mathbf{w} = X^T \\mathbf{y}$.\n   - Multiplying by $(X^T X)^{-1}$: $\\mathbf{w} = (X^T X)^{-1} X^T \\mathbf{y}$.\n4. Complexity Comparison:\n   - Normal Equation requires computing $(X^T X)^{-1}$, which has time complexity $O(n^3)$ where $n$ is the number of features. It becomes computationally intractable when $n > 10,000$.\n   - Gradient Descent has time complexity $O(k \\cdot m \\cdot n)$ per iteration and handles millions of features and samples gracefully using Mini-Batch SGD."
+      }
+    ],
+    "revision_60s": [
+      "Linear regression hypothesis: y_hat = w^T * x + b.",
+      "Cost function: Mean Squared Error (MSE).",
+      "Normal equation: w = (X^T X)^(-1) X^T y.",
+      "Ridge (L2): shrinks weights; Lasso (L1): drives weights to zero (feature selection).",
+      "Assumptions: Linearity, Independence, Homoscedasticity, Normality, No Multicollinearity."
+    ]
+  },
+  "logistic-regression": {
+    "title": "Logistic Regression & Binary Classification",
+    "subject": "ml",
+    "exam_definition": "Logistic Regression is a supervised classification algorithm that models the probability of a categorical binary outcome by passing a linear combination of inputs through the Sigmoid (Logistic) activation function, optimized by minimizing Binary Cross-Entropy Loss (Log Loss).",
+    "remember": "Sigmoid Activation: sigma(z) = 1 / (1 + e^(-z)). Maps any real value z in (-inf, +inf) into probability in (0, 1).",
+    "core_concept": "Applying linear regression to classification produces unbounded predictions outside $[0, 1]$ and is heavily distorted by outliers. Logistic regression addresses this by modeling the log-odds (logit) of the positive class. The output represents a calibrated posterior probability $P(y=1|x)$. Standard classification applies a decision threshold (typically 0.50) to output discrete labels.",
+    "key_points": [
+      "Sigmoid Function: $\\sigma(z) = \\frac{1}{1 + e^{-z}}$, where $z = \\mathbf{w}^T \\mathbf{x} + b$.",
+      "Odds and Logit: Odds = $\\frac{p}{1 - p}$; $\\text{Logit}(p) = \\ln\\left(\\frac{p}{1 - p}\\right) = \\mathbf{w}^T \\mathbf{x} + b$.",
+      "Binary Cross-Entropy Loss (Log Loss): $J(\\mathbf{w}) = -\\frac{1}{m} \\sum_{i=1}^m [y^{(i)} \\ln(\\hat{y}^{(i)}) + (1 - y^{(i)}) \\ln(1 - \\hat{y}^{(i)})]$.",
+      "Convex Loss: Unlike MSE on sigmoid outputs (which is non-convex with bad local minima), Log Loss is mathematically guaranteed to be strictly convex.",
+      "Decision Boundary: The hyperplane where $z = \\mathbf{w}^T \\mathbf{x} + b = 0$, corresponding to probability $\\hat{y} = 0.50$.",
+      "Multinomial Logistic Regression: Generalized to $K > 2$ classes using the Softmax function: $P(y = k | \\mathbf{x}) = \\frac{e^{\\mathbf{w}_k^T \\mathbf{x}}}{\\sum_j e^{\\mathbf{w}_j^T \\mathbf{x}}}$."
+    ],
+    "classification": {
+      "title": "Logistic Regression Types",
+      "items": [
+        {
+          "name": "Binary Logistic Regression",
+          "desc": "Target has 2 discrete classes (e.g. 0 or 1, Spam or Not Spam). Uses Sigmoid function."
+        },
+        {
+          "name": "Multinomial Logistic Regression (Softmax)",
+          "desc": "Target has 3 or more unordered classes (e.g. Cat, Dog, Bird). Uses Softmax function."
+        },
+        {
+          "name": "Ordinal Logistic Regression",
+          "desc": "Target has 3 or more ordered classes (e.g. Poor, Fair, Good, Excellent)."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Logistic Regression Inference & Training Pipeline",
+      "steps": [
+        "1. Compute linear logit: $z = \\mathbf{w}^T \\mathbf{x} + b$.",
+        "2. Apply Sigmoid activation: $\\hat{y} = P(y = 1 | \\mathbf{x}) = \\frac{1}{1 + e^{-z}}$.",
+        "3. Evaluate Binary Cross-Entropy Loss over training batch.",
+        "4. Compute Gradients: $\\frac{\\partial J}{\\partial w_j} = \\frac{1}{m} \\sum_{i=1}^m (\\hat{y}^{(i)} - y^{(i)}) x_j^{(i)}$ (miraculously identical form to linear regression!).",
+        "5. Update Parameters: $w_j := w_j - \\alpha \\frac{\\partial J}{\\partial w_j}$.",
+        "6. Thresholding: Classify $\\hat{C} = 1$ if $\\hat{y} \\ge 0.5$, else $\\hat{C} = 0$."
+      ],
+      "diagram": "Linear Combination z = w^T*x + b ──> Sigmoid Function sigma(z) ──> Probability p in (0, 1) ──> Threshold (0.5) ──> Class Label"
+    },
+    "example": {
+      "title": "Binary Logistic Regression in Python",
+      "scenario": "Fitting logistic regression and evaluating classification report.",
+      "code": "from sklearn.linear_model import LogisticRegression\nfrom sklearn.datasets import make_classification\nfrom sklearn.metrics import classification_report\n\nX, y = make_classification(n_samples=200, n_features=4, n_classes=2, random_state=42)\n\nclf = LogisticRegression(solver='lbfgs', C=1.0) # C = 1/lambda (inverse regularization)\nclf.fit(X, y)\n\n# Probability outputs\nprobs = clf.predict_proba(X[:3])\npreds = clf.predict(X[:3])\nprint('Probabilities:\\n', probs)\nprint('Predicted Classes:', preds)"
+    },
+    "comparison": {
+      "title": "Linear Regression vs Logistic Regression",
+      "headers": [
+        "Attribute",
+        "Linear Regression",
+        "Logistic Regression"
+      ],
+      "rows": [
+        [
+          "Target Variable Type",
+          "Continuous numeric variable ($y \\in \\mathbb{R}$)",
+          "Categorical discrete classes ($y \\in \\{0, 1\\}$)"
+        ],
+        [
+          "Activation Function",
+          "Identity: $\\hat{y} = \\mathbf{w}^T \\mathbf{x}$",
+          "Sigmoid: $\\hat{y} = \\frac{1}{1 + e^{-(\\mathbf{w}^T \\mathbf{x})}}$"
+        ],
+        [
+          "Loss Function",
+          "Mean Squared Error (MSE)",
+          "Binary Cross-Entropy Loss (Log Loss)"
+        ],
+        [
+          "Output Range",
+          "$(-\\infty, +\\infty)$",
+          "Strictly bounded probability $[0, 1]$"
+        ],
+        [
+          "Nature of Boundary",
+          "Continuous hyper-plane",
+          "Linear Decision Boundary where $\\mathbf{w}^T \\mathbf{x} = 0$"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Sigmoid Activation Function",
+        "formula": "sigma(z) = 1 / (1 + exp(-z))",
+        "explanation": "Maps any real input z to output in range (0, 1)."
+      },
+      {
+        "name": "Binary Cross-Entropy Loss",
+        "formula": "J(w) = -1/m * sum( y * ln(y_hat) + (1 - y) * ln(1 - y_hat) )",
+        "explanation": "Strictly convex loss function for binary classification."
+      }
+    ],
+    "exam_tip": "Why can't we use Mean Squared Error (MSE) for Logistic Regression? Because when the non-linear Sigmoid function is plugged into MSE, the resulting loss surface is non-convex with numerous local minima, causing gradient descent to get trapped. Binary Cross-Entropy is strictly convex.",
+    "common_confusion": {
+      "wrong": "Logistic Regression is a regression algorithm.",
+      "correct": "Despite the word 'Regression' in its name, Logistic Regression is fundamentally a CLASSIFICATION algorithm.",
+      "explanation": "It performs linear regression on log-odds, but outputs categorical class probabilities."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is the Sigmoid function and why is it used in Logistic Regression?",
+        "a": "The Sigmoid function is an S-shaped activation function defined as $\\sigma(z) = \\frac{1}{1 + e^{-z}}$. It is used because it monotonically maps any real-valued number from $(-\\infty, +\\infty)$ into a valid probability range $(0, 1)$ with an easily differentiable derivative $\\sigma'(z) = \\sigma(z)(1 - \\sigma(z))$."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Derive the derivative of the Sigmoid function sigma(z) with respect to z.",
+        "a": "1. $\\sigma(z) = (1 + e^{-z})^{-1}$.\n2. Using chain rule:\n   $$\\frac{d}{dz}\\sigma(z) = -(1 + e^{-z})^{-2} \\cdot (-e^{-z}) = \\frac{e^{-z}}{(1 + e^{-z})^2}$$\n3. Algebraic rearrangement:\n   $$\\frac{d}{dz}\\sigma(z) = \\frac{1}{1 + e^{-z}} \\cdot \\frac{e^{-z}}{1 + e^{-z}} = \\sigma(z) \\cdot \\left(\\frac{1 + e^{-z} - 1}{1 + e^{-z}}\\right) = \\sigma(z) (1 - \\sigma(z)).$$\n4. Result: $\\sigma'(z) = \\sigma(z)(1 - \\sigma(z))$. This simple form makes gradient descent extremely efficient."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Explain the Logit function, Odds Ratio, and Binary Cross-Entropy Loss. Prove that the decision boundary for logistic regression is linear.",
+        "a": "1. Odds and Logit:\n   - Probability of positive outcome = $p$.\n   - Odds ratio: $\\text{Odds} = \\frac{p}{1 - p}$.\n   - Logit function: Natural log of odds $\\text{Logit}(p) = \\ln\\left(\\frac{p}{1 - p}\\right)$.\n   - In Logistic Regression, we model the logit as a linear combination: $\\ln\\left(\\frac{p}{1 - p}\\right) = \\mathbf{w}^T \\mathbf{x} + b$.\n2. Proof of Linear Decision Boundary:\n   - The standard decision threshold classifies an instance as positive ($y=1$) when probability $p \\ge 0.5$.\n   - When $p = 0.5$, the odds ratio is $\\frac{0.5}{1 - 0.5} = 1$.\n   - The logit is $\\ln(1) = 0$.\n   - Substituting the linear model: $\\mathbf{w}^T \\mathbf{x} + b = 0$.\n   - The equation $\\mathbf{w}^T \\mathbf{x} + b = 0$ is mathematically the definition of a flat hyperplane (linear decision boundary).\n3. Binary Cross-Entropy Loss:\n   - Formulated from maximum likelihood estimation: $J(\\mathbf{w}) = -\\frac{1}{m} \\sum [y \\ln(\\hat{y}) + (1 - y) \\ln(1 - \\hat{y})]$. Heavily penalizes confident incorrect predictions."
+      }
+    ],
+    "revision_60s": [
+      "Logistic Regression is a CLASSIFICATION algorithm.",
+      "Sigmoid: sigma(z) = 1 / (1 + exp(-z)), maps to (0, 1).",
+      "Derivative: sigma'(z) = sigma(z) * (1 - sigma(z)).",
+      "Loss function: Binary Cross-Entropy (Log Loss) is strictly convex.",
+      "Decision boundary is linear: w^T * x + b = 0 (where p = 0.5)."
+    ]
+  },
+  "knn": {
+    "title": "K-Nearest Neighbors (KNN) Classification & Regression",
+    "subject": "ml",
+    "exam_definition": "K-Nearest Neighbors (KNN) is a non-parametric, instance-based lazy supervised learning algorithm that classifies a query point by taking the majority vote of its $K$ closest training instances based on distance metrics (Euclidean, Manhattan, Minkowski).",
+    "remember": "KNN Properties: Non-parametric (makes no distributional assumptions), Lazy Learner (zero training time, O(N * D) query time).",
+    "core_concept": "KNN does not learn explicit model parameters or equations during training; it literally stores the entire training dataset in memory. When a query point arrives, it computes distances to all training points, identifies the $K$ closest points, and predicts via majority vote (classification) or average (regression). It suffers severely from the Curse of Dimensionality.",
+    "key_points": [
+      "Lazy Learner / Instance-Based: Training phase is $O(1)$ (simply memorizes data); testing phase is expensive ($O(N \\cdot D)$).",
+      "Non-Parametric: Makes no assumptions about underlying data distribution (unlike linear regression which assumes normal error).",
+      "Hyperparameter K Choice: Small $K$ (e.g. $K=1$) leads to low bias, high variance (Overfitting, sensitive to noise); Large $K$ leads to high bias (Underfitting, smooth boundary).",
+      "Odd K for Binary Classification: Always choose an odd value for $K$ to break ties.",
+      "Distance Metrics: Euclidean ($L_2$), Manhattan ($L_1$), Minkowski ($L_p$), Hamming (categorical).",
+      "MANDATORY Feature Scaling: Features with larger numerical ranges dominate distance calculations unless standardized.",
+      "Curse of Dimensionality: In high dimensions, all pairwise distances become equidistant, degrading nearest neighbor discrimination."
+    ],
+    "classification": {
+      "title": "Distance Metrics in KNN",
+      "items": [
+        {
+          "name": "Euclidean Distance (L2 Norm)",
+          "desc": "Straight-line distance: sqrt(sum((x_i - y_i)^2)). Standard choice for continuous coordinates."
+        },
+        {
+          "name": "Manhattan Distance (L1 Norm / Taxicab)",
+          "desc": "Sum of absolute coordinate differences: sum(|x_i - y_i|). Better for grid-like or sparse spaces."
+        },
+        {
+          "name": "Minkowski Distance (Lp Norm)",
+          "desc": "Generalized metric: (sum(|x_i - y_i|^p))^(1/p). p=1 gives Manhattan, p=2 gives Euclidean."
+        },
+        {
+          "name": "Hamming Distance",
+          "desc": "Percentage of positions where two categorical feature strings or bit vectors differ."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "KNN Query Algorithm Steps",
+      "steps": [
+        "1. Choose hyperparameter $K$ and distance metric (e.g. Euclidean).",
+        "2. Preprocessing: Standardize all features via StandardScaler.",
+        "3. For given test query point $x_q$, compute distance $d(x_q, x_i)$ to EVERY training instance $x_i \\in D$.",
+        "4. Sort computed distances in ascending order.",
+        "5. Select the top $K$ nearest training instances.",
+        "6. Output: For Classification, return mode class label (majority vote). For Regression, return mean target value $\\bar{y}$."
+      ],
+      "diagram": "Query Point (xq) ──> Calculate Distances to all N points ──> Sort ──> Pick K smallest ──> Majority Vote Class"
+    },
+    "example": {
+      "title": "KNN Classification Numerical Example",
+      "scenario": "Classify query point $P(3, 4)$ using $K = 3$ Euclidean distance.",
+      "code": "Training Data:\nA: (1, 2) - Class 0\nB: (2, 3) - Class 0\nC: (3, 6) - Class 1\nD: (6, 8) - Class 1\n\nQuery Point P: (3, 4) | K = 3\n\nCalculate Euclidean Distances (d = sqrt((x2 - x1)^2 + (y2 - y1)^2)):\nd(P, A) = sqrt((3 - 1)^2 + (4 - 2)^2) = sqrt(4 + 4) = sqrt(8) ≈ 2.83\nd(P, B) = sqrt((3 - 2)^2 + (4 - 3)^2) = sqrt(1 + 1) = sqrt(2) ≈ 1.41\nd(P, C) = sqrt((3 - 3)^2 + (4 - 6)^2) = sqrt(0 + 4) = sqrt(4) = 2.00\nd(P, D) = sqrt((3 - 6)^2 + (4 - 8)^2) = sqrt(9 + 16) = sqrt(25) = 5.00\n\nSort Distances:\n1. Point B (dist 1.41) -> Class 0\n2. Point C (dist 2.00) -> Class 1\n3. Point A (dist 2.83) -> Class 0\n\nMajority Vote among top 3: Class 0 (2 votes) vs Class 1 (1 vote).\nPrediction for P: CLASS 0"
+    },
+    "comparison": {
+      "title": "KNN vs Eager Learners (Logistic Regression, Decision Trees)",
+      "headers": [
+        "Dimension",
+        "K-Nearest Neighbors (KNN)",
+        "Eager Learners (Logistic / Trees)"
+      ],
+      "rows": [
+        [
+          "Training Time",
+          "Zero ($O(1)$) — merely stores training instances in RAM",
+          "High — optimizes loss over multiple epochs"
+        ],
+        [
+          "Testing / Query Time",
+          "Very Slow ($O(N \\cdot D)$ per query)",
+          "Extremely Fast ($O(D)$ dot product or tree traversal)"
+        ],
+        [
+          "Model Representation",
+          "Non-parametric (no weights, memorizes raw data)",
+          "Parametric weights $\\mathbf{w}$ or hierarchical decision rules"
+        ],
+        [
+          "Memory Consumption",
+          "Very High — must hold entire training dataset in memory",
+          "Very Low — only stores compact weight vector or tree structure"
+        ],
+        [
+          "Scaling Requirement",
+          "Mandatory (distance completely warped without scaling)",
+          "Optional for trees; required for regularized linear models"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Euclidean Distance (L2)",
+        "formula": "d(x, y) = sqrt( sum_{i=1}^D (x_i - y_i)^2 )",
+        "explanation": "Standard shortest straight-line metric in Cartesian space."
+      },
+      {
+        "name": "Manhattan Distance (L1)",
+        "formula": "d(x, y) = sum_{i=1}^D |x_i - y_i|",
+        "explanation": "Sum of absolute coordinate differences."
+      }
+    ],
+    "exam_tip": "In KNN questions, always check if features are on different scales! If Feature 1 is Age (20-80) and Feature 2 is Salary (20,000-100,000), distance will be 99.99% driven by Salary unless standardized. State explicitly: 'Feature scaling is mandatory for distance-based algorithms like KNN'.",
+    "common_confusion": {
+      "wrong": "Choosing K=1 is the best because training error is 0%.",
+      "correct": "K=1 memorizes training data and has 0% training error, but it creates a complex, fractured decision boundary that captures noise and outliers (severe overfitting).",
+      "explanation": "As K increases, decision boundary becomes smoother and more robust to noise."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "Why is KNN termed a 'Lazy Learner'?",
+        "a": "KNN is called a lazy learner (instance-based learner) because it performs zero training or generalization during the training phase—it simply stores the training instances in memory. All computational work is deferred to query/test time, where it computes distances across all stored instances."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Explain how the choice of hyperparameter K influences the Bias-Variance tradeoff in KNN.",
+        "a": "1. Small K (e.g. K=1): The model's prediction depends solely on the single nearest neighbor. The decision boundary is jagged and sensitive to noise and outliers. This results in Low Bias but High Variance (Overfitting).\n2. Large K (e.g. K=N): The prediction approaches the majority class of the entire dataset. The decision boundary is overly smooth and fails to capture local nuances. This results in High Bias but Low Variance (Underfitting).\n3. Optimal K: Typically determined via cross-validation; an odd integer is chosen for binary classification to eliminate vote ties."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "What is the Curse of Dimensionality in KNN? Explain its mathematical impact on distance metrics and discuss dimensionality reduction techniques used to overcome it.",
+        "a": "1. Concept: The Curse of Dimensionality refers to exponential volume expansion when adding features, causing training data points to become sparsely scattered in high-dimensional space.\n2. Mathematical Impact on Distances:\n   - In high dimensions ($D \\to \\infty$), the distance to the nearest neighbor approaches the distance to the farthest neighbor:\n   $$\\lim_{D \\to \\infty} \\frac{\\text{Dist}_{\\max} - \\text{Dist}_{\\min}}{\\text{Dist}_{\\min}} = 0.$$\n   - All points become virtually equidistant from each other, rendering distance-based similarity metrics meaningless.\n3. Computational Bottleneck: Query time scales as $O(N \\cdot D)$. Fast spatial tree indexing structures (k-d trees, Ball trees) break down and degenerate into linear scans when $D > 20$.\n4. Mitigation Techniques:\n   - Principal Component Analysis (PCA) to project data into lower-dimensional orthogonal subspaces.\n   - Feature Selection (mutual information, Lasso L1) to remove redundant dimensions.\n   - Approximate Nearest Neighbors (ANN, Locality Sensitive Hashing)."
+      }
+    ],
+    "revision_60s": [
+      "KNN is non-parametric and lazy: 0 training time, expensive test time.",
+      "Small K = Overfitting (high variance); Large K = Underfitting (high bias).",
+      "Pick odd K for binary classification to prevent ties.",
+      "Feature scaling is MANDATORY for KNN.",
+      "Curse of Dimensionality makes all points equidistant in high dimensions."
+    ]
+  },
+  "naive-bayes": {
+    "title": "Naive Bayes & Probabilistic Classification",
+    "subject": "ml",
+    "exam_definition": "Naive Bayes is a family of probabilistic supervised classifiers based on Bayes' Theorem with the 'naive' assumption of conditional feature independence given the class label: $P(x_1, x_2, \\dots, x_n | y) = \\prod_{i=1}^n P(x_i | y)$.",
+    "remember": "Bayes' Theorem: P(y|X) = [P(X|y) * P(y)] / P(X). MAP Rule: Classify y = argmax P(y) * PROD P(x_i | y).",
+    "core_concept": "Calculating true joint probability $P(X|y)$ requires tracking probabilities for all combinations of features, which is impossible due to exponential parameter explosion. Naive Bayes dramatically simplifies this by assuming every feature is conditionally independent of every other feature given the class label. Despite this unrealistic assumption, Naive Bayes performs remarkably well in text classification, spam filtering, and sentiment analysis.",
+    "key_points": [
+      "Bayes' Theorem: $P(y | X) = \\frac{P(X | y) P(y)}{P(X)}$, where $P(y|X)$ is Posterior, $P(X|y)$ is Likelihood, $P(y)$ is Prior, and $P(X)$ is Evidence.",
+      "Conditional Independence Assumption: $P(x_1, x_2, \\dots, x_n | y) = \\prod_{i=1}^n P(x_i | y)$.",
+      "Maximum A Posteriori (MAP) Decision Rule: $\\hat{y} = \\arg\\max_y P(y) \\prod_{i=1}^n P(x_i | y)$ (denominator $P(X)$ is identical for all classes and ignored).",
+      "Log-Likelihood Transformation: $\\ln P(y) + \\sum \\ln P(x_i | y)$ prevents floating-point underflow when multiplying small probabilities.",
+      "Zero Frequency Problem: If a word/feature never appears in training for a class, $P(x_i | y) = 0$, zeroing out the entire product!",
+      "Laplace Smoothing (Additive Smoothing): Solves zero frequency by adding pseudo-count: $P(x_i | y) = \\frac{\\text{count}(x_i, y) + 1}{\\text{total}(y) + |V|}$."
+    ],
+    "classification": {
+      "title": "Naive Bayes Variants",
+      "items": [
+        {
+          "name": "Gaussian Naive Bayes",
+          "desc": "Assumes continuous numeric features follow a Normal (Gaussian) distribution: N(mu, sigma^2)."
+        },
+        {
+          "name": "Multinomial Naive Bayes",
+          "desc": "Used for discrete count data (e.g. word frequencies in text documents)."
+        },
+        {
+          "name": "Bernoulli Naive Bayes",
+          "desc": "Used for binary boolean features (e.g. word presence/absence: 1 or 0)."
+        },
+        {
+          "name": "Categorical Naive Bayes",
+          "desc": "Handles categorical features with categorical distribution for each feature."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Multinomial Naive Bayes Text Classification with Laplace Smoothing",
+      "steps": [
+        "1. Training: Calculate Class Prior probabilities: $P(y) = \\frac{N_y}{N}$.",
+        "2. Vocabulary Construction: Extract unique vocabulary set $V$ of size $|V|$.",
+        "3. Likelihood Calculation with Laplace Smoothing ($\\alpha = 1$):\n   $P(w_k | y) = \\frac{\\text{count}(w_k, y) + 1}{\\sum_{w \\in V} \\text{count}(w, y) + |V|}$.",
+        "4. Inference: Given new document $D$ containing words $(w_1, w_2, \\dots, w_m)$:\n   Compute log score for each class: $\\text{Score}(y) = \\ln P(y) + \\sum_{i=1}^m \\ln P(w_i | y)$.",
+        "5. Predict class with highest score: $\\hat{y} = \\arg\\max_y \\text{Score}(y)$."
+      ],
+      "diagram": "Input Features X ──> Compute Priors P(y) ──> Compute Likelihoods with Laplace Smoothing P(xi|y) ──> argmax [ P(y) * PROD P(xi|y) ]"
+    },
+    "example": {
+      "title": "Spam Classification with Bayes' Theorem Numerical",
+      "scenario": "Classify email containing word 'Offer'. Training: 100 emails (40 Spam, 60 Ham). 'Offer' in 30 Spam, 'Offer' in 6 Ham.",
+      "code": "Priors:\nP(Spam) = 40 / 100 = 0.40\nP(Ham)  = 60 / 100 = 0.60\n\nLikelihoods:\nP(Offer | Spam) = 30 / 40 = 0.75\nP(Offer | Ham)  = 6 / 60  = 0.10\n\nEvidence P(Offer):\nP(Offer) = P(Offer|Spam)*P(Spam) + P(Offer|Ham)*P(Ham)\n         = (0.75 * 0.40) + (0.10 * 0.60) = 0.30 + 0.06 = 0.36\n\nPosterior Probability P(Spam | Offer):\nP(Spam | Offer) = (P(Offer | Spam) * P(Spam)) / P(Offer)\n                = (0.75 * 0.40) / 0.36 = 0.30 / 0.36 ≈ 0.833 (83.3%)\n\nResult: Email is classified as SPAM."
+    },
+    "comparison": {
+      "title": "Gaussian vs Multinomial vs Bernoulli Naive Bayes",
+      "headers": [
+        "Variant",
+        "Feature Type",
+        "Distribution",
+        "Standard Application"
+      ],
+      "rows": [
+        [
+          "Gaussian Naive Bayes",
+          "Continuous real values",
+          "Normal Gaussian distribution $\\mathcal{N}(\\mu, \\sigma^2)$",
+          "Iris dataset, physical measurements"
+        ],
+        [
+          "Multinomial Naive Bayes",
+          "Discrete integer counts",
+          "Multinomial distribution",
+          "Text classification with Word Frequencies (Bag-of-Words)"
+        ],
+        [
+          "Bernoulli Naive Bayes",
+          "Binary indicator flags (0 or 1)",
+          "Bernoulli distribution",
+          "Short document classification with word presence/absence"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Bayes Theorem",
+        "formula": "P(y | X) = (P(X | y) * P(y)) / P(X)",
+        "explanation": "Posterior = (Likelihood * Prior) / Evidence."
+      },
+      {
+        "name": "Laplace Smoothing Formula",
+        "formula": "P(w_i | c) = (count(w_i, c) + alpha) / (total_words(c) + alpha * |V|)",
+        "explanation": "alpha = 1 adds pseudo-count to eliminate zero frequency problem."
+      }
+    ],
+    "exam_tip": "In numerical exam problems on Naive Bayes: Don't forget Laplace Smoothing if a word count is zero! If asked to calculate with Laplace smoothing ($\\alpha = 1$), remember to add $|V|$ (vocabulary size) to the denominator, NOT 1!",
+    "common_confusion": {
+      "wrong": "Naive Bayes assumes all features are independent.",
+      "correct": "Naive Bayes assumes features are CONDITIONALLY independent GIVEN THE CLASS LABEL.",
+      "explanation": "Features can be strongly correlated in the general population, but within a given class, knowing one feature gives no additional information about another."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is the 'naive' assumption in the Naive Bayes algorithm?",
+        "a": "The naive assumption is that all input features $x_1, x_2, \\dots, x_n$ are mutually conditionally independent of each other given the class label $y$: $P(x_1, x_2, \\dots, x_n | y) = \\prod_{i=1}^n P(x_i | y)$."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "What is the Zero-Frequency problem in Naive Bayes and how does Laplace Smoothing resolve it?",
+        "a": "1. Problem: If a categorical feature value or vocabulary word never occurs with a specific class in the training dataset, its empirical likelihood $P(x_i | y) = 0$. Because Naive Bayes multiplies feature likelihoods, this single zero zeros out the entire posterior probability product, ignoring all other strong evidence.\n2. Solution (Laplace / Additive Smoothing): Adds a small pseudo-count $\\alpha$ (typically $\\alpha = 1$) to every count: $$P(x_i | y) = \\frac{\\text{count}(x_i, y) + \\alpha}{\\sum \\text{count}(x, y) + \\alpha |V|}$$\n   This guarantees non-zero probabilities for all features while preserving relative frequency ranks."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "State Bayes' Theorem. Explain the MAP (Maximum A Posteriori) decision rule, and demonstrate Gaussian Naive Bayes likelihood estimation for continuous features.",
+        "a": "1. Bayes' Theorem: $P(y | X) = \\frac{P(X | y) P(y)}{P(X)}$.\n   - $P(y)$ = Prior probability of class $y$.\n   - $P(X|y)$ = Likelihood of feature vector $X$ given class $y$.\n   - $P(X)$ = Marginal evidence probability $\\sum_c P(X|c) P(c)$.\n   - $P(y|X)$ = Posterior probability.\n2. MAP Decision Rule:\n   - Classify: $\\hat{y} = \\arg\\max_{y} P(y | X) = \\arg\\max_y \\frac{P(X | y) P(y)}{P(X)}$.\n   - Since $P(X)$ is identical across all candidate classes, it can be dropped:\n     $$\\hat{y} = \\arg\\max_y P(y) \\prod_{i=1}^D P(x_i | y).$$\n3. Gaussian Naive Bayes:\n   - For continuous feature $x_i$, assume values in class $y$ follow a Gaussian distribution $\\mathcal{N}(\\mu_{y,i}, \\sigma_{y,i}^2)$.\n   - Likelihood formula: $$P(x_i | y) = \\frac{1}{\\sqrt{2\\pi \\sigma_{y,i}^2}} \\exp\\left(-\\frac{(x_i - \\mu_{y,i})^2}{2\\sigma_{y,i}^2}\\right)$$\n   - Parameters $\\mu$ (mean) and $\\sigma^2$ (variance) are computed directly from training points of class $y$."
+      }
+    ],
+    "revision_60s": [
+      "Bayes Theorem: Posterior = (Likelihood * Prior) / Evidence.",
+      "Naive assumption: features are conditionally independent given class.",
+      "MAP rule drops evidence denominator P(X).",
+      "Zero-frequency problem solved by Laplace smoothing (+1 in numerator, +|V| in denominator).",
+      "Log-transform avoids floating point underflow."
+    ]
+  },
+  "decision-trees": {
+    "title": "Decision Trees: Entropy, Information Gain & Pruning",
+    "subject": "ml",
+    "exam_definition": "A Decision Tree is a non-parametric supervised learning algorithm that partitions feature space recursively into hierarchical axis-aligned decision regions using greedy splitting criteria: Information Gain / Entropy (ID3), Gain Ratio (C4.5), or Gini Impurity (CART).",
+    "remember": "Entropy: H(S) = -sum(p_i * log2(p_i)) | Gini Impurity: Gini(S) = 1 - sum(p_i^2). Both reach 0 for completely pure nodes.",
+    "core_concept": "A decision tree asks sequential if-else questions to split data into increasingly pure subsets. At each node, the algorithm evaluates all possible features and split thresholds, selecting the split that maximizes purity gain. Fully grown trees suffer from severe overfitting (memorizing training data); Cost-Complexity Pruning or stopping criteria (max_depth, min_samples_split) are required for generalization.",
+    "key_points": [
+      "Entropy: Measure of impurity or disorder: $H(S) = -\\sum_{i=1}^C p_i \\log_2(p_i)$. If pure, $H=0$; if 50/50 split, $H=1.0$.",
+      "Information Gain (IG): Reduction in entropy after splitting: $IG(S, A) = H(S) - \\sum_{v} \\frac{|S_v|}{|S|} H(S_v)$.",
+      "Gini Impurity (CART): $Gini(S) = 1 - \\sum_{i=1}^C p_i^2$. Computationally faster than entropy because it avoids $\\log_2$ calculations.",
+      "ID3 Algorithm: Uses Information Gain on categorical features; biased toward features with many distinct values.",
+      "C4.5 Algorithm: Uses Gain Ratio ($IG / SplitInfo$) to penalize features with many values.",
+      "CART Algorithm: Uses Gini Impurity; creates strictly binary trees; supports both classification and regression.",
+      "Pre-Pruning vs Post-Pruning: Pre-pruning stops splitting early (max_depth, min_samples_leaf); Post-pruning trims branches back using Cost-Complexity Pruning."
+    ],
+    "classification": {
+      "title": "Decision Tree Splitting Criteria",
+      "items": [
+        {
+          "name": "Entropy / Information Gain (ID3)",
+          "desc": "Measures reduction in Shannon Entropy. Biased toward features with numerous distinct values."
+        },
+        {
+          "name": "Gain Ratio (C4.5)",
+          "desc": "Normalizes Information Gain by Split Information to eliminate multi-value bias."
+        },
+        {
+          "name": "Gini Impurity (CART)",
+          "desc": "Measures probability of incorrectly classifying a randomly chosen element. Default in scikit-learn."
+        },
+        {
+          "name": "Variance Reduction (Regression Trees)",
+          "desc": "Splits based on minimizing Mean Squared Error (MSE) / variance of continuous target."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Recursive Partitioning Algorithm (ID3 / CART)",
+      "steps": [
+        "1. Calculate impurity of current node dataset $S$ (using Entropy or Gini).",
+        "2. For each candidate feature $A$:\n   - Evaluate all possible split thresholds.\n   - Calculate weighted average impurity of resulting child partitions.\n   - Compute impurity reduction (Information Gain).",
+        "3. Select feature and threshold that yields the MAXIMUM Information Gain.",
+        "4. Split dataset $S$ into child nodes based on the best split.",
+        "5. Base Cases (Stop criteria):\n   - All instances in node belong to identical class (pure node).\n   - Maximum depth (`max_depth`) reached or `min_samples_split` violated.\n   - No remaining features to split on.",
+        "6. Label leaf node with the majority class (classification) or mean value (regression)."
+      ],
+      "diagram": "Root Node (S) ──[Best Feature A <= Threshold]──┬──> Left Child (S_left, pure?)\n                                                └──> Right Child (S_right, recurse...)"
+    },
+    "example": {
+      "title": "Information Gain Calculation Numerical",
+      "scenario": "Dataset S has 14 instances: 9 'Yes' and 5 'No'. Feature 'Wind' splits into Weak (6 Yes, 2 No) and Strong (3 Yes, 3 No).",
+      "code": "Total S: 9 Yes, 5 No (m = 14)\np(Yes) = 9/14 ≈ 0.643, p(No) = 5/14 ≈ 0.357\n\n1. Total Entropy H(S):\nH(S) = -(9/14 * log2(9/14) + 5/14 * log2(5/14))\n     = -(0.643 * -0.637 + 0.357 * -1.486)\n     = -(-0.410 - 0.530) = 0.940 bits\n\n2. Entropy of Wind = Weak (6 Yes, 2 No, total = 8):\nH(Weak) = -(6/8 * log2(6/8) + 2/8 * log2(2/8))\n        = -(0.75 * -0.415 + 0.25 * -2.0) = -(-0.311 - 0.5) = 0.811 bits\n\n3. Entropy of Wind = Strong (3 Yes, 3 No, total = 6):\nH(Strong) = -(3/6 * log2(3/6) + 3/6 * log2(3/6)) = 1.000 bit (Maximum uncertainty!)\n\n4. Weighted Entropy after split:\nH(S, Wind) = (8/14) * H(Weak) + (6/14) * H(Strong)\n           = (8/14 * 0.811) + (6/14 * 1.0) = 0.463 + 0.429 = 0.892 bits\n\n5. Information Gain:\nIG(S, Wind) = H(S) - H(S, Wind) = 0.940 - 0.892 = 0.048 bits"
+    },
+    "comparison": {
+      "title": "Entropy vs Gini Impurity",
+      "headers": [
+        "Metric",
+        "Formula",
+        "Computation Speed",
+        "Max Value (Binary)",
+        "Standard Algorithm"
+      ],
+      "rows": [
+        [
+          "Entropy",
+          "$-\\sum p_i \\log_2(p_i)$",
+          "Slower (computes logarithms)",
+          "1.0 (at 50/50 split)",
+          "ID3, C4.5"
+        ],
+        [
+          "Gini Impurity",
+          "$1 - \\sum p_i^2$",
+          "Faster (simple multiplication/squaring)",
+          "0.5 (at 50/50 split)",
+          "CART (scikit-learn default)"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Shannon Entropy",
+        "formula": "H(S) = - sum_{i=1}^C p_i * log_2(p_i)",
+        "explanation": "H(S) = 0 for pure node; H(S) = 1.0 for binary 50/50 split."
+      },
+      {
+        "name": "Gini Impurity",
+        "formula": "Gini(S) = 1 - sum_{i=1}^C p_i^2",
+        "explanation": "Gini = 0 for pure node; Gini = 0.5 for binary 50/50 split."
+      }
+    ],
+    "exam_tip": "In numerical exam questions, remember: $\\log_2(1) = 0$, $\\log_2(0.5) = -1.0$. If a node has all instances belonging to one class (e.g. 10 Yes, 0 No), its Entropy is strictly 0 ($0 \\log_2 0$ is defined as 0 by convention).",
+    "common_confusion": {
+      "wrong": "Information Gain always favors the best generalizable feature.",
+      "correct": "Standard Information Gain is heavily biased toward features with many distinct unique values (like Customer ID or Date), because splitting on ID produces pure nodes with 0 entropy but zero predictive value!",
+      "explanation": "C4.5 introduced Gain Ratio to penalize features with high split information."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is the difference between Pre-Pruning and Post-Pruning in Decision Trees?",
+        "a": "Pre-pruning halts the growth of the decision tree early during training when specific stopping criteria are met (e.g. `max_depth`, `min_samples_split`). Post-pruning allows the tree to grow to full depth (overfitting) and then recursively trims non-essential leaf branches backward based on validation performance (e.g. Cost-Complexity Pruning)."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Explain Gini Impurity and Entropy. How do they compare computationally?",
+        "a": "1. Entropy: Originating from Information Theory, $H(S) = -\\sum p_i \\log_2(p_i)$ measures average uncertainty in bits. Maximum value is 1.0 for balanced binary outcomes.\n2. Gini Impurity: $Gini(S) = 1 - \\sum p_i^2$ measures the probability that a randomly chosen element would be incorrectly labeled if randomly classified according to the label distribution. Maximum value is 0.5 for balanced binary outcomes.\n3. Comparison: Both yield virtually identical tree structures in 98% of cases, but Gini Impurity is computationally faster because it avoids expensive $\\log_2$ floating-point calculations."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Explain the ID3 algorithm step-by-step. Detail why Information Gain is biased toward features with many values and how C4.5's Gain Ratio corrects this.",
+        "a": "1. ID3 Algorithm Steps:\n   - Calculate Entropy of current dataset $S$.\n   - For each attribute $A$, compute Information Gain: $IG(S, A) = H(S) - \\sum_{v} \\frac{|S_v|}{|S|} H(S_v)$.\n   - Choose the attribute with highest Information Gain as decision node.\n   - Create branches for each possible attribute value and partition data.\n   - Recurse until all records belong to the same class or attributes are exhausted.\n2. Multi-Value Bias Problem:\n   - If a feature has unique values for every row (e.g. `Transaction_ID`), splitting on it creates $N$ leaf nodes, each containing exactly 1 instance with Entropy = 0.\n   - Information Gain will be maximal ($IG = H(S) - 0 = H(S)$), selecting `Transaction_ID` as the root node, which has zero generalization capability.\n3. C4.5 Gain Ratio Solution:\n   - Defines Split Information: $\\text{SplitInfo}_A(S) = -\\sum_{v} \\frac{|S_v|}{|S|} \\log_2\\left(\\frac{|S_v|}{|S|}\\right)$.\n   - Computes Gain Ratio: $\\text{GainRatio}(S, A) = \\frac{IG(S, A)}{\\text{SplitInfo}_A(S)}$.\n   - Features with many splits generate a massive Split Information penalty in the denominator, suppressing artificially high Information Gain."
+      }
+    ],
+    "revision_60s": [
+      "Decision trees partition feature space using axis-aligned orthogonal splits.",
+      "Entropy H(S) = -sum(p * log2(p)); Gini = 1 - sum(p^2).",
+      "Information Gain = Entropy(Parent) - Weighted_Entropy(Children).",
+      "ID3 is biased to multi-value features; C4.5 fixes this using Gain Ratio.",
+      "Pruning prevents overfitting by limiting tree complexity."
+    ]
+  },
+  "random-forest": {
+    "title": "Random Forest & Ensemble Learning",
+    "subject": "ml",
+    "exam_definition": "Random Forest is an ensemble supervised learning algorithm that constructs a multitude of uncorrelated decision trees at training time via Bagging (Bootstrap Aggregation) and Random Feature Selection, combining outputs through majority voting (classification) or averaging (regression).",
+    "remember": "Random Forest = Bagging (Bootstrap Aggregation) + Random Feature Subspace (Feature Bagging). Reduces variance without increasing bias.",
+    "core_concept": "Individual decision trees suffer from high variance and are notorious for overfitting. Random Forest builds an ensemble of $B$ deep, uncorrelated decision trees. Each tree is trained on a distinct bootstrap sample with replacement, and at every split, only a random subset of $m = \\sqrt{p}$ features is considered. Averaging predictions across trees reduces overall variance by $\\frac{1}{B}$, producing a robust, high-accuracy model.",
+    "key_points": [
+      "Bootstrap Aggregation (Bagging): Training each base estimator on a random sample of size $N$ drawn WITH REPLACEMENT from original dataset.",
+      "Out-Of-Bag (OOB) Error: The ~36.8% of training samples omitted from each bootstrap sample act as a free, built-in cross-validation set.",
+      "Random Feature Selection (Feature Bagging): At each split, only $m = \\sqrt{p}$ features (classification) or $m = p / 3$ (regression) are evaluated.",
+      "De-correlation of Trees: Random feature selection prevents dominant features from dominating the roots of all trees, ensuring true ensemble diversity.",
+      "Feature Importance: Computed by measuring the total mean decrease in Gini impurity brought by a feature across all trees in the forest.",
+      "Hyperparameters: `n_estimators` (number of trees), `max_features` (size of random subset), `max_depth`, `bootstrap`."
+    ],
+    "classification": {
+      "title": "Ensemble Learning Paradigms",
+      "items": [
+        {
+          "name": "Bagging (Bootstrap Aggregation)",
+          "desc": "Trains independent base models in parallel on bootstrap samples. Primary goal: REDUCE VARIANCE (e.g. Random Forest)."
+        },
+        {
+          "name": "Boosting",
+          "desc": "Trains base models sequentially where each model corrects the errors of its predecessor. Primary goal: REDUCE BIAS (e.g. AdaBoost, Gradient Boosting, XGBoost)."
+        },
+        {
+          "name": "Stacking (Stacked Generalization)",
+          "desc": "Heterogeneous base models trained in parallel; a meta-model learns to combine their predictions."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Random Forest Training & Prediction Architecture",
+      "steps": [
+        "1. Given training dataset $D$ of $N$ instances and $p$ features.",
+        "2. For tree $b = 1 \\dots B$ (where $B$ is `n_estimators`):\n   - Draw a bootstrap sample $D_b$ of size $N$ with replacement from $D$.\n   - Grow a decision tree $T_b$ on $D_b$.\n   - At each split, randomly sample $m = \\sqrt{p}$ features from $p$ total features.\n   - Choose the best split among the $m$ features.\n   - Grow tree to maximum depth without pruning.",
+        "3. Aggregation during Inference for query point $x$:\n   - Classification: $\\hat{y} = \\text{mode}\\{T_1(x), T_2(x), \\dots, T_B(x)\\}$ (Majority Voting).\n   - Regression: $\\hat{y} = \\frac{1}{B} \\sum_{b=1}^B T_b(x)$ (Simple Average)."
+      ],
+      "diagram": "Dataset D ──> [Bootstrap Sample 1] ──> Tree 1 (subset m features) ──┐\n          ──> [Bootstrap Sample 2] ──> Tree 2 (subset m features) ──┼──> Majority Vote ──> Final Class\n          ──> [Bootstrap Sample B] ──> Tree B (subset m features) ──┘"
+    },
+    "example": {
+      "title": "Random Forest Classification & Feature Importance in Python",
+      "scenario": "Training Random Forest on Breast Cancer dataset and extracting feature importances.",
+      "code": "from sklearn.ensemble import RandomForestClassifier\nfrom sklearn.datasets import load_breast_cancer\nfrom sklearn.model_selection import train_test_split\n\ndata = load_breast_cancer()\nX_train, X_test, y_train, y_test = train_test_split(data.data, data.target, test_size=0.2, random_state=42)\n\n# Train Random Forest with OOB scoring\nrf = RandomForestClassifier(n_estimators=100, max_features='sqrt', oob_score=True, random_state=42)\nrf.fit(X_train, y_train)\n\nprint(f'OOB Score: {rf.oob_score_ * 100:.2f}%')\nprint(f'Test Accuracy: {rf.score(X_test, y_test) * 100:.2f}%')\n\n# Top feature importances\nimportances = rf.feature_importances_\ntop_feature = data.feature_names[importances.argmax()]\nprint(f'Most Important Feature: {top_feature}')"
+    },
+    "comparison": {
+      "title": "Decision Tree vs Random Forest vs Gradient Boosting",
+      "headers": [
+        "Feature",
+        "Decision Tree",
+        "Random Forest (Bagging)",
+        "Gradient Boosting (GBDT)"
+      ],
+      "rows": [
+        [
+          "Base Estimators",
+          "Single tree",
+          "Ensemble of independent trees (parallel)",
+          "Ensemble of shallow sequential trees (sequential)"
+        ],
+        [
+          "Training Speed",
+          "Very Fast",
+          "Fast (embarrassingly parallel across CPU cores)",
+          "Slower (strictly sequential tree building)"
+        ],
+        [
+          "Variance & Overfitting",
+          "High Variance (severely prone to overfitting)",
+          "Low Variance (averaging uncorrelated trees suppresses variance)",
+          "Low Bias & Low Variance"
+        ],
+        [
+          "Primary Goal",
+          "Baseline interpretability",
+          "Reduce Variance",
+          "Reduce Bias"
+        ],
+        [
+          "Tuning Complexity",
+          "Low (max_depth)",
+          "Low (robust to hyperparameter choices)",
+          "High (learning_rate, n_estimators, subsample)"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Probability of Instance in Bootstrap Sample",
+        "formula": "P(included) = 1 - (1 - 1/N)^N ≈ 1 - 1/e ≈ 63.2%",
+        "explanation": "OOB samples constitute the remaining 36.8% of instances."
+      },
+      {
+        "name": "Variance of Average of B Independent Trees",
+        "formula": "Var(Ensemble) = sigma^2 / B",
+        "explanation": "Averaging B uncorrelated estimators reduces variance by 1/B."
+      }
+    ],
+    "exam_tip": "If an exam question asks: 'What percentage of data is omitted in a Bootstrap sample?', the exact mathematical answer is $1/e \\approx 36.8\\%$ as $N \\to \\infty$. These omitted samples are known as the Out-Of-Bag (OOB) samples.",
+    "common_confusion": {
+      "wrong": "Increasing the number of trees in Random Forest causes it to overfit.",
+      "correct": "Adding more trees does NOT cause Random Forest to overfit. By the Law of Large Numbers, the generalization error asymptotically converges to a limiting value.",
+      "explanation": "Adding trees only increases computational time; it does not increase variance."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is Out-Of-Bag (OOB) Error in Random Forest?",
+        "a": "OOB error is the mean prediction error calculated on training instances that were omitted from a tree's bootstrap sample (~36.8% of the data). It acts as an internal cross-validation metric, eliminating the need for a separate validation set."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Why does Random Forest select a random subset of features at each split instead of evaluating all features?",
+        "a": "1. Problem: If one or two features are overwhelmingly strong predictors, standard bagging will select those dominant features for the root splits of virtually every tree, causing all trees in the ensemble to become highly correlated.\n2. Correlation Penalty: The variance of an average of correlated variables depends on pairwise correlation $\\rho$: $\\text{Var} = \\rho \\sigma^2 + \\frac{1 - \\rho}{B} \\sigma^2$. As $B \\to \\infty$, variance cannot drop below $\\rho \\sigma^2$.\n3. Solution: By restricting candidate split features to a random subset (typically $m = \\sqrt{p}$), other features get opportunities to lead splits, de-correlating the trees (reducing $\\rho$) and drastically reducing ensemble variance."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Compare Bagging and Boosting ensemble paradigms. Detail their mechanisms, how they impact the Bias-Variance tradeoff, and explain why Random Forest is immune to overfitting from adding trees.",
+        "a": "1. Bagging (Bootstrap Aggregation):\n   - Mechanism: Trains multiple independent models in parallel on bootstrap samples drawn with replacement.\n   - Combination: Majority voting (classification) or simple average (regression).\n   - Impact: Primarily REDUCES VARIANCE. Ideal for high-variance, low-bias base learners (fully grown decision trees).\n   - Examples: Random Forest, Bagged Decision Trees.\n2. Boosting:\n   - Mechanism: Trains weak base models sequentially. Each model focuses on instances misclassified by earlier models (re-weighting or fitting residual errors).\n   - Combination: Weighted majority voting or additive combination.\n   - Impact: Primarily REDUCES BIAS (turns weak learners into strong learners).\n   - Examples: AdaBoost, XGBoost, LightGBM, CatBoost.\n3. Why Random Forest Does Not Overfit with More Trees:\n   - By the Strong Law of Large Numbers, as the number of trees $B \\to \\infty$, the ensemble average converges almost surely to a definite mathematical expectation.\n   - The upper bound on generalization error depends only on individual tree strength $s$ and pairwise tree correlation $\\rho$ (Breiman's Bound), NOT on tree count $B$."
+      }
+    ],
+    "revision_60s": [
+      "Random Forest = Bagging + Random Feature Subspace (sqrt(p)).",
+      "Bootstrap sampling uses replacement; ~36.8% samples are Out-Of-Bag (OOB).",
+      "Random feature selection de-correlates individual trees.",
+      "Bagging reduces Variance; Boosting reduces Bias.",
+      "Adding more trees does NOT cause overfitting in Random Forest."
+    ]
+  },
+  "svm": {
+    "title": "Support Vector Machines (SVM) & Kernel Trick",
+    "subject": "ml",
+    "exam_definition": "A Support Vector Machine (SVM) is a supervised learning algorithm that finds the Optimal Separating Hyperplane maximizing the Margin ($2 / ||w||$) between support vectors of two classes, projecting non-linear data into higher dimensions via the Kernel Trick.",
+    "remember": "SVM Objective: Maximize Margin = 2 / ||w||, equivalent to minimizing (1/2) * ||w||^2 subject to y_i(w^T * x_i + b) >= 1.",
+    "core_concept": "Many possible hyperplanes can separate two linearly separable classes. SVM mathematically identifies the single optimal hyperplane that maximizes the geometric distance (margin) to the closest training points. These critical boundary points are called Support Vectors. For non-linearly separable data, the Kernel Trick computes inner products in high-dimensional feature spaces without ever explicitly calculating high-dimensional coordinates.",
+    "key_points": [
+      "Hyperplane Equation: $\\mathbf{w}^T \\mathbf{x} + b = 0$. Decision rule: $\\text{sign}(\\mathbf{w}^T \\mathbf{x} + b)$.",
+      "Margin: Distance between the positive and negative margin hyperplanes: $\\text{Margin} = \\frac{2}{\\|\\mathbf{w}\\|}$.",
+      "Support Vectors: Data points that lie directly ON the margin boundaries (satisfying $y_i(\\mathbf{w}^T \\mathbf{x}_i + b) = 1$). Only these points determine the model!",
+      "Hard Margin SVM: Requires perfect linear separability with zero misclassifications (fails on overlapping or noisy data).",
+      "Soft Margin SVM (Slack Variables $\\xi_i$): Permits bounded margin violations via hyperparameter $C$: $\\min \\frac{1}{2}\\|\\mathbf{w}\\|^2 + C \\sum \\xi_i$.",
+      "Hyperparameter C: Large $C$ strictly penalizes misclassifications (Low Bias, High Variance, Narrow Margin); Small $C$ allows violations (High Bias, Low Variance, Wide Margin).",
+      "Kernel Trick: Computes inner product $K(\\mathbf{x}, \\mathbf{z}) = \\langle \\phi(\\mathbf{x}), \\phi(\\mathbf{z}) \\rangle$ directly in high dimensions in $O(D)$ time."
+    ],
+    "classification": {
+      "title": "Popular SVM Kernel Functions",
+      "items": [
+        {
+          "name": "Linear Kernel",
+          "desc": "K(x, z) = x^T * z. Optimal for linearly separable datasets and high-dimensional sparse text data."
+        },
+        {
+          "name": "Polynomial Kernel",
+          "desc": "K(x, z) = (x^T * z + c)^d. Models polynomial feature interactions up to degree d."
+        },
+        {
+          "name": "Radial Basis Function (RBF) / Gaussian",
+          "desc": "K(x, z) = exp(-gamma * ||x - z||^2). Projects data into infinite-dimensional Hilbert space. Default general-purpose kernel."
+        },
+        {
+          "name": "Sigmoid Kernel",
+          "desc": "K(x, z) = tanh(alpha * x^T * z + c). Mimics two-layer neural network behavior."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "The Kernel Trick Mechanics",
+      "steps": [
+        "1. Given non-linearly separable data in 2D space (e.g. concentric circles).",
+        "2. Explicit transformation: Mapping $\\phi((x_1, x_2)) = (x_1^2, \\sqrt{2}x_1 x_2, x_2^2)$ projects data to 3D space where it becomes linearly separable.",
+        "3. Bottleneck: Explicit coordinate transformation $\\phi(x)$ to infinite dimensions is computationally impossible.",
+        "4. Kernel Function Resolution: Mercer's Theorem proves that as long as $K(\\mathbf{x}, \\mathbf{z})$ is positive semi-definite, it evaluates the dot product in high-dimensional space directly using original coordinates:",
+        "   $K(\\mathbf{x}, \\mathbf{z}) = \\langle \\phi(\\mathbf{x}), \\phi(\\mathbf{z}) \\rangle = \\exp(-\\gamma \\|\\mathbf{x} - \\mathbf{z}\\|^2)$.",
+        "5. SVM optimization problem depends strictly on dot products $x_i^T x_j$, allowing seamless substitution of $K(x_i, x_j)$."
+      ],
+      "diagram": "2D Non-linear data ──> Kernel Function K(x, z) [Implicit infinite-D projection] ──> Linear Hyperplane in Feature Space"
+    },
+    "example": {
+      "title": "SVM Classification with RBF Kernel in Python",
+      "scenario": "Classifying non-linear concentric circles using RBF kernel.",
+      "code": "from sklearn.svm import SVC\nfrom sklearn.datasets import make_circles\nfrom sklearn.model_selection import train_test_split\n\nX, y = make_circles(n_samples=200, noise=0.1, factor=0.4, random_state=42)\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n\n# RBF Kernel SVM\nsvm = SVC(kernel='rbf', C=1.0, gamma='scale')\nsvm.fit(X_train, y_train)\n\nprint(f'Number of Support Vectors: {len(svm.support_)}')\nprint(f'Test Accuracy: {svm.score(X_test, y_test) * 100:.2f}%')"
+    },
+    "comparison": {
+      "title": "Hard Margin vs Soft Margin SVM",
+      "headers": [
+        "Feature",
+        "Hard Margin SVM",
+        "Soft Margin SVM"
+      ],
+      "rows": [
+        [
+          "Linear Separability",
+          "Requires 100% strict linear separability (zero errors)",
+          "Works on noisy, overlapping, and non-separable data"
+        ],
+        [
+          "Slack Variables ($\\xi_i$)",
+          "No slack allowed ($\\xi_i = 0$ for all $i$)",
+          "Permits slack $\\xi_i \\ge 0$ for points violating margin"
+        ],
+        [
+          "Sensitivity to Outliers",
+          "Extreme — a single outlier completely shifts or breaks the hyperplane",
+          "Robust — controlled via trade-off regularization parameter $C$"
+        ],
+        [
+          "Constraint",
+          "$y_i(\\mathbf{w}^T \\mathbf{x}_i + b) \\ge 1$",
+          "$y_i(\\mathbf{w}^T \\mathbf{x}_i + b) \\ge 1 - \\xi_i$"
+        ],
+        [
+          "Practical Usage",
+          "Rarely usable on real-world noisy datasets",
+          "Standard industry formulation (default in all ML libraries)"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "SVM Margin Width",
+        "formula": "Margin = 2 / ||w||",
+        "explanation": "Distance between positive hyperplane w^T*x + b = +1 and negative w^T*x + b = -1."
+      },
+      {
+        "name": "RBF (Gaussian) Kernel",
+        "formula": "K(x, z) = exp(-gamma * ||x - z||^2)",
+        "explanation": "gamma determines radius of influence of individual support vectors."
+      }
+    ],
+    "exam_tip": "Remember the effect of hyperparameter $\\gamma$ (gamma) in RBF SVM: Large $\\gamma$ means points must be very close to be considered similar (complex, tight decision boundaries around support vectors $\\implies$ Overfitting). Small $\\gamma$ means far-reaching influence (smooth, broad boundaries $\\implies$ Underfitting).",
+    "common_confusion": {
+      "wrong": "SVM decision boundary is computed using all training points.",
+      "correct": "The SVM decision boundary is determined EXCLUSIVELY by the Support Vectors. Removing all other non-support vector training points has ZERO effect on the final hyperplane!",
+      "explanation": "Points with alpha_i = 0 do not participate in w = sum(alpha_i * y_i * x_i)."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What are Support Vectors in an SVM?",
+        "a": "Support Vectors are the subset of critical training points that lie directly on the margins or violate the margin boundaries. They are the only points that determine the orientation and position of the optimal separating hyperplane; all other training points can be removed without affecting the model."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "What is the Kernel Trick in Support Vector Machines and why is it computationally advantageous?",
+        "a": "1. Purpose: When data is not linearly separable in its original input space, mapping features into a higher-dimensional space $\\phi(\\mathbf{x})$ can make them linearly separable.\n2. The Trick: In the dual formulation of SVM, the optimization problem and prediction depend strictly on the dot product of feature vectors $\\langle \\phi(\\mathbf{x}), \\phi(\\mathbf{z}) \\rangle$.\n3. Computational Advantage: A Kernel function $K(\\mathbf{x}, \\mathbf{z})$ computes this inner product directly in the original space without ever computing or materializing high-dimensional coordinates, completely avoiding the computational cost and memory explosion of high-dimensional spaces (even infinite dimensions with RBF kernel!)."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Formulate the mathematical optimization problem for Soft-Margin SVM. Explain the role of Slack Variables (xi) and the regularization hyperparameter C.",
+        "a": "1. Problem Formulation:\n   $$\\min_{\\mathbf{w}, b, \\boldsymbol{\\xi}} \\frac{1}{2} \\|\\mathbf{w}\\|^2 + C \\sum_{i=1}^m \\xi_i$$\n   $$\\text{Subject to: } y_i(\\mathbf{w}^T \\mathbf{x}_i + b) \\ge 1 - \\xi_i \\quad \\text{and} \\quad \\xi_i \\ge 0 \\quad \\forall i=1\\dots m.$$\n2. Role of Slack Variables ($\\xi_i$):\n   - $\\xi_i = 0$: Instance lies on or beyond the correct margin boundary (correctly classified with safe margin).\n   - $0 < \\xi_i \\le 1$: Instance is correctly classified but falls within the margin boundary (margin violation).\n   - $\\xi_i > 1$: Instance is on the wrong side of the separating hyperplane (misclassified).\n3. Role of Hyperparameter $C$ (Penalty parameter):\n   - $C$ controls the tradeoff between maximizing the margin ($2/\\|\\mathbf{w}\\|$) and minimizing training errors ($\\sum \\xi_i$).\n   - High $C$: Heavy penalty for violations. SVM forces narrow margin to avoid mistakes (Low Bias, High Variance $\\implies$ Risk of Overfitting).\n   - Low $C$: Tolerates more margin violations to achieve a wider, smoother margin (High Bias, Low Variance $\\implies$ Better Generalization)."
+      }
+    ],
+    "revision_60s": [
+      "SVM finds optimal hyperplane maximizing margin = 2 / ||w||.",
+      "Only Support Vectors determine the decision boundary.",
+      "Soft Margin uses slack variables xi controlled by penalty C.",
+      "High C = narrow margin (overfitting); Low C = wide margin (underfitting).",
+      "Kernel trick computes inner products in high dimensions without explicit mapping."
+    ]
+  },
+  "clustering": {
+    "title": "K-Means Clustering & Unsupervised Grouping",
+    "subject": "ml",
+    "exam_definition": "K-Means is an unsupervised iterative centroid-based clustering algorithm that partitions $N$ unlabeled instances into $K$ non-overlapping clusters by minimizing Within-Cluster Sum of Squares (WCSS / Inertia), evaluated using the Elbow Method and Silhouette Analysis.",
+    "remember": "WCSS (Inertia): sum_{k=1}^K sum_{x in C_k} ||x - mu_k||^2. Decreases monotonically as K increases.",
+    "core_concept": "Unsupervised learning uncovers natural groupings in unlabeled data. K-Means uses an Expectation-Maximization (EM) style heuristic: it alternates between assigning points to the nearest centroid and recomputing centroids as the mean of assigned points. Because naive random initialization can trap K-Means in terrible local minima, modern implementations use K-Means++ initialization.",
+    "key_points": [
+      "Objective Function: Minimize Within-Cluster Sum of Squares (WCSS / Inertia): $J = \\sum_{k=1}^K \\sum_{x \\in C_k} \\|x - \\mu_k\\|^2$.",
+      "K-Means Steps: 1) Initialize $K$ centroids; 2) Assignment step (assign to nearest centroid); 3) Update step (recalculate centroids as cluster means); 4) Repeat until convergence.",
+      "K-Means++ Initialization: Chooses first centroid uniformly at random, then selects subsequent centroids with probability proportional to squared distance $D(x)^2$ from nearest existing centroid.",
+      "Determining K: Elbow Method (plot WCSS vs $K$; inflection point represents optimal $K$) and Silhouette Score ($s \\in [-1, +1]$).",
+      "Silhouette Score: $s(i) = \\frac{b(i) - a(i)}{\\max(a(i), b(i))}$, where $a(i)$ is mean intra-cluster distance, $b(i)$ is mean nearest-cluster distance.",
+      "Limitations of K-Means: Assumes spherical clusters of equal size/density; fails on non-convex shapes (requires DBSCAN or Spectral Clustering); sensitive to outliers."
+    ],
+    "classification": {
+      "title": "Clustering Algorithm Families",
+      "items": [
+        {
+          "name": "Partitioning (K-Means / K-Medoids)",
+          "desc": "Divides data into non-overlapping spherical partitions. Requires specifying K in advance."
+        },
+        {
+          "name": "Hierarchical Clustering",
+          "desc": "Builds tree of clusters (Dendrogram) via Agglomerative (bottom-up) or Divisive (top-down) merging."
+        },
+        {
+          "name": "Density-Based (DBSCAN)",
+          "desc": "Groups points in dense regions separated by low-density noise. Detects arbitrary shapes and outliers automatically."
+        },
+        {
+          "name": "Probabilistic (Gaussian Mixture Models)",
+          "desc": "Soft clustering assigning probability of membership in K Gaussian distributions via EM."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "K-Means Expectation-Maximization Algorithm",
+      "steps": [
+        "1. Choose $K$ (number of clusters) and initialize centroids $\\mu_1, \\dots, \\mu_K$ (using K-Means++).",
+        "2. Expectation (Assignment Step):\n   Assign each data point $x_i$ to its closest centroid:\n   $c^{(i)} = \\arg\\min_j \\|x_i - \\mu_j\\|^2$.",
+        "3. Maximization (Update Step):\n   Recalculate centroid coordinates as the arithmetic mean of all assigned points:\n   $\\mu_j = \\frac{1}{|C_j|} \\sum_{i \\in C_j} x_i$.",
+        "4. Convergence Check:\n   Repeat steps 2 and 3 until centroids stop moving ($\\sum \\|\\mu_{\\text{new}} - \\mu_{\\text{old}}\\|^2 < \\epsilon$) or maximum iterations reached."
+      ],
+      "diagram": "Random Centroids ──> Assign Points to Nearest Centroid ──> Recompute Means ──> Shift Centroids ──> Repeat until Converged"
+    },
+    "example": {
+      "title": "K-Means Clustering & Silhouette Score in Python",
+      "scenario": "Clustering blobs and evaluating silhouette score.",
+      "code": "from sklearn.cluster import KMeans\nfrom sklearn.datasets import make_blobs\nfrom sklearn.metrics import silhouette_score\n\nX, _ = make_blobs(n_samples=300, centers=4, cluster_std=0.6, random_state=42)\n\n# Fit K-Means with k-means++ initialization\nkmeans = KMeans(n_clusters=4, init='k-means++', n_init=10, random_state=42)\ncluster_labels = kmeans.fit_predict(X)\n\nscore = silhouette_score(X, cluster_labels)\nprint(f'Inertia (WCSS): {kmeans.inertia_:.2f}')\nprint(f'Silhouette Score: {score:.3f}')"
+    },
+    "comparison": {
+      "title": "K-Means vs DBSCAN vs Hierarchical Clustering",
+      "headers": [
+        "Feature",
+        "K-Means",
+        "DBSCAN",
+        "Hierarchical Clustering"
+      ],
+      "rows": [
+        [
+          "Cluster Shapes",
+          "Spherical (globular) clusters only",
+          "Arbitrary non-linear shapes (crescents, rings)",
+          "Any shape based on linkage criteria"
+        ],
+        [
+          "Number of Clusters K",
+          "Must be specified in advance",
+          "Automatically discovered based on $\\epsilon$ and MinPts",
+          "Determined by cutting dendrogram"
+        ],
+        [
+          "Outlier / Noise Handling",
+          "Forces every outlier into a cluster (sensitive to noise)",
+          "Explicitly classifies outliers as Noise points (-1)",
+          "Sensitive to outliers at initial merge levels"
+        ],
+        [
+          "Computational Complexity",
+          "$O(t \\cdot K \\cdot N \\cdot D)$ (Fast, scales linearly)",
+          "$O(N \\log N)$ with spatial index; $O(N^2)$ worst case",
+          "$O(N^3)$ naive or $O(N^2 \\log N)$ (does not scale to big data)"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "Within-Cluster Sum of Squares (WCSS / Inertia)",
+        "formula": "WCSS = sum_{k=1}^K sum_{x in C_k} ||x - mu_k||^2",
+        "explanation": "Cost function minimized by K-Means."
+      },
+      {
+        "name": "Silhouette Coefficient",
+        "formula": "s(i) = (b(i) - a(i)) / max(a(i), b(i))",
+        "explanation": "a(i) = mean intra-cluster distance, b(i) = mean nearest-cluster distance. s in [-1, +1]."
+      }
+    ],
+    "exam_tip": "In Silhouette score questions: $s = +1$ means point is perfectly clustered far from neighbors; $s = 0$ means point is on the decision boundary between two clusters; $s = -1$ means point is assigned to the completely WRONG cluster.",
+    "common_confusion": {
+      "wrong": "K-Means is guaranteed to find the global optimum WCSS.",
+      "correct": "K-Means is a greedy heuristic algorithm that is guaranteed to converge, but only to a LOCAL minimum. The final clustering heavily depends on initial centroid placement.",
+      "explanation": "K-Means++ and running multiple restarts (n_init=10) help avoid bad local minima."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is the Elbow Method for selecting the optimal number of clusters K in K-Means?",
+        "a": "The Elbow Method plots the Within-Cluster Sum of Squares (WCSS / Inertia) as a function of the number of clusters $K$. As $K$ increases, WCSS continuously drops. The point where the rate of decrease abruptly bends and levels off (forming an 'elbow') represents the optimal trade-off value for $K$."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Explain how K-Means++ initialization improves upon standard random initialization in K-Means.",
+        "a": "1. Standard Issue: Purely random initialization frequently places multiple centroids in the same natural cluster, resulting in poor local minima and slow convergence.\n2. K-Means++ Algorithm:\n   - Choose the first centroid $\\mu_1$ uniformly at random from the dataset.\n   - For each remaining data point $x$, compute $D(x)$, the shortest distance to the nearest already chosen centroid.\n   - Choose the next centroid with probability proportional to squared distance: $P(x) = \\frac{D(x)^2}{\\sum D(x')^2}$.\n   - Repeat until $K$ centroids are chosen.\n3. Advantage: Guarantees that initial centroids are widely dispersed across the data space, mathematically bounding expected WCSS to $O(\\log K)$ of the optimal clustering."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Explain the step-by-step mechanics of the K-Means algorithm. What are its major limitations, and how does DBSCAN address them?",
+        "a": "1. K-Means Algorithm Steps:\n   - Step 1: Initialize $K$ centroids in feature space.\n   - Step 2 (Assignment): Assign each sample $x_i$ to its nearest centroid: $C_k = \\{x_i : \\|x_i - \\mu_k\\|^2 \\le \\|x_i - \\mu_j\\|^2, \\forall j\\}$.\n   - Step 3 (Update): Compute new centroids as arithmetic mean: $\\mu_k = \\frac{1}{|C_k|} \\sum_{x \\in C_k} x$.\n   - Step 4: Repeat until centroids stabilize (convergence).\n2. Major Limitations of K-Means:\n   - Must specify $K$ manually prior to execution.\n   - Assumes clusters are spherical (globular) with similar densities.\n   - Cannot handle non-convex shapes (e.g. concentric circles, elongated ribbons).\n   - Sensitive to outliers (pulls centroid away from dense clusters).\n3. How DBSCAN Resolves These:\n   - Discovers number of clusters automatically based on density parameters ($\\epsilon$ radius and MinPts).\n   - Discovers arbitrarily shaped clusters using connected density components.\n   - Outliers in low-density zones are explicitly filtered out as Noise points (-1), leaving cluster shapes pristine."
+      }
+    ],
+    "revision_60s": [
+      "K-Means minimizes Within-Cluster Sum of Squares (WCSS / Inertia).",
+      "Alternates between Assignment step and Update step until convergence.",
+      "K-Means++ spaces out initial centroids, avoiding bad local minima.",
+      "Elbow Method and Silhouette Score determine optimal K.",
+      "K-Means assumes spherical clusters; fails on complex non-convex shapes."
+    ]
+  },
+  "model-evaluation": {
+    "title": "Model Evaluation Metrics & Cross-Validation",
+    "subject": "ml",
+    "exam_definition": "Model Evaluation is the methodology for assessing the generalization capability and error characteristics of machine learning models via Confusion Matrix metrics (Accuracy, Precision, Recall, F1-score, Specificity), ROC-AUC curves, Regression metrics (MAE, MSE, RMSE, R^2), and K-Fold Cross-Validation.",
+    "remember": "Confusion Matrix: Precision = TP / (TP + FP) [cost of false alarm] | Recall = TP / (TP + FN) [cost of missing a case] | F1 = 2 * (P * R) / (P + R).",
+    "core_concept": "Accuracy is misleading on imbalanced datasets (e.g. 99% accuracy by always predicting 'healthy' in a 1% disease dataset). Precision evaluates how many predicted positives are truly positive; Recall evaluates how many actual positives were caught. The F1-score harmonic mean balances Precision and Recall. ROC-AUC evaluates true positive vs false positive rate tradeoffs across all thresholds.",
+    "key_points": [
+      "Confusion Matrix: True Positives (TP), True Negatives (TN), False Positives (FP - Type I Error), False Negatives (FN - Type II Error).",
+      "Accuracy: $\\frac{TP + TN}{TP + TN + FP + FN}$. Misleading under class imbalance (Accuracy Paradox).",
+      "Precision: $\\frac{TP}{TP + FP}$. Use when False Positives are catastrophic (e.g. Spam detection, false accusation).",
+      "Recall (Sensitivity): $\\frac{TP}{TP + FN}$. Use when False Negatives are catastrophic (e.g. Cancer diagnosis, fraud detection).",
+      "F1-Score: Harmonic mean of Precision and Recall: $F_1 = 2 \\times \\frac{\\text{Precision} \\times \\text{Recall}}{\\text{Precision} + \\text{Recall}}$.",
+      "ROC-AUC: Receiver Operating Characteristic curve plotting True Positive Rate (Recall) vs False Positive Rate ($1 - \\text{Specificity}$) across all thresholds. AUC = 1.0 is perfect; 0.5 is random guessing.",
+      "Regression Metrics: MAE ($L_1$), MSE ($L_2$), RMSE (same units as $y$), $R^2$ (variance explained).",
+      "K-Fold Cross-Validation: Splits data into $K$ equal folds; trains on $K-1$ and validates on 1, rotating $K$ times to prevent evaluation variance."
+    ],
+    "classification": {
+      "title": "Evaluation Metric Domains",
+      "items": [
+        {
+          "name": "Classification Threshold Metrics",
+          "desc": "Precision, Recall, F1-Score, Specificity. Calculated at a single fixed decision threshold (typically 0.50)."
+        },
+        {
+          "name": "Threshold-Agnostic Classification Metrics",
+          "desc": "ROC-AUC, Precision-Recall AUC. Evaluate ranking capability across ALL possible decision thresholds."
+        },
+        {
+          "name": "Regression Metrics",
+          "desc": "Mean Absolute Error (MAE), Mean Squared Error (MSE), Root Mean Squared Error (RMSE), R-squared (R^2)."
+        },
+        {
+          "name": "Validation Strategies",
+          "desc": "K-Fold CV, Stratified K-Fold (preserves class ratios), TimeSeriesSplit (prevents lookahead leakage)."
+        }
+      ]
+    },
+    "how_it_works": {
+      "title": "Confusion Matrix Computation & Metric Derivation",
+      "steps": [
+        "1. Construct 2x2 Confusion Matrix from actual vs predicted labels:\n   - Row 1: Actual Positives [TP, FN]\n   - Row 2: Actual Negatives [FP, TN]",
+        "2. Calculate Precision: $P = \\frac{TP}{TP + FP}$.",
+        "3. Calculate Recall (Sensitivity): $R = \\frac{TP}{TP + FN}$.",
+        "4. Calculate Specificity: $S = \\frac{TN}{TN + FP}$.",
+        "5. Calculate False Positive Rate: $FPR = 1 - \\text{Specificity} = \\frac{FP}{TN + FP}$.",
+        "6. Calculate Harmonic Mean F1-Score: $F_1 = 2 \\cdot \\frac{P \\cdot R}{P + R}$."
+      ],
+      "diagram": "                    Predicted Positive   Predicted Negative\nActual Positive:    True Positive (TP)   False Negative (FN)  --> Recall = TP/(TP+FN)\nActual Negative:    False Positive (FP)  True Negative (TN)   --> Specificity = TN/(TN+FP)\n                           |\n                           v\n                 Precision = TP/(TP+FP)"
+    },
+    "example": {
+      "title": "Confusion Matrix & Evaluation Metrics Numerical",
+      "scenario": "Medical test on 1000 patients: 100 actual cancer, 900 healthy. Model predicts 90 correct cancer (TP), 10 missed (FN), 20 false alarm (FP), 880 healthy (TN).",
+      "code": "Given:\nTP = 90, FN = 10\nFP = 20, TN = 880\nTotal = 1000\n\n1. Accuracy:\nAccuracy = (TP + TN) / Total = (90 + 880) / 1000 = 970 / 1000 = 97.0%\n\n2. Precision:\nPrecision = TP / (TP + FP) = 90 / (90 + 20) = 90 / 110 ≈ 81.82%\n\n3. Recall (Sensitivity):\nRecall = TP / (TP + FN) = 90 / (90 + 10) = 90 / 100 = 90.0%\n\n4. Specificity:\nSpecificity = TN / (TN + FP) = 880 / (880 + 20) = 880 / 900 ≈ 97.78%\n\n5. F1-Score:\nF1 = 2 * (Precision * Recall) / (Precision + Recall)\n   = 2 * (0.8182 * 0.90) / (0.8182 + 0.90) = 1.4728 / 1.7182 ≈ 85.72%"
+    },
+    "comparison": {
+      "title": "Precision vs Recall vs F1-Score",
+      "headers": [
+        "Metric",
+        "Formula",
+        "Focus Area",
+        "When to Prioritize"
+      ],
+      "rows": [
+        [
+          "Precision",
+          "$\\frac{TP}{TP + FP}$",
+          "Minimizing False Positives (False Alarms)",
+          "Spam detection, YouTube video recommendations, legal accusations"
+        ],
+        [
+          "Recall (Sensitivity)",
+          "$\\frac{TP}{TP + FN}$",
+          "Minimizing False Negatives (Missed Cases)",
+          "Cancer screening, Covid-19 testing, credit card fraud, airport security"
+        ],
+        [
+          "F1-Score",
+          "$2 \\frac{P \\cdot R}{P + R}$",
+          "Harmonic balance of Precision and Recall",
+          "Imbalanced datasets where both precision and recall are critical"
+        ]
+      ]
+    },
+    "formulas": [
+      {
+        "name": "F1-Score Harmonic Mean",
+        "formula": "F1 = 2 * (Precision * Recall) / (Precision + Recall)",
+        "explanation": "Harmonic mean heavily penalizes extreme imbalances between P and R."
+      },
+      {
+        "name": "Root Mean Squared Error",
+        "formula": "RMSE = sqrt( 1/m * sum(y - y_hat)^2 )",
+        "explanation": "Penalizes large outlier errors more heavily than MAE."
+      }
+    ],
+    "exam_tip": "Why is F1-score defined using the HARMONIC mean rather than the arithmetic mean? Because the arithmetic mean fails when one value is abysmal! If Precision = 1.0 and Recall = 0.0, the arithmetic mean is 0.50 (deceptive), but the harmonic mean is 0.0 (accurately reflecting complete failure).",
+    "common_confusion": {
+      "wrong": "ROC-AUC is always the best metric for heavily imbalanced datasets.",
+      "correct": "On heavily imbalanced datasets (e.g. 99.9% negative), the large number of TNs inflates the False Positive Rate denominator, making ROC-AUC look artificially high (e.g. 0.98).",
+      "explanation": "For extreme imbalance, use Precision-Recall AUC (PR-AUC), which does not include TNs."
+    },
+    "faqs": [
+      {
+        "marks": "2-Mark Question",
+        "q": "What is the Accuracy Paradox in machine learning?",
+        "a": "The Accuracy Paradox occurs in highly imbalanced datasets where a naive model that predicts only the majority class achieves deceptively high accuracy (e.g. 99% accuracy by predicting all transactions are legitimate in a 1% fraud dataset) while failing completely at its intended task."
+      },
+      {
+        "marks": "5-Mark Question",
+        "q": "Explain K-Fold Cross-Validation and Stratified K-Fold Cross-Validation.",
+        "a": "1. K-Fold Cross-Validation: Splits the dataset into $K$ equal, non-overlapping folds. In each of $K$ iterations, $K-1$ folds are used for training and the remaining 1 fold is used for validation. The final score is the average of all $K$ test scores, minimizing evaluation variance.\n2. Stratified K-Fold: An essential variation for classification that ensures each fold contains approximately the same percentage of samples of each target class as the complete dataset, preventing folds from having zero positive instances in imbalanced data."
+      },
+      {
+        "marks": "10-Mark Question",
+        "q": "Define Confusion Matrix. Derive Precision, Recall, Specificity, and F1-score. Sketch and explain the ROC Curve and AUC metric.",
+        "a": "1. Confusion Matrix Layout:\n   - TP: Correctly predicted positive; FP (Type I error): Inactive predicted as positive.\n   - TN: Correctly predicted negative; FN (Type II error): Positive predicted as negative.\n2. Metric Formulas:\n   - $\\text{Precision} = \\frac{TP}{TP + FP}$ (Accuracy of positive predictions).\n   - $\\text{Recall (Sensitivity)} = \\frac{TP}{TP + FN}$ (Fraction of actual positives caught).\n   - $\\text{Specificity} = \\frac{TN}{TN + FP}$ (Fraction of actual negatives caught).\n   - $F_1 = 2 \\cdot \\frac{\\text{Precision} \\cdot \\text{Recall}}{\\text{Precision} + \\text{Recall}}$ (Harmonic mean).\n3. ROC Curve and AUC:\n   - Receiver Operating Characteristic (ROC) curve plots True Positive Rate (Recall) on the y-axis versus False Positive Rate ($FPR = 1 - \\text{Specificity}$) on the x-axis across all decision thresholds from 1.0 down to 0.0.\n   - Diagonal line ($y = x$) represents random coin-flip guessing with $\\text{AUC} = 0.5$.\n   - An ideal model passes through the top-left corner $(0, 1)$ with $\\text{AUC} = 1.0$.\n   - AUC (Area Under the Curve) measures the probability that the classifier will rank a randomly chosen positive instance higher than a randomly chosen negative instance."
+      }
+    ],
+    "revision_60s": [
+      "Accuracy is misleading on imbalanced data.",
+      "Precision = TP / (TP + FP); prioritize when False Positives are costly.",
+      "Recall = TP / (TP + FN); prioritize when False Negatives are costly.",
+      "F1-score is the harmonic mean of Precision and Recall.",
+      "ROC curves plot TPR vs FPR across all thresholds; AUC = 1.0 is perfect.",
+      "Stratified K-Fold preserves class proportions across folds."
+    ]
+  }
+}

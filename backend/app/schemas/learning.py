@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Dict
 from datetime import datetime
 
 class QuestionOptionResponse(BaseModel):
@@ -25,6 +25,10 @@ class QuestionResponse(BaseModel):
     explanation: Optional[str] = None
     is_important: bool = False
     metadata_json: Optional[str] = None
+    question_context: Optional[str] = "LEARN"
+    source_name: Optional[str] = None
+    source_url: Optional[str] = None
+    source_type: Optional[str] = None
     options: List[QuestionOptionResponse] = []
 
     class Config:
@@ -38,6 +42,12 @@ class LessonStepResponse(BaseModel):
     content: str
     code_snippet: Optional[str] = None
     interactive_data: Optional[str] = None
+    section_order: Optional[int] = 1
+    section_type: Optional[str] = "concept"
+    example_data: Optional[str] = None
+    diagram_data: Optional[str] = None
+    source_name: Optional[str] = None
+    source_url: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -67,6 +77,10 @@ class TopicProgressResponse(BaseModel):
     total_steps: int
     last_practiced_at: Optional[datetime] = None
     next_review_due: Optional[datetime] = None
+    is_accessible: bool = True
+    is_completed: bool = False
+    is_current: bool = False
+    is_next: bool = False
 
     class Config:
         from_attributes = True
@@ -82,6 +96,9 @@ class TopicResponse(BaseModel):
     boss_title: Optional[str] = None
     lessons_count: int = 0
     questions_count: int = 0
+    is_accessible: bool = True
+    is_completed: bool = False
+    status: str = "AVAILABLE"
     progress: Optional[TopicProgressResponse] = None
 
     class Config:
@@ -139,3 +156,43 @@ class BookmarkResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class QuizCompleteRequest(BaseModel):
+    score: Optional[int] = None
+    total: Optional[int] = None
+    answers: Optional[List[Dict[str, Any]]] = None
+    time_taken_seconds: int = 0
+
+class QuizCompleteResponse(BaseModel):
+    topic_id: int
+    topic_slug: str
+    status: str
+    mastery_score: float
+    mastery_level: str
+    xp_earned: int
+    xp_awarded: int
+    new_xp: int
+    new_level: int
+    level_up: bool
+    next_topic_slug: Optional[str] = None
+    next_topic_title: Optional[str] = None
+    unlocked_next: bool = False
+
+class QuickReferenceResponse(BaseModel):
+    topic_slug: str
+    title: str
+    subject: str
+    exam_definition: str
+    remember: str
+    core_concept: str
+    key_points: List[str]
+    classification: Any
+    how_it_works: Any
+    example: Any
+    comparison: Any
+    formulas: List[Any]
+    exam_tip: str
+    common_confusion: Any
+    faqs: List[Any]
+    revision_60s: List[str]
+    references: List[Any]

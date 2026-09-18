@@ -62,31 +62,91 @@ def get_subject_detail(slug_or_id: str, db: Session = Depends(get_db), current_u
     completed_count = 0
     total_mastery = 0.0
 
-    for idx, t in enumerate(topics):
-        prog = db.query(TopicProgress).filter(
+    # Load all user progress for this subject's topics in one query
+    topic_ids = [t.id for t in topics]
+    user_progress_map = {}
+    if topic_ids:
+        progress_records = db.query(TopicProgress).filter(
             TopicProgress.user_id == current_user.id,
-            TopicProgress.topic_id == t.id
-        ).first()
+            TopicProgress.topic_id.in_(topic_ids)
+        ).all()
+        user_progress_map = {p.topic_id: p for p in progress_records}
 
-        # If user has no progress record yet, first topic is AVAILABLE, others LOCKED
-        if not prog:
-            default_status = "AVAILABLE" if idx == 0 else "LOCKED"
+    current_assigned = False
+    next_assigned = False
+
+    for idx, t in enumerate(topics):
+        prog = user_progress_map.get(t.id)
+        is_completed = bool(prog and prog.status in ["COMPLETED", "MASTERED"])
+        
+        if is_completed:
+            completed_count += 1
+            total_mastery += prog.mastery_score
+
+        # Sequential Accessibility Rule:
+        # Topic 1 is ALWAYS accessible.
+        # Topic N (N > 1) is accessible iff Topic N-1 is COMPLETED or MASTERED.
+        # Completed topics remain permanently accessible (COMPLETED != LOCKED).
+        if idx == 0:
+            is_accessible = True
+        else:
+            prev_topic = topics[idx - 1]
+            prev_prog = user_progress_map.get(prev_topic.id)
+            prev_completed = bool(prev_prog and prev_prog.status in ["COMPLETED", "MASTERED"])
+            is_accessible = prev_completed
+
+        # Determine status
+        if is_completed:
+            status = prog.status if (prog and prog.status) else "COMPLETED"
+        elif is_accessible:
+            status = "AVAILABLE"
+        else:
+            status = "UPCOMING"
+
+        # Determine current active topic and next upcoming topic
+        is_current = False
+        is_next = False
+        if is_accessible and not is_completed and not current_assigned:
+            is_current = True
+            current_assigned = True
+        elif not is_accessible and not next_assigned:
+            is_next = True
+            next_assigned = True
+
+        if prog:
             prog_data = TopicProgressResponse(
                 topic_id=t.id,
-                status=default_status,
+                status=status,
+                mastery_score=prog.mastery_score,
+                accuracy=prog.accuracy,
+                recent_accuracy=prog.recent_accuracy,
+                attempts_count=prog.attempts_count,
+                correct_count=prog.correct_count,
+                completed_steps=prog.completed_steps,
+                total_steps=prog.total_steps,
+                last_practiced_at=prog.last_practiced_at,
+                next_review_due=prog.next_review_due,
+                is_accessible=is_accessible,
+                is_completed=is_completed,
+                is_current=is_current,
+                is_next=is_next
+            )
+        else:
+            prog_data = TopicProgressResponse(
+                topic_id=t.id,
+                status=status,
                 mastery_score=0.0,
                 accuracy=0.0,
                 recent_accuracy=0.0,
                 attempts_count=0,
                 correct_count=0,
                 completed_steps=0,
-                total_steps=6
+                total_steps=12,
+                is_accessible=is_accessible,
+                is_completed=is_completed,
+                is_current=is_current,
+                is_next=is_next
             )
-        else:
-            prog_data = TopicProgressResponse.model_validate(prog)
-            if prog.status in ["COMPLETED", "MASTERED"]:
-                completed_count += 1
-            total_mastery += prog.mastery_score
 
         topic_responses.append(TopicResponse(
             id=t.id,
@@ -99,6 +159,9 @@ def get_subject_detail(slug_or_id: str, db: Session = Depends(get_db), current_u
             boss_title=t.boss_title,
             lessons_count=len(t.lessons),
             questions_count=len(t.questions),
+            is_accessible=is_accessible,
+            is_completed=is_completed,
+            status=status,
             progress=prog_data
         ))
 

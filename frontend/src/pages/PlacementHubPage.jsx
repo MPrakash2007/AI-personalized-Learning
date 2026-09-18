@@ -208,10 +208,13 @@ export default function PlacementHubPage() {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="px-3 py-2 rounded-xl bg-[#0f0921] border border-purple-500/20 text-xs font-semibold text-white focus:outline-none focus:border-cyan-400"
               >
-                <option value="ALL">All Categories</option>
+                <option value="ALL">All Categories (14 Tracks)</option>
                 <option value="DSA">Data Structures & Algo</option>
                 <option value="CORE_CS">Core CS & Systems</option>
-                <option value="SYSTEM_DESIGN">System Design</option>
+                <option value="SYSTEM_DESIGN">System Design & Scalability</option>
+                <option value="HR & Behavioral">HR & Behavioral</option>
+                <option value="Aptitude & Logical">Aptitude & Reasoning</option>
+                <option value="Puzzles">Analytical Puzzles</option>
               </select>
             </div>
           </div>
