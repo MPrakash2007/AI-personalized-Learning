@@ -10,6 +10,7 @@ from app.auth.deps import get_current_user
 
 router = APIRouter(prefix="/quests", tags=["Daily Quests"])
 
+@router.get("", response_model=List[DailyQuestResponse])
 @router.get("/today", response_model=List[DailyQuestResponse])
 def get_today_quests(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     today = datetime.now(timezone.utc).date()

@@ -141,10 +141,12 @@ export default function App() {
 
               {/* PERFORMANCE */}
               <Route path="/progress" element={<ProgressAnalyticsPage />} />
+              <Route path="/performance" element={<ProgressAnalyticsPage />} />
               <Route path="/planner" element={<StudyPlannerPage />} />
 
               {/* CAREER */}
               <Route path="/career" element={<PlacementHubPage />} />
+              <Route path="/placement" element={<PlacementHubPage />} />
 
               {/* PERSONAL */}
               <Route path="/notes" element={<NotesPage />} />
