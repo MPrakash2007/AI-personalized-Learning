@@ -631,19 +631,19 @@ DBMS_CURRICULUM: Dict[str, Dict[str, Any]] = {
             {
                 "marks": "5-Mark Question",
                 "q": "Compare DELETE, TRUNCATE, and DROP commands in SQL.",
-                "a": "1. DELETE is a DML command that removes specific rows using a WHERE clause, logs each row deletion, fires triggers, and can be rolled back.
+                "a": """""1. DELETE is a DML command that removes specific rows using a WHERE clause, logs each row deletion, fires triggers, and can be rolled back.
 2. TRUNCATE is a DDL command that removes all rows by deallocating data pages, resets identity seeds, does not fire triggers, and is much faster than DELETE.
-3. DROP is a DDL command that completely destroys both the table data and its schema definition from the system catalog."
+3. DROP is a DDL command that completely destroys both the table data and its schema definition from the system catalog."""""
             },
             {
                 "marks": "10-Mark Question",
                 "q": "Explain the structure of SQL commands with categories, syntax, constraints, and transaction management.",
-                "a": "1. DDL: CREATE TABLE, ALTER TABLE, DROP TABLE, TRUNCATE TABLE. Used to manage schema definitions.
+                "a": """""1. DDL: CREATE TABLE, ALTER TABLE, DROP TABLE, TRUNCATE TABLE. Used to manage schema definitions.
 2. DML: INSERT INTO, UPDATE SET, DELETE FROM. Used to manipulate rows.
 3. DQL: SELECT column FROM table WHERE condition. Used for data retrieval.
 4. DCL: GRANT privilege ON object TO user; REVOKE privilege FROM user. Controls role security.
 5. TCL: COMMIT (persists state), ROLLBACK (undoes uncommitted work), SAVEPOINT (partial rollback point).
-6. Integrity Constraints in SQL: NOT NULL, UNIQUE, PRIMARY KEY, FOREIGN KEY REFERENCES, CHECK, DEFAULT."
+6. Integrity Constraints in SQL: NOT NULL, UNIQUE, PRIMARY KEY, FOREIGN KEY REFERENCES, CHECK, DEFAULT."""""
             }
         ],
         "revision_60s": [
@@ -765,26 +765,26 @@ DBMS_CURRICULUM: Dict[str, Dict[str, Any]] = {
             {
                 "marks": "5-Mark Question",
                 "q": "Explain the difference between WHERE and HAVING with a suitable example.",
-                "a": "1. WHERE filters individual rows before grouping takes place. It cannot use aggregate functions.
+                "a": """""1. WHERE filters individual rows before grouping takes place. It cannot use aggregate functions.
 2. HAVING filters groups of rows after aggregation has been performed.
 Example:
 SELECT dept_id, AVG(salary)
 FROM Employees
 WHERE status = 'Active'         -- WHERE filters active rows
 GROUP BY dept_id
-HAVING AVG(salary) > 60000;     -- HAVING filters departments with avg salary > 60000."
+HAVING AVG(salary) > 60000;     -- HAVING filters departments with avg salary > 60000."""""
             },
             {
                 "marks": "10-Mark Question",
                 "q": "Detail the logical execution order of an SQL query and write queries for 3 practical analytical scenarios.",
-                "a": "1. Execution Order: FROM/JOIN → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT.
+                "a": """""1. Execution Order: FROM/JOIN → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT.
 2. Queries:
 (a) Find second highest salary:
 SELECT MAX(salary) FROM Employees WHERE salary < (SELECT MAX(salary) FROM Employees);
 (b) Departments where average salary > company average:
 SELECT dept_id, AVG(salary) FROM Employees GROUP BY dept_id HAVING AVG(salary) > (SELECT AVG(salary) FROM Employees);
 (c) Count of students enrolled in more than 2 courses:
-SELECT student_id, COUNT(course_id) FROM Enrollments GROUP BY student_id HAVING COUNT(course_id) > 2;"
+SELECT student_id, COUNT(course_id) FROM Enrollments GROUP BY student_id HAVING COUNT(course_id) > 2;"""""
             }
         ],
         "revision_60s": [
@@ -795,8 +795,7 @@ SELECT student_id, COUNT(course_id) FROM Enrollments GROUP BY student_id HAVING 
             "LIKE '%' matches any number of characters; '_' matches exactly one character.",
             "ORDER BY defaults to ASC (ascending); DESC sorts descending."
         ]
-    }
-}
+    },
 
     # -------------------------------------------------------------------------
     # 7. SQL Joins
@@ -896,16 +895,16 @@ SELECT student_id, COUNT(course_id) FROM Enrollments GROUP BY student_id HAVING 
             {
                 "marks": "5-Mark Question",
                 "q": "Explain the difference between INNER JOIN, LEFT OUTER JOIN, and FULL OUTER JOIN with examples.",
-                "a": "1. INNER JOIN returns only records that have matching keys in both tables. Unmatched rows from either table are omitted.
+                "a": """1. INNER JOIN returns only records that have matching keys in both tables. Unmatched rows from either table are omitted.
 2. LEFT OUTER JOIN returns all records from the left table; matching records from the right table are joined, while unmatched right columns are filled with NULL.
-3. FULL OUTER JOIN returns all records from both tables; where matches exist, rows are combined; where no match exists, missing sides are padded with NULL."
+3. FULL OUTER JOIN returns all records from both tables; where matches exist, rows are combined; where no match exists, missing sides are padded with NULL."""
             },
             {
                 "marks": "10-Mark Question",
                 "q": "Explain the three primary join algorithms used by DBMS execution engines and analyze their time complexities.",
-                "a": "1. Nested Loop Join: Iterates over outer relation R and for each tuple searches inner relation S. Cost: O(|R| × |S|) without index; O(|R| × log|S|) with B-Tree index on S. Best for small outer tables.
+                "a": """1. Nested Loop Join: Iterates over outer relation R and for each tuple searches inner relation S. Cost: O(|R| × |S|) without index; O(|R| × log|S|) with B-Tree index on S. Best for small outer tables.
 2. Hash Join: Builds an in-memory hash table on the join key of the smaller relation, then scans the larger relation to probe the hash table. Cost: O(|R| + |S|). Best for large, unsorted equijoins.
-3. Sort-Merge Join: Sorts both relations on join key (cost O(|R|log|R| + |S|log|S|)), then performs a linear merge pass (cost O(|R| + |S|)). Highly optimal when inputs are already sorted by clustered indexes."
+3. Sort-Merge Join: Sorts both relations on join key (cost O(|R|log|R| + |S|log|S|)), then performs a linear merge pass (cost O(|R| + |S|)). Highly optimal when inputs are already sorted by clustered indexes."""
             }
         ],
         "revision_60s": [
@@ -1021,18 +1020,18 @@ SELECT student_id, COUNT(course_id) FROM Enrollments GROUP BY student_id HAVING 
             {
                 "marks": "5-Mark Question",
                 "q": "Explain the difference between EXISTS and IN operators in SQL subqueries.",
-                "a": "1. IN evaluates the subquery, returns a list of values, and checks whether the outer value matches any element. It performs poorly on large subquery results and fails if NULLs exist in a NOT IN query.
-2. EXISTS tests for the existence of rows in the subquery. It returns TRUE as soon as the first matching row is found (short-circuit evaluation), making it significantly faster for large datasets. It also safely ignores NULL values in subquery columns."
+                "a": """1. IN evaluates the subquery, returns a list of values, and checks whether the outer value matches any element. It performs poorly on large subquery results and fails if NULLs exist in a NOT IN query.
+2. EXISTS tests for the existence of rows in the subquery. It returns TRUE as soon as the first matching row is found (short-circuit evaluation), making it significantly faster for large datasets. It also safely ignores NULL values in subquery columns."""
             },
             {
                 "marks": "10-Mark Question",
                 "q": "Write SQL queries for: (a) 2nd highest salary using subquery, (b) Employees earning above their department average, (c) Customers with no orders using NOT EXISTS.",
-                "a": "(a) Second Highest Salary:
+                "a": """(a) Second Highest Salary:
 SELECT MAX(salary) FROM Employees WHERE salary < (SELECT MAX(salary) FROM Employees);
 (b) Employees earning above department average:
 SELECT e1.name, e1.salary FROM Employees e1 WHERE e1.salary > (SELECT AVG(e2.salary) FROM Employees e2 WHERE e2.dept_id = e1.dept_id);
 (c) Customers with no orders:
-SELECT c.customer_id, c.name FROM Customers c WHERE NOT EXISTS (SELECT 1 FROM Orders o WHERE o.customer_id = c.customer_id);"
+SELECT c.customer_id, c.name FROM Customers c WHERE NOT EXISTS (SELECT 1 FROM Orders o WHERE o.customer_id = c.customer_id);"""
             }
         ],
         "revision_60s": [
@@ -1167,20 +1166,20 @@ SELECT c.customer_id, c.name FROM Customers c WHERE NOT EXISTS (SELECT 1 FROM Or
             {
                 "marks": "5-Mark Question",
                 "q": "Differentiate between 3NF and BCNF with a counterexample.",
-                "a": "In 3NF, for every functional dependency X → Y, either X is a Superkey OR Y is a Prime Attribute. In BCNF, X must be a Superkey, with no exception for prime attributes.
-Example: R(A, B, C) with FDs {AB → C, C → B}. Candidate keys are AB and AC. For C → B, C is not a superkey, but B is a prime attribute (part of candidate key AB). Therefore, R is in 3NF, but NOT in BCNF because determinant C is not a superkey."
+                "a": """In 3NF, for every functional dependency X → Y, either X is a Superkey OR Y is a Prime Attribute. In BCNF, X must be a Superkey, with no exception for prime attributes.
+Example: R(A, B, C) with FDs {AB → C, C → B}. Candidate keys are AB and AC. For C → B, C is not a superkey, but B is a prime attribute (part of candidate key AB). Therefore, R is in 3NF, but NOT in BCNF because determinant C is not a superkey."""
             },
             {
                 "marks": "10-Mark Question",
                 "q": "Define 1NF, 2NF, 3NF, and BCNF. Given R(A, B, C, D, E) with F = {A -> B, BC -> D, E -> C}. Determine the highest normal form.",
-                "a": "1. Definitions: 1NF requires atomic values; 2NF eliminates partial dependencies; 3NF eliminates transitive dependencies (X is SK or Y is prime); BCNF requires every determinant to be a superkey.
+                "a": """1. Definitions: 1NF requires atomic values; 2NF eliminates partial dependencies; 3NF eliminates transitive dependencies (X is SK or Y is prime); BCNF requires every determinant to be a superkey.
 2. Candidate Key finding for R:
 - Attributes not on RHS: A, E. Closure of (AE):
   AE+ = {A, E, B, C, D} (A->B, E->C, BC->D). AE covers all attributes and is minimal. Candidate Key = {AE}.
 - Prime attributes: {A, E}; Non-prime attributes: {B, C, D}.
 3. Testing Normal Forms:
 - Check A -> B: A is a proper subset of candidate key {AE}, and B is a non-prime attribute. This is a PARTIAL DEPENDENCY!
-Conclusion: Because A -> B violates 2NF, the highest normal form of relation R is 1NF."
+Conclusion: Because A -> B violates 2NF, the highest normal form of relation R is 1NF."""
             }
         ],
         "revision_60s": [
@@ -1235,10 +1234,10 @@ Conclusion: Because A -> B violates 2NF, the highest normal form of relation R i
             "title": "Precedence Graph Conflict Serializability Algorithm",
             "steps": [
                 "1. For each transaction Ti in schedule S, create a node labeled Ti.",
-                "2. Identify all conflicting operations on the same data item Q:
+                """2. Identify all conflicting operations on the same data item Q:
   - Ti reads Q and Tj writes Q (Read-Write conflict)
   - Ti writes Q and Tj reads Q (Write-Read conflict)
-  - Ti writes Q and Tj writes Q (Write-Write conflict)",
+  - Ti writes Q and Tj writes Q (Write-Write conflict)""",
                 "3. If Ti's conflicting operation occurs before Tj's operation in the schedule, draw a directed edge Ti → Tj.",
                 "4. Check for cycles: If the Precedence Graph has NO CYCLES, schedule S is Conflict Serializable.",
                 "5. If serializable, topological sort of the graph yields the equivalent serial schedule (e.g. T1 → T2 → T3)."
@@ -1302,24 +1301,24 @@ Conclusion: Because A -> B violates 2NF, the highest normal form of relation R i
             {
                 "marks": "2-Mark Question",
                 "q": "Define the ACID properties of a database transaction.",
-                "a": "ACID stands for:
+                "a": """ACID stands for:
 1. Atomicity: All operations succeed or none do (All-or-Nothing).
 2. Consistency: Database remains in a valid state adhering to all integrity constraints.
 3. Isolation: Concurrent transactions execute independently without interference.
-4. Durability: Committed changes permanently survive subsequent system crashes."
+4. Durability: Committed changes permanently survive subsequent system crashes."""
             },
             {
                 "marks": "5-Mark Question",
                 "q": "Explain the Precedence Graph method for testing Conflict Serializability.",
-                "a": "1. Construct a directed graph G = (V, E) where each node represents a transaction Ti in the schedule.
+                "a": """1. Construct a directed graph G = (V, E) where each node represents a transaction Ti in the schedule.
 2. Add a directed edge Ti → Tj if Ti executes an operation that conflicts with a subsequent operation in Tj on the same data item (Read-Write, Write-Read, or Write-Write).
 3. Test the graph for cycles using Depth First Search (DFS).
-4. If the graph contains no cycles, the schedule is Conflict Serializable, and a topological sort of the graph gives the equivalent serial schedule. If a cycle exists, the schedule is non-serializable."
+4. If the graph contains no cycles, the schedule is Conflict Serializable, and a topological sort of the graph gives the equivalent serial schedule. If a cycle exists, the schedule is non-serializable."""
             },
             {
                 "marks": "10-Mark Question",
                 "q": "Test whether the schedule S: r1(X), r2(Y), w1(X), r1(Y), w2(Y), w1(Y) is conflict serializable. If yes, find equivalent serial schedule.",
-                "a": "Conflicting pairs in S:
+                "a": """Conflicting pairs in S:
 1. On item X: r1(X) before w1(X) (same transaction T1, no edge).
 2. On item Y:
 - r2(Y) before r1(Y) (Read-Read, no conflict).
@@ -1327,7 +1326,7 @@ Conclusion: Because A -> B violates 2NF, the highest normal form of relation R i
 - r1(Y) before w2(Y): T1 reads Y before T2 writes Y → Edge T1 → T2!
 Cycle Analysis:
 We have edge T2 → T1 and edge T1 → T2, forming a DIRECTED CYCLE: T1 ⇆ T2.
-Conclusion: Because the precedence graph contains a cycle between T1 and T2, the schedule S is NOT Conflict Serializable."
+Conclusion: Because the precedence graph contains a cycle between T1 and T2, the schedule S is NOT Conflict Serializable."""
             }
         ],
         "revision_60s": [
@@ -1381,12 +1380,12 @@ Conclusion: Because the precedence graph contains a cycle between T1 and T2, the
             "title": "Deadlock Prevention Schemes (Wait-Die vs Wound-Wait)",
             "steps": [
                 "Assume older transaction T_old has smaller timestamp TS(T_old) < TS(T_young).",
-                "Wait-Die Scheme (Non-preemptive):
+                """Wait-Die Scheme (Non-preemptive):
   - If T_old requests resource held by T_young → T_old is allowed to WAIT.
-  - If T_young requests resource held by T_old → T_young DIES (aborts and restarts).",
-                "Wound-Wait Scheme (Preemptive):
+  - If T_young requests resource held by T_old → T_young DIES (aborts and restarts).""",
+                """Wound-Wait Scheme (Preemptive):
   - If T_old requests resource held by T_young → T_old WOUNDS T_young (preempts and aborts T_young).
-  - If T_young requests resource held by T_old → T_young is allowed to WAIT."
+  - If T_young requests resource held by T_old → T_young is allowed to WAIT."""
             ],
             "diagram": (
                 "Two-Phase Locking (2PL) Phases:\n"
@@ -1451,18 +1450,18 @@ Conclusion: Because the precedence graph contains a cycle between T1 and T2, the
             {
                 "marks": "5-Mark Question",
                 "q": "Explain Two-Phase Locking (2PL) and differentiate between Basic 2PL, Strict 2PL, and Rigorous 2PL.",
-                "a": "Two-Phase Locking (2PL) divides locking into two distinct phases: (1) Growing Phase where locks can only be acquired, and (2) Shrinking Phase where locks can only be released.
+                "a": """Two-Phase Locking (2PL) divides locking into two distinct phases: (1) Growing Phase where locks can only be acquired, and (2) Shrinking Phase where locks can only be released.
 1. Basic 2PL: Locks can be released at any time during shrinking phase. Prone to cascading aborts.
 2. Strict 2PL: All Exclusive (X) locks must be held until transaction commit/abort. Prevents cascading aborts and guarantees strict schedules.
-3. Rigorous 2PL: All locks (both Shared and Exclusive) are held until transaction commit/abort. Guarantees serialization in exact commit order."
+3. Rigorous 2PL: All locks (both Shared and Exclusive) are held until transaction commit/abort. Guarantees serialization in exact commit order."""
             },
             {
                 "marks": "10-Mark Question",
                 "q": "Explain Deadlock detection using Wait-For Graphs and detail the Wait-Die and Wound-Wait deadlock prevention algorithms.",
-                "a": "1. Wait-For Graph (WFG): Directed graph where nodes represent active transactions. A directed edge Ti → Tj exists if Ti is waiting for a lock currently held by Tj. A cycle in the WFG indicates a Deadlock. When detected, the DBMS selects a victim transaction to abort and roll back.
+                "a": """1. Wait-For Graph (WFG): Directed graph where nodes represent active transactions. A directed edge Ti → Tj exists if Ti is waiting for a lock currently held by Tj. A cycle in the WFG indicates a Deadlock. When detected, the DBMS selects a victim transaction to abort and roll back.
 2. Deadlock Prevention using Timestamps (older transaction has smaller timestamp):
 - Wait-Die (Non-preemptive): If an older transaction requests a resource held by a younger transaction, the older is allowed to wait. If a younger transaction requests a resource held by an older, the younger dies (aborts and restarts).
-- Wound-Wait (Preemptive): If an older transaction requests a resource held by a younger transaction, the older 'wounds' (aborts and preempts) the younger. If a younger requests a resource held by an older, the younger waits."
+- Wound-Wait (Preemptive): If an older transaction requests a resource held by a younger transaction, the older 'wounds' (aborts and preempts) the younger. If a younger requests a resource held by an older, the younger waits."""
             }
         ],
         "revision_60s": [
@@ -1579,18 +1578,18 @@ Conclusion: Because the precedence graph contains a cycle between T1 and T2, the
             {
                 "marks": "5-Mark Question",
                 "q": "Explain the Write-Ahead Logging (WAL) protocol and its role in crash recovery.",
-                "a": "The Write-Ahead Logging (WAL) protocol mandates that any update made to a database page in buffer memory must have its corresponding log record written and flushed to non-volatile disk BEFORE the dirty page itself is allowed to be written to disk.
+                "a": """The Write-Ahead Logging (WAL) protocol mandates that any update made to a database page in buffer memory must have its corresponding log record written and flushed to non-volatile disk BEFORE the dirty page itself is allowed to be written to disk.
 This ensures that if a crash occurs mid-execution:
 1. The Redo log can reapply committed changes that were not yet flushed to data files (Durability).
-2. The Undo log can reverse uncommitted modifications that were partially written to disk (Atomicity)."
+2. The Undo log can reverse uncommitted modifications that were partially written to disk (Atomicity)."""
             },
             {
                 "marks": "10-Mark Question",
                 "q": "Explain the ARIES recovery algorithm detailing the Analysis, Redo, and Undo phases.",
-                "a": "ARIES (Algorithms for Recovery and Isolation Exploiting Semantics) handles crash recovery in three sequential phases:
+                "a": """""ARIES (Algorithms for Recovery and Isolation Exploiting Semantics) handles crash recovery in three sequential phases:
 1. Analysis Phase: Scans the log forward from the most recent Checkpoint to determine the state at crash time: identifies all active transactions (the Transaction Table) and dirty pages in memory (the Dirty Page Table).
 2. Redo Phase: 'Repeats history' by scanning forward from the smallest PageLSN in the Dirty Page Table to the crash point, reapplying all logged updates (for both committed and uncommitted transactions) to restore the exact pre-crash state.
-3. Undo Phase: Scans backward from the crash point, rolling back all operations performed by active transactions that never committed before the crash. For each undone operation, a Compensation Log Record (CLR) is written to prevent repeated work if another crash occurs during recovery."
+3. Undo Phase: Scans backward from the crash point, rolling back all operations performed by active transactions that never committed before the crash. For each undone operation, a Compensation Log Record (CLR) is written to prevent repeated work if another crash occurs during recovery."""""
             }
         ],
         "revision_60s": [

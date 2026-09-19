@@ -46,17 +46,19 @@ from starlette.types import ASGIApp, Scope, Receive, Send
 
 fastapi_app = None
 startup_error_type = None
+startup_clean_msg = None
+startup_clean_tb = None
 
 try:
     from app.main import app as fastapi_app
 except Exception as import_exc:
     startup_error_type = type(import_exc).__name__
-    clean_msg = sanitize_log(str(import_exc))
-    clean_tb = sanitize_log(traceback.format_exc())
+    startup_clean_msg = sanitize_log(str(import_exc))
+    startup_clean_tb = sanitize_log(traceback.format_exc())
 
     # Write directly to stderr and flush so Vercel runtime logs capture the exact failure
-    sys.stderr.write(f"\n[CRITICAL STARTUP ERROR] {startup_error_type}: {clean_msg}\n")
-    sys.stderr.write(f"[STARTUP TRACEBACK]\n{clean_tb}\n\n")
+    sys.stderr.write(f"\n[CRITICAL STARTUP ERROR] {startup_error_type}: {startup_clean_msg}\n")
+    sys.stderr.write(f"[STARTUP TRACEBACK]\n{startup_clean_tb}\n\n")
     sys.stderr.flush()
 
     from fastapi import FastAPI
@@ -71,7 +73,7 @@ except Exception as import_exc:
             content={
                 "status": "service_unavailable",
                 "service": "CodeOrbit API Fallback",
-                "detail": f"Backend initialization failed during startup ({startup_error_type}). Please check server logs for details.",
+                "detail": f"Backend initialization failed during startup ({startup_error_type}): {startup_clean_msg}. Please check server logs for details.",
                 "error_type": startup_error_type
             }
         )
