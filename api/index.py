@@ -5,11 +5,32 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BACKEND_DIR = os.path.join(BASE_DIR, "backend")
 
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
-from app.main import app as fastapi_app
 from starlette.types import ASGIApp, Scope, Receive, Send
+
+try:
+    from app.main import app as fastapi_app
+except Exception as import_exc:
+    import logging
+    logging.getLogger("uvicorn.error").critical(f"Critical startup import error in api/index.py: {type(import_exc).__name__}: {import_exc}")
+    from fastapi import FastAPI
+    from fastapi.responses import JSONResponse
+
+    fastapi_app = FastAPI(title="CodeOrbit API Fallback")
+
+    @fastapi_app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"])
+    async def fallback_catchall(path: str):
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "service_unavailable",
+                "detail": "CodeOrbit backend is initializing or encountered a database configuration issue. Please try again shortly."
+            }
+        )
 
 class VercelPathNormalizationMiddleware:
     """

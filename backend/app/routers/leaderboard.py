@@ -11,8 +11,8 @@ router = APIRouter(prefix="/leaderboard", tags=["Leaderboard"])
 
 @router.get("", response_model=LeaderboardResponse)
 def get_leaderboard(
-    timeframe: str = Query("weekly", regex="^(weekly|monthly|all_time)$"),
-    category: str = Query("global", regex="^(global|college|friends)$"),
+    timeframe: str = Query("weekly", pattern="^(weekly|monthly|all_time)$"),
+    category: str = Query("global", pattern="^(global|college|friends)$"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):

@@ -35,29 +35,51 @@ class Settings(BaseSettings):
     ]
 
     def get_database_url(self) -> str:
-        raw_url = self.DATABASE_URL
-        if not raw_url:
-            # Fallback to local sqlite
-            local_db = os.path.join(self.BASE_DIR, "codeorbit.db")
-            raw_url = f"sqlite:///{local_db}"
+        raw_url = (self.DATABASE_URL or os.getenv("DATABASE_URL", "")).strip()
         
-        # Handle Postgres dialect compatibility for SQLAlchemy (Neon, Supabase, Vercel Postgres provide postgres://)
-        if raw_url.startswith("postgres://"):
-            raw_url = raw_url.replace("postgres://", "postgresql://", 1)
-            
-        # Handle Vercel serverless environment with SQLite fallback
-        if raw_url.startswith("sqlite") and os.getenv("VERCEL"):
+        # If PostgreSQL URL provided
+        if raw_url:
+            # Handle Postgres dialect compatibility for SQLAlchemy (Neon, Supabase, Vercel Postgres provide postgres://)
+            if raw_url.startswith("postgres://"):
+                raw_url = raw_url.replace("postgres://", "postgresql://", 1)
+
+            # Auto-detect driver capability if standard postgresql://
+            if raw_url.startswith("postgresql://"):
+                try:
+                    import psycopg2  # noqa: F401
+                except ImportError:
+                    try:
+                        import pg8000  # noqa: F401
+                        raw_url = raw_url.replace("postgresql://", "postgresql+pg8000://", 1)
+                    except ImportError:
+                        pass
+
+            # Ensure sslmode=require for remote cloud Postgres (Neon, Supabase, AWS, etc.) if not already specified
+            if "localhost" not in raw_url and "127.0.0.1" not in raw_url:
+                if "?" not in raw_url:
+                    raw_url += "?sslmode=require"
+                elif "sslmode=" not in raw_url:
+                    raw_url += "&sslmode=require"
+
+            return raw_url
+
+        # Fallback to local SQLite when no DATABASE_URL is set
+        if os.getenv("VERCEL"):
+            # Vercel serverless environment: root filesystem (/var/task) is read-only.
+            # Writable directory is strictly /tmp.
             tmp_db = "/tmp/codeorbit.db"
             src_db = os.path.join(self.BASE_DIR, "codeorbit.db")
-            if not os.path.exists(tmp_db) and os.path.exists(src_db):
+            root_db = os.path.join(os.path.dirname(self.BASE_DIR), "codeorbit.db")
+            candidate = src_db if os.path.exists(src_db) else (root_db if os.path.exists(root_db) else None)
+            if candidate and not os.path.exists(tmp_db):
                 try:
-                    shutil.copyfile(src_db, tmp_db)
+                    shutil.copyfile(candidate, tmp_db)
                 except Exception:
                     pass
-            if os.path.exists(tmp_db):
-                raw_url = f"sqlite:///{tmp_db}"
+            return f"sqlite:///{tmp_db}"
 
-        return raw_url
+        local_db = os.path.join(self.BASE_DIR, "codeorbit.db")
+        return f"sqlite:///{local_db}"
 
     def get_cors_origins(self) -> List[str]:
         origins = [

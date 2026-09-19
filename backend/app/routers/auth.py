@@ -1,7 +1,9 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError, OperationalError, DatabaseError, ProgrammingError
 from datetime import datetime, timezone
-from app.database import get_db
+from app.database import get_db, init_db
 from app.models.user import User, UserPreferences, LearningStreak, XPTransaction
 from app.schemas.auth import (
     UserRegister, UserLogin, TokenResponse, UserResponse,
@@ -11,60 +13,117 @@ from app.auth.security import hash_password, verify_password
 from app.auth.jwt import create_access_token
 from app.auth.deps import get_current_user
 
+logger = logging.getLogger("uvicorn.error")
+
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @router.post("/register", response_model=TokenResponse)
 def register(user_in: UserRegister, db: Session = Depends(get_db)):
     if user_in.password != user_in.confirm_password:
-        raise HTTPException(status_code=400, detail="Passwords do not match.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Passwords do not match.")
 
-    existing_user = db.query(User).filter(User.email == user_in.email).first()
+    email = user_in.email.strip().lower()
+    full_name = user_in.full_name.strip()
+
+    # Query for existing user with table self-healing if needed
+    try:
+        existing_user = db.query(User).filter(User.email == email).first()
+    except ProgrammingError:
+        # Table may not exist yet in a fresh database
+        db.rollback()
+        init_db(force=True)
+        try:
+            existing_user = db.query(User).filter(User.email == email).first()
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Database lookup error after table creation: {type(e).__name__}")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Database service is initializing. Please try again in a few moments."
+            )
+    except (OperationalError, DatabaseError) as e:
+        db.rollback()
+        logger.error(f"Database connectivity error during registration lookup: {type(e).__name__}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database service is temporarily unavailable. Please try again shortly."
+        )
+
     if existing_user:
-        raise HTTPException(status_code=400, detail="A user with this email already exists.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="A user with this email already exists.")
 
-    new_user = User(
-        email=user_in.email,
-        hashed_password=hash_password(user_in.password),
-        full_name=user_in.full_name,
-        college=user_in.college,
-        degree=user_in.degree,
-        branch=user_in.branch,
-        graduation_year=user_in.graduation_year,
-        level=1,
-        xp=0,
-        gems=100,
-        onboarding_completed=False
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    try:
+        new_user = User(
+            email=email,
+            hashed_password=hash_password(user_in.password),
+            full_name=full_name,
+            college=user_in.college.strip() if user_in.college else None,
+            degree=user_in.degree.strip() if user_in.degree else None,
+            branch=user_in.branch.strip() if user_in.branch else None,
+            graduation_year=user_in.graduation_year,
+            level=1,
+            xp=0,
+            gems=100,
+            onboarding_completed=False,
+            is_admin=False
+        )
 
-    # Initialize default streak and preferences
-    streak = LearningStreak(
-        user_id=new_user.id,
-        current_streak=0,
-        longest_streak=0,
-        freeze_count=1,
-        weekly_history=""
-    )
-    prefs = UserPreferences(
-        user_id=new_user.id,
-        programming_level="Intermediate",
-        preferred_subjects="DBMS,DS,OS",
-        daily_target_minutes=30,
-        career_goal="Placement preparation"
-    )
-    db.add(streak)
-    db.add(prefs)
-    db.commit()
-    db.refresh(new_user)
+        # Attach default streak and preferences directly via ORM relationship
+        new_user.streak = LearningStreak(
+            current_streak=0,
+            longest_streak=0,
+            freeze_count=1,
+            weekly_history=""
+        )
+        new_user.preferences = UserPreferences(
+            programming_level="Intermediate",
+            preferred_subjects="DBMS,DS,OS",
+            daily_target_minutes=30,
+            career_goal="Placement preparation"
+        )
+
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+
+    except IntegrityError as e:
+        db.rollback()
+        logger.warning(f"Registration integrity conflict for email '{email}'")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A user with this email already exists."
+        )
+    except (OperationalError, DatabaseError) as e:
+        db.rollback()
+        logger.error(f"Database error during user persistence: {type(e).__name__}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database service is temporarily unavailable. Please try again shortly."
+        )
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Unexpected error during user registration: {type(e).__name__}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Registration could not be completed. Please try again."
+        )
 
     token = create_access_token(data={"sub": str(new_user.id)})
     return {"access_token": token, "token_type": "bearer", "user": new_user}
 
 @router.post("/login", response_model=TokenResponse)
 def login(login_in: UserLogin, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == login_in.email).first()
+    email = login_in.email.strip().lower()
+    try:
+        user = db.query(User).filter(User.email == email).first()
+    except (OperationalError, DatabaseError) as e:
+        db.rollback()
+        logger.error(f"Database error during login: {type(e).__name__}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database service is temporarily unavailable. Please try again shortly."
+        )
+
     if not user or not verify_password(login_in.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

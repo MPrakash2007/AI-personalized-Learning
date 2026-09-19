@@ -1,11 +1,15 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Optional, Dict, Any, List
+import logging
 
 from app.config import settings
-from app.database import engine, Base, get_db, SessionLocal
+from app.database import engine, Base, get_db, SessionLocal, init_db, check_db_connection
 import app.models  # Ensures all SQLAlchemy models are registered
+
+logger = logging.getLogger("uvicorn.error")
 
 # Import routers
 from app.routers.auth import router as auth_router
@@ -31,13 +35,23 @@ from app.routers.practice import router as practice_router
 from app.models.learning import Subject, Topic, Question
 from app.models.career import CareerQuestion
 
-# Automatically initialize database schema
-Base.metadata.create_all(bind=engine)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Serverless-safe application lifespan.
+    Initializes database schema cleanly without crashing module import or cold starts.
+    """
+    try:
+        init_db()
+    except Exception as e:
+        logger.warning(f"Lifespan DB initialization notice: {e}")
+    yield
 
 app = FastAPI(
     title="CodeOrbit API",
     description="Backend REST API for CodeOrbit - AI Personalized Learning Platform for Engineering Students",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # CORS configuration
@@ -71,18 +85,6 @@ app.include_router(notes_router, prefix=settings.API_V1_STR)
 app.include_router(career_router, prefix=settings.API_V1_STR)
 app.include_router(admin_router, prefix=settings.API_V1_STR)
 
-@app.on_event("startup")
-def on_startup():
-    """Auto-seeds fresh database (e.g. newly provisioned Postgres on Vercel) if empty."""
-    try:
-        db = SessionLocal()
-        if db.query(Subject).count() == 0:
-            from seed import seed_database
-            seed_database(reset=False)
-        db.close()
-    except Exception as e:
-        print(f"Startup check notice: {e}")
-
 @app.get("/")
 @app.get("/api")
 @app.get("/api/")
@@ -93,6 +95,19 @@ def root():
         "version": "1.0.0",
         "status": "online",
         "docs": "/docs"
+    }
+
+@app.get("/health")
+@app.get("/api/health")
+def health_check():
+    """Safe diagnostic endpoint reporting health status without exposing sensitive credentials."""
+    db_check = check_db_connection()
+    is_healthy = db_check.get("status") == "connected"
+    return {
+        "status": "healthy" if is_healthy else "degraded",
+        "service": "CodeOrbit API",
+        "database": db_check.get("status"),
+        "dialect": db_check.get("dialect")
     }
 
 @app.get(f"{settings.API_V1_STR}/search")
