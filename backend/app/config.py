@@ -57,6 +57,12 @@ class Settings(BaseSettings):
         local_db = os.path.join(self.BASE_DIR, "codeorbit.db")
         return f"sqlite:///{local_db}"
 
+    def get_jwt_secret(self) -> str:
+        secret = (self.JWT_SECRET or os.getenv("JWT_SECRET") or "").strip()
+        if not secret:
+            return "codeorbit_super_secret_jwt_key_2026_engineering_students"
+        return secret
+
     def get_cors_origins(self) -> List[str]:
         origins = [
             "http://localhost:5173",

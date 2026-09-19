@@ -12,13 +12,15 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
         expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET, algorithm=settings.ALGORITHM)
+    secret = settings.get_jwt_secret()
+    encoded_jwt = jwt.encode(to_encode, secret, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
 def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
     """Decode and validate a JWT access token."""
     try:
-        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.ALGORITHM])
+        secret = settings.get_jwt_secret()
+        payload = jwt.decode(token, secret, algorithms=[settings.ALGORITHM])
         return payload
     except jwt.PyJWTError:
         return None
