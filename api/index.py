@@ -1,22 +1,64 @@
 import os
 import sys
 
-# Add the backend directory to Python sys.path so app and curriculum can be imported cleanly
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BACKEND_DIR = os.path.join(BASE_DIR, "backend")
+import re
+import traceback
 
-if BASE_DIR not in sys.path:
-    sys.path.insert(0, BASE_DIR)
-if BACKEND_DIR not in sys.path:
-    sys.path.insert(0, BACKEND_DIR)
+def sanitize_log(text: str) -> str:
+    """
+    Sanitize sensitive information from logs (passwords, connection strings, JWT, API keys).
+    Never leaks credentials to stdout/stderr.
+    """
+    if not text:
+        return ""
+    # Redact credentials in database URLs (postgres://, postgresql://, etc.)
+    sanitized = re.sub(
+        r'(postgres(?:ql)?(?:\+[a-zA-Z0-9_-]+)?://)([^:@/\s]+):([^@/\s]+)@',
+        r'\1\2:***@',
+        text
+    )
+    # Redact key-value pairs with sensitive keys
+    sanitized = re.sub(
+        r'(?i)(password|secret|api[_-]?key|jwt|token)\s*([=:])\s*([^\s,;&"\']+)',
+        r'\1\2***',
+        sanitized
+    )
+    return sanitized
+
+# Resolve paths for local, Vercel, and AWS Lambda serverless execution
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(CURRENT_DIR)
+CANDIDATE_PATHS = [
+    os.path.join(BASE_DIR, "backend"),
+    BASE_DIR,
+    CURRENT_DIR,
+    os.path.join(os.getcwd(), "backend"),
+    os.getcwd(),
+    "/var/task/backend",
+    "/var/task"
+]
+
+for p in CANDIDATE_PATHS:
+    if p and os.path.exists(p) and p not in sys.path:
+        sys.path.insert(0, p)
 
 from starlette.types import ASGIApp, Scope, Receive, Send
+
+fastapi_app = None
+startup_error_type = None
 
 try:
     from app.main import app as fastapi_app
 except Exception as import_exc:
-    import logging
-    logging.getLogger("uvicorn.error").critical(f"Critical startup import error in api/index.py: {type(import_exc).__name__}: {import_exc}")
+    startup_error_type = type(import_exc).__name__
+    clean_msg = sanitize_log(str(import_exc))
+    clean_tb = sanitize_log(traceback.format_exc())
+
+    # Write directly to stderr and flush so Vercel runtime logs capture the exact failure
+    sys.stderr.write(f"\n[CRITICAL STARTUP ERROR] {startup_error_type}: {clean_msg}\n")
+    sys.stderr.write(f"[STARTUP TRACEBACK]\n{clean_tb}\n\n")
+    sys.stderr.flush()
+
     from fastapi import FastAPI
     from fastapi.responses import JSONResponse
 
@@ -28,7 +70,9 @@ except Exception as import_exc:
             status_code=503,
             content={
                 "status": "service_unavailable",
-                "detail": "CodeOrbit backend is initializing or encountered a database configuration issue. Please try again shortly."
+                "service": "CodeOrbit API Fallback",
+                "detail": f"Backend initialization failed during startup ({startup_error_type}). Please check server logs for details.",
+                "error_type": startup_error_type
             }
         )
 

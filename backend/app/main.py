@@ -102,13 +102,16 @@ def root():
 def health_check():
     """Safe diagnostic endpoint reporting health status without exposing sensitive credentials."""
     db_check = check_db_connection()
-    is_healthy = db_check.get("status") == "connected"
-    return {
+    is_healthy = db_check.get("database") == "connected" or db_check.get("status") == "connected"
+    res = {
         "status": "healthy" if is_healthy else "degraded",
         "service": "CodeOrbit API",
-        "database": db_check.get("status"),
-        "dialect": db_check.get("dialect")
+        "database": "connected" if is_healthy else "disconnected",
+        "dialect": db_check.get("dialect", "unknown")
     }
+    if not is_healthy and "detail" in db_check:
+        res["detail"] = db_check["detail"]
+    return res
 
 @app.get(f"{settings.API_V1_STR}/search")
 def global_search(q: str = Query(..., min_length=2), db: Session = Depends(get_db)):
