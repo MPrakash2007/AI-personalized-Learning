@@ -85,6 +85,7 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
+        user_response = UserResponse.model_validate(new_user)
 
     except IntegrityError as e:
         db.rollback()
@@ -109,7 +110,7 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
         )
 
     token = create_access_token(data={"sub": str(new_user.id)})
-    return {"access_token": token, "token_type": "bearer", "user": new_user}
+    return {"access_token": token, "token_type": "bearer", "user": user_response}
 
 @router.post("/login", response_model=TokenResponse)
 def login(login_in: UserLogin, db: Session = Depends(get_db)):
@@ -130,12 +131,13 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
             detail="Invalid email or password."
         )
 
+    user_response = UserResponse.model_validate(user)
     token = create_access_token(data={"sub": str(user.id)})
-    return {"access_token": token, "token_type": "bearer", "user": user}
+    return {"access_token": token, "token_type": "bearer", "user": user_response}
 
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user)):
-    return current_user
+    return UserResponse.model_validate(current_user)
 
 @router.post("/onboarding", response_model=UserResponse)
 def complete_onboarding(

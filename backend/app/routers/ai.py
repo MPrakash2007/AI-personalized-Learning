@@ -103,6 +103,7 @@ def chat_with_tutor(
     return {
         "session_id": session.id,
         "message": ai_reply_text,
+        "reply": ai_reply_text,
         "quick_check": quick_check_data,
         "sources": sources
     }

@@ -24,8 +24,8 @@ class User(Base):
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
-    preferences = relationship("UserPreferences", back_populates="user", uselist=False, cascade="all, delete-orphan")
-    streak = relationship("LearningStreak", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    preferences = relationship("UserPreferences", back_populates="user", uselist=False, lazy="joined", cascade="all, delete-orphan")
+    streak = relationship("LearningStreak", back_populates="user", uselist=False, lazy="joined", cascade="all, delete-orphan")
     xp_transactions = relationship("XPTransaction", back_populates="user", cascade="all, delete-orphan")
     topic_progress = relationship("TopicProgress", back_populates="user", cascade="all, delete-orphan")
     question_attempts = relationship("UserQuestionAttempt", back_populates="user", cascade="all, delete-orphan")

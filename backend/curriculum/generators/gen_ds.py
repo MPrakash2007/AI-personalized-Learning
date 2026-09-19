@@ -1401,7 +1401,7 @@ DS_TOPICS = {
             {
                 "marks": "5-Mark Question",
                 "q": "Explain the concept of Binary Search on Answer with a classic example.",
-                "a": "1. Concept: If an optimization problem asks for the minimum or maximum value $X$ satisfying a condition $P(X)$, and the predicate $P(X)$ is monotonic (i.e. if $P(k)$ is true, then $P(k+1)$ is also true), we can binary search the answer range $[low, high]$.\n2. Monotonicity: Check function `isValid(mid)` runs in $O(n)$ time.\n3. Example (Painter's Partition / Book Allocation): To find the minimum possible maximum workload assigned to $K$ workers, we binary search across workload range $[\max(arr), \sum arr]$.\n4. Overall Complexity: $O(n \\log(\\sum arr))$. Transforms complex optimization into simple binary search."
+                "a": "1. Concept: If an optimization problem asks for the minimum or maximum value $X$ satisfying a condition $P(X)$, and the predicate $P(X)$ is monotonic (i.e. if $P(k)$ is true, then $P(k+1)$ is also true), we can binary search the answer range $[low, high]$.\n2. Monotonicity: Check function `isValid(mid)` runs in $O(n)$ time.\n3. Example (Painter's Partition / Book Allocation): To find the minimum possible maximum workload assigned to $K$ workers, we binary search across workload range $[\\max(arr), \\sum arr]$.\n4. Overall Complexity: $O(n \\log(\\sum arr))$. Transforms complex optimization into simple binary search."
             },
             {
                 "marks": "10-Mark Question",

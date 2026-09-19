@@ -1,6 +1,7 @@
 import os
 import shutil
 from typing import List, Union
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -80,7 +81,6 @@ class Settings(BaseSettings):
                     origins.append(clean)
         return origins
 
-    class Config:
-        case_sensitive = True
+    model_config = ConfigDict(case_sensitive=True, extra="ignore")
 
 settings = Settings()
