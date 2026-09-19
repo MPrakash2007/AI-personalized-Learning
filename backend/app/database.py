@@ -155,7 +155,7 @@ class SafeSessionFactory:
                 detail="CodeOrbit database service is not configured. Please ensure DATABASE_URL is set in Vercel environment variables."
             )
         if self._underlying is None or (self._custom_bind and self._underlying.kw.get("bind") != self._custom_bind):
-            self._underlying = sessionmaker(autocommit=False, autoflush=False, bind=eng)
+            self._underlying = sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=eng)
         return self._underlying(**kwargs)
 
     def configure(self, **kwargs):
@@ -164,7 +164,7 @@ class SafeSessionFactory:
         if self._underlying:
             self._underlying.configure(**kwargs)
         else:
-            self._underlying = sessionmaker(autocommit=False, autoflush=False, **kwargs)
+            self._underlying = sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, **kwargs)
 
     @property
     def bind(self):
@@ -244,6 +244,7 @@ def check_db_connection() -> dict:
     try:
         with eng.connect() as conn:
             conn.execute(text("SELECT 1"))
+        init_db()
         dialect_name = eng.dialect.name
         return {
             "database": "connected",
@@ -261,6 +262,9 @@ def check_db_connection() -> dict:
 
 def get_db():
     """FastAPI database session dependency."""
+    global _schema_initialized
+    if not _schema_initialized:
+        init_db()
     db = SessionLocal()
     try:
         yield db

@@ -1,12 +1,16 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, Query
+import logging
+import sys
+import traceback
+from typing import Optional, Dict, Any, List
+
+from fastapi import FastAPI, Depends, Query, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from typing import Optional, Dict, Any, List
-import logging
 
 from app.config import settings
-from app.database import engine, Base, get_db, SessionLocal, init_db, check_db_connection
+from app.database import engine, Base, get_db, SessionLocal, init_db, check_db_connection, sanitize_db_log
 import app.models  # Ensures all SQLAlchemy models are registered
 
 logger = logging.getLogger("uvicorn.error")
@@ -53,6 +57,24 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    exc_type = type(exc).__name__
+    clean_msg = sanitize_db_log(str(exc))
+    clean_tb = sanitize_db_log(traceback.format_exc())
+    sys.stderr.write(f"\n[UNHANDLED EXCEPTION on {request.method} {request.url.path}] {exc_type}: {clean_msg}\n")
+    sys.stderr.write(f"{clean_tb}\n\n")
+    sys.stderr.flush()
+    return JSONResponse(
+        status_code=500,
+        content={
+            "status": "error",
+            "error_type": exc_type,
+            "detail": f"Internal error during request ({exc_type}): {clean_msg}",
+            "path": request.url.path
+        }
+    )
 
 # CORS configuration
 app.add_middleware(
