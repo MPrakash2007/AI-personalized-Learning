@@ -12,6 +12,9 @@ router = APIRouter(prefix="/subjects", tags=["Subjects"])
 @router.get("", response_model=List[SubjectResponse])
 def get_all_subjects(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     subjects = db.query(Subject).order_by(Subject.order.asc()).all()
+    if not subjects:
+        from app.services.curriculum_seed import ensure_subjects_and_topics
+        subjects = ensure_subjects_and_topics(db)
     results = []
 
     for s in subjects:
@@ -52,6 +55,14 @@ def get_subject_detail(slug_or_id: str, db: Session = Depends(get_db), current_u
         subject = db.query(Subject).filter(Subject.id == int(slug_or_id)).first()
     else:
         subject = db.query(Subject).filter(Subject.slug == slug_or_id.lower()).first()
+
+    if not subject:
+        from app.services.curriculum_seed import ensure_subjects_and_topics
+        ensure_subjects_and_topics(db)
+        if slug_or_id.isdigit():
+            subject = db.query(Subject).filter(Subject.id == int(slug_or_id)).first()
+        else:
+            subject = db.query(Subject).filter(Subject.slug == slug_or_id.lower()).first()
 
     if not subject:
         raise HTTPException(status_code=404, detail="Subject not found")

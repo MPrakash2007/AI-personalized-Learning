@@ -67,7 +67,18 @@ def get_topic_detail(slug_or_id: str, db: Session = Depends(get_db), current_use
         topic = db.query(Topic).filter(Topic.slug == slug_or_id.lower()).first()
 
     if not topic:
+        from app.services.curriculum_seed import ensure_subjects_and_topics
+        ensure_subjects_and_topics(db)
+        if slug_or_id.isdigit():
+            topic = db.query(Topic).filter(Topic.id == int(slug_or_id)).first()
+        else:
+            topic = db.query(Topic).filter(Topic.slug == slug_or_id.lower()).first()
+
+    if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
+
+    from app.services.curriculum_seed import ensure_topic_content_and_questions
+    ensure_topic_content_and_questions(db, topic)
 
     is_accessible, is_completed, status = _check_topic_accessibility(topic, current_user.id, db)
 
@@ -229,7 +240,14 @@ def get_topic_learn_questions(
     ).all()
 
     if not questions:
-        questions = db.query(Question).filter(Question.topic_id == topic.id).all()
+        from app.services.curriculum_seed import ensure_topic_content_and_questions
+        ensure_topic_content_and_questions(db, topic)
+        questions = db.query(Question).filter(
+            Question.topic_id == topic.id,
+            Question.question_context == "LEARN"
+        ).all()
+        if not questions:
+            questions = db.query(Question).filter(Question.topic_id == topic.id).all()
 
     # Shuffle for randomized experience
     q_list = list(questions)
