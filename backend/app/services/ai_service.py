@@ -1,6 +1,7 @@
+from __future__ import annotations
 import json
 import logging
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, List
 import requests
 from app.config import settings
 

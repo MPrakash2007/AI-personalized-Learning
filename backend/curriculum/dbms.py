@@ -497,7 +497,7 @@ DBMS_CURRICULUM: Dict[str, Dict[str, Any]] = {
         },
         "formulas": [
             {"name": "Candidate Key Invariant", "formula": "If K is Candidate Key, then K+ = R and ∀ A ∈ K, (K - {A})+ ≠ R", "explanation": "Closure of K must cover all attributes, and no proper subset of K can cover all attributes."},
-            {"name": "Alternate Key Set", "formula": "Alternate_Keys = Candidate_Keys \ {Primary_Key}", "explanation": "Alternate keys are simply unused candidate keys."}
+            {"name": "Alternate Key Set", "formula": r"Alternate_Keys = Candidate_Keys \ {Primary_Key}", "explanation": "Alternate keys are simply unused candidate keys."}
         ],
         "exam_tip": "Remember: Every Candidate Key is a Superkey, but every Superkey is NOT a Candidate Key. A Candidate Key is strictly a MINIMAL Superkey.",
         "common_confusion": {
@@ -1388,17 +1388,17 @@ Conclusion: Because the precedence graph contains a cycle between T1 and T2, the
   - If T_young requests resource held by T_old → T_young is allowed to WAIT."""
             ],
             "diagram": (
-                "Two-Phase Locking (2PL) Phases:\n"
-                "Lock Count\n"
-                "    ▲           [Lock Point]\n"
-                "    │              /\ \n"
-                "    │             /  \ \n"
-                "    │  GROWING   /    \   SHRINKING\n"
-                "    │   PHASE   /      \    PHASE\n"
-                "    │(Acquires)/        \(Releases)\n"
-                "    │         /          \ \n"
-                "    └────────┴────────────┴──────► Time\n"
-                "       Start            Commit"
+                r"Two-Phase Locking (2PL) Phases:" + "\n"
+                r"Lock Count" + "\n"
+                r"    ▲           [Lock Point]" + "\n"
+                r"    │              /\ " + "\n"
+                r"    │             /  \ " + "\n"
+                r"    │  GROWING   /    \   SHRINKING" + "\n"
+                r"    │   PHASE   /      \    PHASE" + "\n"
+                r"    │(Acquires)/        \(Releases)" + "\n"
+                r"    │         /          \ " + "\n"
+                r"    └────────┴────────────┴──────► Time" + "\n"
+                r"       Start            Commit"
             )
         },
         "example": {
@@ -1522,9 +1522,9 @@ Conclusion: Because the precedence graph contains a cycle between T1 and T2, the
             "diagram": (
                 "B+ Tree Index Structure:\n"
                 "             [ 50 | 100 ]            ← Root Node\n"
-                "            /     │      \\n"
+                "            /     │      \\\\ \n"
                 "      [ 20 | 35 ] [ 70 ] [ 120 | 150 ] ← Internal Routing Nodes\n"
-                "      /    │   \   ...     ...\n"
+                "      /    │   \\   ...     ...\n"
                 "   [Leaves store all data pointers & linked list: L1 <-> L2 <-> L3 <-> L4]"
             )
         },
