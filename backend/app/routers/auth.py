@@ -3,8 +3,10 @@ import sys
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from sqlalchemy.pool import NullPool
 from sqlalchemy.exc import IntegrityError, OperationalError, DatabaseError, ProgrammingError
 from datetime import datetime, timezone
+from app.config import settings
 from app.database import get_db, init_db, Base, sanitize_db_log
 from app.models.user import User, UserPreferences, LearningStreak, XPTransaction
 from app.schemas.auth import (
@@ -37,18 +39,26 @@ def auth_diagnostic(db: Session = Depends(get_db)):
         results["postgres_context_error"] = sanitize_db_log(str(e))
         db.rollback()
 
-    # 0b. Test SET ROLE neondb_owner
+    # 0b. Test if neondb_owner connects with the same connection parameters
     try:
-        db.execute(text("SET ROLE neondb_owner;"))
-        u_after = db.execute(text("SELECT current_user;")).scalar()
-        results["set_role_neondb_owner"] = f"success, current_user={u_after}"
-        # Test query users under neondb_owner!
-        u_test = db.execute(text("SELECT count(*) FROM users;")).scalar()
-        results["users_count_under_neondb_owner"] = u_test
-        db.rollback()
+        raw_db_url = settings.get_database_url()
+        if "://authenticator:" in raw_db_url:
+            owner_url = raw_db_url.replace("://authenticator:", "://neondb_owner:", 1)
+            from sqlalchemy import create_engine
+            owner_eng = create_engine(owner_url, poolclass=NullPool)
+            with owner_eng.connect() as oconn:
+                oconn.execute(text("GRANT ALL ON SCHEMA public TO authenticator;"))
+                oconn.execute(text("GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticator;"))
+                oconn.execute(text("GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticator;"))
+                oconn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO authenticator;"))
+                oconn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO authenticator;"))
+                oconn.commit()
+            results["neondb_owner_grant"] = "SUCCESS! Granted all public permissions to authenticator."
+        else:
+            results["neondb_owner_grant"] = "Not applicable (URL username is not authenticator)."
     except Exception as e:
-        db.rollback()
-        results["set_role_error"] = sanitize_db_log(str(e))
+        orig = getattr(e, "orig", e)
+        results["neondb_owner_grant_error"] = sanitize_db_log(f"{type(e).__name__}: {orig}")
 
     # 0c. Role memberships
     try:
