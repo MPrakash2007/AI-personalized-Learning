@@ -39,26 +39,13 @@ def auth_diagnostic(db: Session = Depends(get_db)):
         results["postgres_context_error"] = sanitize_db_log(str(e))
         db.rollback()
 
-    # 0b. Test if neondb_owner connects with the same connection parameters
+    # 0b. What tables CAN authenticator/authenticated/PUBLIC access?
     try:
-        raw_db_url = settings.get_database_url()
-        if "://authenticator:" in raw_db_url:
-            owner_url = raw_db_url.replace("://authenticator:", "://neondb_owner:", 1)
-            from sqlalchemy import create_engine
-            owner_eng = create_engine(owner_url, poolclass=NullPool)
-            with owner_eng.connect() as oconn:
-                oconn.execute(text("GRANT ALL ON SCHEMA public TO authenticator;"))
-                oconn.execute(text("GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticator;"))
-                oconn.execute(text("GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticator;"))
-                oconn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO authenticator;"))
-                oconn.execute(text("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO authenticator;"))
-                oconn.commit()
-            results["neondb_owner_grant"] = "SUCCESS! Granted all public permissions to authenticator."
-        else:
-            results["neondb_owner_grant"] = "Not applicable (URL username is not authenticator)."
+        grants = db.execute(text("SELECT grantee, table_schema, table_name, privilege_type FROM information_schema.role_table_grants WHERE grantee IN ('authenticator', 'authenticated', 'anonymous', 'PUBLIC');")).fetchall()
+        results["grants_for_current_role"] = [{"grantee": r[0], "schema": r[1], "table": r[2], "privilege": r[3]} for r in grants]
     except Exception as e:
-        orig = getattr(e, "orig", e)
-        results["neondb_owner_grant_error"] = sanitize_db_log(f"{type(e).__name__}: {orig}")
+        db.rollback()
+        results["grants_error"] = sanitize_db_log(str(e))
 
     # 0c. Role memberships
     try:
@@ -92,18 +79,6 @@ def auth_diagnostic(db: Session = Depends(get_db)):
         results["users_grants_error"] = sanitize_db_log(str(e))
         db.rollback()
 
-    # 4. Check if we can grant permissions on public schema / tables to current user
-    try:
-        curr_u = results.get("postgres_context", {}).get("current_user")
-        if curr_u:
-            db.execute(text(f'GRANT ALL ON SCHEMA public TO "{curr_u}";'))
-            db.execute(text(f'GRANT ALL ON ALL TABLES IN SCHEMA public TO "{curr_u}";'))
-            db.execute(text(f'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{curr_u}";'))
-            db.commit()
-            results["grant_attempt"] = "success"
-    except Exception as e:
-        db.rollback()
-        results["grant_attempt_error"] = sanitize_db_log(str(e))
 
     # 5. Existing columns of users
     try:

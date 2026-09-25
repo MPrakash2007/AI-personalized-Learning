@@ -217,26 +217,41 @@ def init_db(force: bool = False) -> bool:
             return False
         Base.metadata.create_all(bind=eng)
         
-        # Safe non-destructive schema upgrade for existing tables (Postgres & SQLite)
+        # Safe, non-destructive schema validation for existing tables (Postgres & SQLite)
+        # Avoids executing redundant ALTER TABLE or DDL that causes InsufficientPrivilege in serverless cold starts
         try:
             with eng.connect() as conn:
                 dialect = eng.dialect.name
                 if "postgres" in dialect:
-                    conn.execute(text("ALTER TABLE chat_sessions ADD COLUMN IF NOT EXISTS subject VARCHAR(100);"))
-                    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_chat_sessions_user_id ON chat_sessions(user_id);"))
-                    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_chat_sessions_updated_at ON chat_sessions(updated_at);"))
-                    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_chat_messages_session_id ON chat_messages(session_id);"))
-                    conn.execute(text("CREATE INDEX IF NOT EXISTS ix_chat_messages_created_at ON chat_messages(created_at);"))
-                    conn.commit()
+                    # Check if column exists first to avoid unnecessary ALTER TABLE
+                    has_subject = False
+                    try:
+                        has_subject = bool(conn.execute(text(
+                            "SELECT 1 FROM information_schema.columns "
+                            "WHERE table_schema = 'public' AND table_name = 'chat_sessions' AND column_name = 'subject';"
+                        )).scalar())
+                    except Exception:
+                        conn.rollback()
+
+                    if not has_subject:
+                        try:
+                            conn.execute(text("ALTER TABLE chat_sessions ADD COLUMN IF NOT EXISTS subject VARCHAR(100);"))
+                            conn.commit()
+                        except Exception as e:
+                            conn.rollback()
+                            logger.info(f"Optional subject column addition skipped: {type(e).__name__}")
                 elif "sqlite" in dialect:
-                    res = conn.execute(text("PRAGMA table_info(chat_sessions);")).fetchall()
-                    cols = [r[1] for r in res]
-                    if cols and "subject" not in cols:
-                        conn.execute(text("ALTER TABLE chat_sessions ADD COLUMN subject VARCHAR(100);"))
-                        conn.commit()
+                    try:
+                        res = conn.execute(text("PRAGMA table_info(chat_sessions);")).fetchall()
+                        cols = [r[1] for r in res]
+                        if cols and "subject" not in cols:
+                            conn.execute(text("ALTER TABLE chat_sessions ADD COLUMN subject VARCHAR(100);"))
+                            conn.commit()
+                    except Exception:
+                        conn.rollback()
         except Exception as migration_err:
             clean_mig = sanitize_db_log(str(migration_err))
-            logger.warning(f"Schema upgrade notice: {clean_mig}")
+            logger.info(f"Schema upgrade check notice: {clean_mig}")
 
         _schema_initialized = True
         logger.info("Database schema successfully synchronized.")
