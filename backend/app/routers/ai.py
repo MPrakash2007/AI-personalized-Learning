@@ -160,36 +160,23 @@ def chat_with_tutor(
     except Exception:
         pass
 
-    # Optional retrieval grounding check for references and quick checks
+    # Optional retrieval grounding check for genuine references and quick checks
     retrieval_data = search_educational_knowledge(db, clean_msg, subject_slug=session.subject)
     quick_check_data = retrieval_data.get("quick_check") if retrieval_data else None
     sources_data = retrieval_data.get("sources", []) if retrieval_data else []
 
-    if not quick_check_data:
-        quick_check_data = {
-            "question": f"In computer science systems, what core design principle ensures correctness when evaluating {clean_msg[:40]}?",
-            "options": [
-                "Invariant validation & modular abstraction",
-                "Unbounded global state mutation",
-                "Tight component coupling",
-                "Suppressing boundary exception checks"
-            ],
-            "correct_answer": "Invariant validation & modular abstraction",
-            "explanation": "Systems engineering mandates strict modular abstraction and invariant preservation across state transitions."
-        }
+    # Determine topic name from request or retrieved curriculum topics
+    topic_name = getattr(req, "topic", None)
+    if not topic_name and retrieval_data and retrieval_data.get("matching_topics"):
+        topic_name = retrieval_data["matching_topics"][0]["title"]
 
-    if not sources_data:
-        sources_data = [
-            {"source_name": "GeeksforGeeks", "name": "GeeksforGeeks", "source_url": "https://www.geeksforgeeks.org/computer-science-projects/", "url": "https://www.geeksforgeeks.org/computer-science-projects/", "title": "Computer Science Knowledge Base"},
-            {"source_name": "TutorialsPoint", "name": "TutorialsPoint", "source_url": "https://www.tutorialspoint.com/computer_science_tutorials.htm", "url": "https://www.tutorialspoint.com/computer_science_tutorials.htm", "title": "TutorialsPoint Engineering Reference"}
-        ]
-
-    # Query OpenAI Tutor Service
+    # Query OpenAI Tutor Service with full academic context
     tutor_service = get_ai_tutor_service()
     answer_text, suggested_followups, model_used = tutor_service.generate_response(
         message=clean_msg,
         conversation_history=history_payload,
         subject=session.subject or subject_name,
+        topic=topic_name,
         action=req.action,
         marks=req.marks,
         student_context=student_ctx,

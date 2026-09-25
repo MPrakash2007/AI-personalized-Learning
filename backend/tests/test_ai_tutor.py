@@ -303,3 +303,242 @@ def test_ai_configuration_matrix(monkeypatch):
     assert "sk-proj" not in str(h_data)
     assert "OPENAI_API_KEY" not in str(h_data)
 
+
+def test_ai_tutor_dbms_normalization_academic_content(auth_tokens):
+    """
+    DBMS normalization question must provide DBMS-related academic content.
+    Must NOT contain solveConcept, process(inputData), System Invariant,
+    or generic placeholder JavaScript.
+    """
+    headers = auth_tokens["user1"]
+    academic_answer = (
+        "### 📘 Normalization in DBMS\n\n"
+        "Normalization is a systematic database design technique used to organize relations "
+        "to reduce data redundancy and eliminate insertion, update, and deletion anomalies.\n\n"
+        "#### Key Normal Forms:\n"
+        "- **1NF**: Atomic values, no repeating groups.\n"
+        "- **2NF**: In 1NF and no partial dependencies on candidate keys.\n"
+        "- **3NF**: In 2NF and no transitive dependencies.\n"
+        "- **BCNF**: For every functional dependency X -> Y, X must be a superkey.\n\n"
+        "#### Example Relation Decomposition:\n"
+        "Given `Student(roll_no, name, dept_id, dept_name)`, decompose into `Student(roll_no, name, dept_id)` "
+        "and `Department(dept_id, dept_name)`.\n\n"
+        "### 💡 Suggested Next Questions\n"
+        "- Explain 3NF vs BCNF with an example.\n"
+        "- What is a lossless join decomposition?\n"
+        "- What are insertion, update, and deletion anomalies?"
+    )
+
+    with patch("app.services.ai_tutor.OpenAITutorService.is_configured", return_value=True):
+        with patch("app.services.ai_tutor.OpenAITutorService._get_client") as mock_get_client:
+            mock_client = MagicMock()
+            mock_choice = MagicMock()
+            mock_choice.message.content = academic_answer
+            mock_client.chat.completions.create.return_value = MagicMock(choices=[mock_choice])
+            mock_get_client.return_value = mock_client
+
+            res = client.post("/api/ai-tutor/chat", json={
+                "message": "Explain normalization in DBMS.",
+                "subject": "DBMS"
+            }, headers=headers)
+
+            assert res.status_code == 200
+            data = res.json()
+            ans = data["answer"]
+            assert "1NF" in ans
+            assert "anomalies" in ans.lower()
+            assert "solveConcept" not in ans
+            assert "process(inputData)" not in ans
+            assert "System Invariant" not in ans
+            assert "Algorithmic Flow" not in ans
+            assert "Trade-off Analysis" not in ans
+
+
+def test_ai_tutor_ml_naive_bayes_academic_content(auth_tokens):
+    """
+    Naive Bayes question must provide ML-specific academic content (Bayes theorem,
+    conditional independence, prior, likelihood, classification).
+    """
+    headers = auth_tokens["user1"]
+    academic_answer = (
+        "### 📘 Naive Bayes Classifier\n\n"
+        "Naive Bayes is a supervised probabilistic classification algorithm based on Bayes' Theorem.\n\n"
+        "#### Bayes' Theorem Formula:\n"
+        "$$P(C|X) = \\frac{P(X|C)P(C)}{P(X)}$$\n\n"
+        "#### Core Independence Assumption:\n"
+        "It is called 'Naive' because it assumes all features are conditionally independent given the class label.\n\n"
+        "### 💡 Suggested Next Questions\n"
+        "- What is Laplace smoothing in Naive Bayes?\n"
+        "- What are the differences between Gaussian, Multinomial, and Bernoulli Naive Bayes?\n"
+        "- When does the conditional independence assumption fail?"
+    )
+
+    with patch("app.services.ai_tutor.OpenAITutorService.is_configured", return_value=True):
+        with patch("app.services.ai_tutor.OpenAITutorService._get_client") as mock_get_client:
+            mock_client = MagicMock()
+            mock_choice = MagicMock()
+            mock_choice.message.content = academic_answer
+            mock_client.chat.completions.create.return_value = MagicMock(choices=[mock_choice])
+            mock_get_client.return_value = mock_client
+
+            res = client.post("/api/ai-tutor/chat", json={
+                "message": "Explain Naive Bayes classification in Machine Learning.",
+                "subject": "ML"
+            }, headers=headers)
+
+            assert res.status_code == 200
+            ans = res.json()["answer"]
+            assert "Bayes" in ans
+            assert "independence" in ans.lower()
+            assert "solveConcept" not in ans
+            assert "System Invariant" not in ans
+
+
+def test_ai_tutor_os_deadlock_academic_content(auth_tokens):
+    """
+    Deadlock question must provide OS-specific academic content (4 Coffman conditions,
+    Banker's algorithm, prevention/avoidance).
+    """
+    headers = auth_tokens["user1"]
+    academic_answer = (
+        "### 📘 Deadlock in Operating Systems\n\n"
+        "A deadlock is a situation where a set of processes are blocked because each process is holding "
+        "a resource and waiting for another resource held by some other process.\n\n"
+        "#### Four Necessary Coffman Conditions:\n"
+        "1. **Mutual Exclusion**: At least one resource must be held in a non-shareable mode.\n"
+        "2. **Hold and Wait**: A process is holding at least one resource and waiting to acquire additional resources.\n"
+        "3. **No Preemption**: Resources cannot be preempted; only released voluntarily.\n"
+        "4. **Circular Wait**: A closed chain of processes exists such that each holds a resource needed by the next.\n\n"
+        "#### Deadlock Handling:\n"
+        "- Deadlock Prevention (invalidate at least one condition)\n"
+        "- Deadlock Avoidance (Banker's Algorithm)\n"
+        "- Deadlock Detection and Recovery\n\n"
+        "### 💡 Suggested Next Questions\n"
+        "- How does Banker's Algorithm ensure a safe state?\n"
+        "- What is a Resource Allocation Graph (RAG)?\n"
+        "- How does deadlock differ from starvation?"
+    )
+
+    with patch("app.services.ai_tutor.OpenAITutorService.is_configured", return_value=True):
+        with patch("app.services.ai_tutor.OpenAITutorService._get_client") as mock_get_client:
+            mock_client = MagicMock()
+            mock_choice = MagicMock()
+            mock_choice.message.content = academic_answer
+            mock_client.chat.completions.create.return_value = MagicMock(choices=[mock_choice])
+            mock_get_client.return_value = mock_client
+
+            res = client.post("/api/ai-tutor/chat", json={
+                "message": "Explain deadlock and its necessary conditions.",
+                "subject": "OS"
+            }, headers=headers)
+
+            assert res.status_code == 200
+            ans = res.json()["answer"]
+            assert "Mutual Exclusion" in ans
+            assert "Circular Wait" in ans
+            assert "solveConcept" not in ans
+            assert "System Invariant" not in ans
+
+
+def test_ai_tutor_dsa_binary_search_academic_content(auth_tokens):
+    """
+    Binary search question must provide DSA-specific content (divide and conquer,
+    sorted array prerequisite, log n complexity).
+    """
+    headers = auth_tokens["user1"]
+    academic_answer = (
+        "### 📘 Binary Search Algorithm\n\n"
+        "Binary Search is an efficient algorithm for searching an element in a **sorted array** "
+        "using the divide-and-conquer strategy.\n\n"
+        "#### Complexity Analysis:\n"
+        "- Best Case: $O(1)$ (element at mid)\n"
+        "- Average & Worst Case: $O(\\log n)$\n"
+        "- Auxiliary Space: $O(1)$ iterative, $O(\\log n)$ recursive.\n\n"
+        "### 💡 Suggested Next Questions\n"
+        "- How to implement binary search iteratively vs recursively?\n"
+        "- What happens if the array is not sorted?\n"
+        "- How to find the first occurrence of a duplicate element?"
+    )
+
+    with patch("app.services.ai_tutor.OpenAITutorService.is_configured", return_value=True):
+        with patch("app.services.ai_tutor.OpenAITutorService._get_client") as mock_get_client:
+            mock_client = MagicMock()
+            mock_choice = MagicMock()
+            mock_choice.message.content = academic_answer
+            mock_client.chat.completions.create.return_value = MagicMock(choices=[mock_choice])
+            mock_get_client.return_value = mock_client
+
+            res = client.post("/api/ai-tutor/chat", json={
+                "message": "Explain binary search algorithm and its complexity.",
+                "subject": "DS"
+            }, headers=headers)
+
+            assert res.status_code == 200
+            ans = res.json()["answer"]
+            assert "sorted" in ans.lower()
+            assert "log" in ans.lower()
+            assert "solveConcept" not in ans
+
+
+def test_ai_tutor_openai_error_handling_clean_notice(auth_tokens):
+    """
+    When OpenAI fails (e.g. rate limit, quota, timeout), the service must return a clean,
+    user-friendly notice and must NEVER fall back to generic software engineering templates
+    or solveConcept.
+    """
+    headers = auth_tokens["user1"]
+
+    with patch("app.services.ai_tutor.OpenAITutorService.is_configured", return_value=True):
+        with patch("app.services.ai_tutor.OpenAITutorService._get_client") as mock_get_client:
+            mock_client = MagicMock()
+            # Simulate OpenAI RateLimitError / 429
+            mock_client.chat.completions.create.side_effect = Exception("RateLimitError: 429 quota exceeded")
+            mock_get_client.return_value = mock_client
+
+            res = client.post("/api/ai-tutor/chat", json={
+                "message": "Explain normalization in DBMS.",
+                "subject": "DBMS"
+            }, headers=headers)
+
+            assert res.status_code == 200
+            data = res.json()
+            ans = data["answer"]
+            assert "temporarily" in ans.lower() or "quota" in ans.lower() or "high demand" in ans.lower()
+            assert "solveConcept" not in ans
+            assert "process(inputData)" not in ans
+            assert "System Invariant" not in ans
+            assert "Algorithmic Flow" not in ans
+            assert "Trade-off Analysis" not in ans
+
+
+def test_ai_tutor_prompt_contains_subject_and_academic_context(auth_tokens):
+    """
+    Verifies that OpenAITutorService properly injects Subject, Topic, Academic Level,
+    and Examination Purpose into the system messages payload sent to OpenAI.
+    """
+    headers = auth_tokens["user1"]
+
+    with patch("app.services.ai_tutor.OpenAITutorService.is_configured", return_value=True):
+        with patch("app.services.ai_tutor.OpenAITutorService._get_client") as mock_get_client:
+            mock_client = MagicMock()
+            mock_choice = MagicMock()
+            mock_choice.message.content = "Academic response."
+            mock_client.chat.completions.create.return_value = MagicMock(choices=[mock_choice])
+            mock_get_client.return_value = mock_client
+
+            res = client.post("/api/ai-tutor/chat", json={
+                "message": "Explain normalization in DBMS.",
+                "subject": "DBMS",
+                "topic": "Relational Normalization"
+            }, headers=headers)
+
+            assert res.status_code == 200
+            # Inspect the messages passed to OpenAI
+            call_kwargs = mock_client.chat.completions.create.call_args[1]
+            sent_messages = call_kwargs["messages"]
+            system_msg = next(m["content"] for m in sent_messages if m["role"] == "system")
+            assert "Subject: DBMS" in system_msg
+            assert "Topic: Relational Normalization" in system_msg
+            assert "Academic Level: University / Undergraduate Computer Science" in system_msg
+            assert "Semester Examination Preparation" in system_msg
+

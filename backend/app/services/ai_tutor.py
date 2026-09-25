@@ -1,7 +1,7 @@
 """
 CodeOrbit AI Tutor Service
 Official OpenAI Python SDK Integration
-General-Purpose Educational AI Assistant for Engineering Students
+Academic University-Level Tutor for Computer Science & Engineering Students
 """
 
 from __future__ import annotations
@@ -13,34 +13,78 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-# System Prompt defining CodeOrbit AI Tutor persona and academic standards
-SYSTEM_PROMPT = """You are CodeOrbit AI Tutor, an intelligent, inspiring, and rigorous educational assistant designed specifically for computer science and engineering students.
+# Academic System Prompt defining CodeOrbit AI Tutor persona and standards
+SYSTEM_PROMPT = """You are CodeOrbit AI Tutor, an academic tutor for university computer science and engineering students.
 
-Your primary mission is to dynamically understand and thoroughly answer ANY question the student asks—covering concepts, algorithms, code implementation, line-by-line code explanation, debugging, university exam preparation, multiple-choice questions (MCQs), and tech placement interview prep.
+Your primary purpose is to explain academic subjects clearly, rigorously, and pedagogically for semester examinations and university coursework.
 
-CORE INVARIANTS:
-1. Dynamic Open-Ended Answering: You MUST answer any question the student types. Never say "question not found", "not in question bank", or refuse an academic question. You are an expert across all fields of computer science, software engineering, mathematics, and systems.
-2. Subject Context is Context, NOT Restriction: If an academic subject (such as DBMS, OS, OOPS, DS, ML, CN) is provided in the prompt context, use it as helpful background knowledge. However, if the student asks about a different subject, programming language, or general engineering question, answer it enthusiastically and fully.
-3. Conversational Coherence: Maintain conversational context across follow-up questions. If the user refers to "it", "explain question 2 again", "give another example", or "how does that compare", interpret their intent using the preceding turns of the conversation.
-4. Academic & Exam Depth:
-   - When asked for "2 Mark Answer": Deliver a concise, laser-accurate formal definition, key formula or invariant, and 2 high-scoring bullet points.
-   - When asked for "5 Mark Answer": Provide definition, key mechanism/architecture representation, 4-5 numbered technical points, and a clean concrete example or code snippet.
-   - When asked for "10 Mark Answer": Provide a university-grade comprehensive answer with:
-     * 1. Formal Definition & Background
-     * 2. Core Architectural Mechanism & Working Principles (with diagrams or step-by-step state transitions)
-     * 3. Complete Code / Pseudo-code / Algorithm (with comments)
-     * 4. Comparative Trade-offs / Advantages & Disadvantages / Edge Cases
-     * 5. Real-World Industry Application (e.g., how PostgreSQL, Linux kernel, or AWS implements it)
-   - When asked to "Explain Simply": Use intuitive real-world metaphors, plain English, and zero unnecessary jargon before connecting back to the technical mechanics.
-   - When asked for "MCQs": Provide clear, challenging questions with 4 distinct options (A, B, C, D), indicate the correct answer, and provide a crisp conceptual explanation for why it is correct.
-   - When asked for "Interview Questions": Focus on top tech company (FAANG / Tier-1) standards, optimal algorithmic time/space complexities, edge cases, and common interviewer follow-ups.
-   - When asked to "Explain Code": Walk through the code line by line, explaining variables, data structures, state changes, and time/space complexity.
-   - When asked to "Summarize": Provide a concise high-yield bulleted cheat sheet.
-5. Markdown & Code Standards:
-   - Use beautiful Markdown formatting: clean headings (###, ####), bullet points, bold key terms, tables for comparisons, and blockquotes for tips.
-   - Format all code in fenced code blocks with language tags (e.g. ```cpp, ```python, ```java, ```sql, ```javascript).
-   - Write clean, production-ready, readable code with descriptive comments.
-6. Tone: Encouraging, authoritative, clear, and pedagogically focused.
+The user's question must be answered according to the SUBJECT and TOPIC supplied by the application context.
+
+CORE ACADEMIC PRINCIPLES:
+1. Academic Accuracy & Relevance:
+   - Always answer the actual question the student asked.
+   - Never replace an academic explanation with generic software engineering concepts.
+   - Never discuss race conditions, state transitions, invariants, architecture, time complexity, or software engineering patterns unless they are actually relevant to the user's question.
+   - Never fabricate a generic 'algorithmic flow' for a theoretical academic question.
+   - Never output irrelevant JavaScript such as solveConcept(), process(), or placeholder implementations.
+
+2. Subject-Aware Expertise:
+   - DBMS: Focus on relational models, normalization (1NF, 2NF, 3NF, BCNF, 4NF/5NF), functional dependencies, update/insertion/deletion anomalies, lossless join decomposition, dependency preservation, candidate keys, superkeys, ACID properties, transactions, concurrency control (2PL, timestamps, serializability), indexing (B-trees, B+ trees), relational algebra, and SQL.
+   - Machine Learning: Focus on Bayes theorem, Naive Bayes (conditional independence assumption, prior, likelihood, posterior, evidence, Laplace smoothing), classification processes, regression, decision trees, SVM, neural networks, loss functions, overfitting/underfitting, and evaluation metrics (confusion matrix, precision, recall, F1, ROC-AUC).
+   - Operating Systems: Focus on process management, CPU scheduling algorithms, process synchronization (critical section, semaphores, mutex, monitors), deadlocks (definition, 4 necessary Coffman conditions: mutual exclusion, hold and wait, no preemption, circular wait; resource allocation graphs; deadlock prevention, avoidance with Banker's algorithm, detection & recovery), memory management (paging, segmentation, TLB, page replacement), and file systems.
+   - Computer Networks: Focus on OSI and TCP/IP models, TCP (connection-oriented, 3-way handshake, 4-way teardown, sliding window flow control, congestion control algorithms), UDP, IP addressing (IPv4, IPv6, CIDR, subnetting), routing protocols (distance vector, link state, OSPF, BGP), DNS, and HTTP/HTTPS.
+   - Object-Oriented Programming (OOPS): Focus on the 4 pillars (Inheritance, Polymorphism, Encapsulation, Abstraction), constructors/destructors, access specifiers, interfaces, abstract classes, method overriding vs overloading, dynamic binding, and design principles.
+   - Data Structures & Algorithms (DSA): Focus on algorithm design, step-by-step traces, time and space complexity analysis (best, average, worst cases), data structures (arrays, linked lists, stacks, queues, trees, heaps, graphs, hash tables), searching, sorting, and dynamic programming.
+
+3. Question-Type Awareness:
+   Before generating the response, internally determine the type of question asked:
+   - A. Definition question: Provide a formal, precise syllabus definition with 2-4 key characteristics.
+   - B. Concept explanation: Explain why the concept is needed, its core mechanism, components, and real academic examples.
+   - C. Compare / Difference question: Use a clean Markdown comparison table with explicit evaluation criteria columns.
+   - D. Algorithm question: State the algorithm, step-by-step procedure, walk through an example trace, and specify time & space complexities.
+   - E. Numerical / Problem-solving question: State given values, governing formula, step-by-step mathematical substitution, and clear final result with units/conclusions.
+   - F. Programming / Code question: Provide syntactically correct, well-commented code in the requested language, followed by a concise explanation of logic and complexity.
+   - G. Short-answer exam question (2-Mark): Concise formal definition and 2-4 high-scoring bullet points.
+   - H. Long-answer exam question (5/10/15-Mark): Comprehensive structured answer with definitions, working mechanisms, types, examples, diagrams/tables in text, and exam-oriented points.
+   - I. Follow-up question: Continue seamlessly from previous conversation turns without restarting or losing subject context.
+   (Do NOT print this internal question-type classification label in your output).
+
+4. Strict Code Generation Rules:
+   - DO NOT generate code for theoretical questions unless:
+     * The user explicitly asks for code (e.g. "Give SQL example for normalization", "Implement binary search in C++"), OR
+     * Code/SQL is genuinely necessary to explain the requested concept (e.g., SQL queries for DBMS, code for DSA algorithms).
+   - For theoretical questions (e.g. "Explain normalization in DBMS", "What is deadlock in OS"), use relational schema notations, mathematical formulas, state tables, or bulleted breakdowns—NOT programming code.
+   - Never use fake placeholder code such as solveConcept(inputData) or process(inputData).
+   - Never use meaningless pseudo-code simply to fill an implementation section.
+
+5. Exam-Oriented Response Format:
+   For standard university theory questions, organize the response logically using this structure where applicable:
+   - **Definition**: Formal academic definition.
+   - **Need / Motivation**: Why the concept is needed and the problems/anomalies it solves.
+   - **Core Concept**: Fundamental principles and rules.
+   - **Detailed Explanation / Types / Forms**: Numbered or categorized breakdown.
+   - **Academic Example**: Concrete example (e.g., student/department relations for DBMS, process/resource states for OS).
+   - **Advantages & Disadvantages / Limitations**: Balanced analytical points.
+   - **Important Exam Points**: Key takeaways and high-scoring exam points.
+   - **Conclusion**: Crisp summary.
+   (Adapt naturally; do not rigidly include sections that do not apply).
+
+6. Marks-Based Depth:
+   - 2 Marks: Precise definition + 2 to 4 bullet points.
+   - 5 Marks: Definition + explanation + example + important points.
+   - 10 / 13 / 15 Marks: Thorough, multi-section answer with deep explanations, examples, comparison tables where relevant, and exam tips.
+   - Unspecified: Balanced, medium-to-detailed answer optimal for university semester preparation.
+
+7. No Fabricated Citations:
+   - Never generate fake "Verified Academic References" or random fabricated URLs.
+   - If external references were not provided in the input context, rely purely on verified academic computer science knowledge without inventing citations.
+
+8. Conversational Continuity:
+   - Maintain multi-turn context. If the student asks a follow-up like "Explain 2NF with example" or "Give me a simple example", resolve references to the subject and topic previously discussed.
+
+9. Response Tone & Formatting:
+   - Professional, encouraging, clear, and academically authoritative.
+   - Use clean Markdown with headers (###, ####), bold technical keywords, bullet points, and tables.
 """
 
 def sanitize_ai_log(text: str) -> str:
@@ -52,8 +96,8 @@ def sanitize_ai_log(text: str) -> str:
 class OpenAITutorService:
     """
     Dedicated AI Tutor service utilizing the official OpenAI Python SDK.
-    Provides open-ended educational tutoring, conversation history awareness,
-    and adaptive academic response formats.
+    Provides academic university-level tutoring, conversation history awareness,
+    and exam-oriented pedagogical response formats.
     """
 
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
@@ -104,6 +148,7 @@ class OpenAITutorService:
         message: str,
         conversation_history: Optional[List[Dict[str, str]]] = None,
         subject: Optional[str] = None,
+        topic: Optional[str] = None,
         action: Optional[str] = None,
         marks: Optional[int] = None,
         student_context: Optional[Dict[str, Any]] = None,
@@ -121,26 +166,31 @@ class OpenAITutorService:
         # Build prompt instructions based on action/marks modifier
         action_instructions = []
         if marks:
-            action_instructions.append(f"Format this specifically as a {marks}-Mark University Exam Answer.")
+            action_instructions.append(f"Answer Format: Format this specifically as a {marks}-Mark University Examination Question. Scale response depth and points appropriately.")
         elif action == "explain_simply":
-            action_instructions.append("Explain this concept in simple words using an intuitive real-world analogy first.")
+            action_instructions.append("Directive: Explain this concept in simple words using an intuitive real-world analogy first, followed by clear academic explanation.")
         elif action == "exam_answer":
-            action_instructions.append("Structure this as a high-scoring university examination answer with definitions, key points, and diagram/code.")
+            action_instructions.append("Directive: Structure this as a high-scoring university examination answer with definitions, key points, and academic example.")
         elif action == "give_example":
-            action_instructions.append("Focus on a concrete, practical real-world scenario with runnable code demonstrating this concept.")
+            action_instructions.append("Directive: Focus on a concrete, practical academic example illustrating this specific concept clearly.")
         elif action == "mcqs":
-            action_instructions.append("Generate challenging multiple choice questions (MCQs) on this topic with options, correct answer, and explanation.")
+            action_instructions.append("Directive: Generate 4 to 5 challenging multiple choice questions (MCQs) on this topic with options A-D, correct answer, and explanation.")
         elif action == "summarize":
-            action_instructions.append("Summarize this topic into high-yield revision bullet points and key takeaways.")
+            action_instructions.append("Directive: Summarize this topic into high-yield revision bullet points and key exam takeaways.")
         elif action == "explain_code":
-            action_instructions.append("Provide a thorough line-by-line explanation of the code, walking through state transitions and complexity.")
+            action_instructions.append("Directive: Provide a thorough line-by-line explanation of the code, walking through logic, data structures, and time/space complexity.")
         elif action == "interview_questions":
-            action_instructions.append("Present top tech interview questions for this topic, detailing optimal approaches and trade-offs.")
+            action_instructions.append("Directive: Present top technical interview questions for this topic, detailing optimal approaches and key considerations.")
 
-        # Build contextual instructions
+        # Build structured contextual instructions
         context_parts = []
         if subject:
-            context_parts.append(f"Student's Current Subject Context: {subject}")
+            context_parts.append(f"Subject: {subject}")
+        if topic:
+            context_parts.append(f"Topic: {topic}")
+        context_parts.append(f"Student Question: {query_text}")
+        context_parts.append("Academic Level: University / Undergraduate Computer Science")
+        context_parts.append("Purpose: Semester Examination Preparation & Technical Mastery")
         if student_context:
             if student_context.get("completed_topics"):
                 context_parts.append(f"Completed Topics: {', '.join(student_context['completed_topics'])}")
@@ -156,8 +206,8 @@ class OpenAITutorService:
 
         # Append instruction for suggested follow-ups
         system_content += (
-            "\n\nFOLLOW-UP SUGGESTIONS REQUIREMENT:\n"
-            "At the very end of your response, output a section with exactly 3 to 4 recommended follow-up questions for the student, "
+            "\n\nSUGGESTED FOLLOW-UP QUESTIONS REQUIREMENT:\n"
+            "At the very end of your response, output a section with exactly 3 to 4 recommended academic follow-up questions for the student, "
             "formatted as:\n"
             "### 💡 Suggested Next Questions\n"
             "- Question 1\n"
@@ -185,7 +235,7 @@ class OpenAITutorService:
         # Check if OpenAI is configured
         client = self._get_client()
         if not client:
-            return self._generate_intelligent_offline_response(query_text, subject, action, marks)
+            return self._generate_intelligent_offline_response(query_text, subject=subject, topic=topic, action=action, marks=marks)
 
         try:
             # Call OpenAI Chat Completions API
@@ -202,7 +252,7 @@ class OpenAITutorService:
 
             if not raw_answer:
                 logger.warning("Empty response received from OpenAI API.")
-                return self._generate_intelligent_offline_response(query_text, subject, action, marks)
+                return self._generate_intelligent_offline_response(query_text, subject=subject, topic=topic, action=action, marks=marks)
 
             # Parse suggested follow-ups from the text
             clean_answer, followups = self._extract_followups(raw_answer)
@@ -213,23 +263,25 @@ class OpenAITutorService:
             clean_exc = sanitize_ai_log(str(exc))
             logger.error(f"OpenAI API call failed ({exc_name}): {clean_exc}")
 
-            # Specific handling for common error scenarios per requirements
+            # Specific handling for common error scenarios without substituting generic templates
             if "AuthenticationError" in exc_name or "invalid_api_key" in clean_exc.lower() or "401" in clean_exc:
-                user_msg = "AI service authentication failed. Please verify the OpenAI API configuration."
-            elif "RateLimitError" in exc_name or "429" in clean_exc:
-                user_msg = "AI service rate limit or quota reached. Please try again later."
+                user_msg = "AI Tutor authentication failed. Please verify the OpenAI API key configuration in settings."
+            elif "RateLimitError" in exc_name or "429" in clean_exc or "insufficient_quota" in clean_exc.lower():
+                user_msg = "The AI Tutor is temporarily experiencing high demand or reached its quota limit. Please try again shortly."
             elif "APITimeoutError" in exc_name or "Timeout" in exc_name:
-                user_msg = "AI service timed out. Please try again."
+                user_msg = "The AI Tutor request timed out. Please try again."
             elif "APIConnectionError" in exc_name:
-                user_msg = "Unable to connect to the OpenAI service. Please try again shortly."
+                user_msg = "Unable to connect to the AI Tutor service. Please try again shortly."
             else:
                 user_msg = "The AI Tutor is temporarily unavailable. Please try again shortly."
 
-            # Return graceful educational fallback if available
-            fallback_ans, fallback_followups, _ = self._generate_intelligent_offline_response(query_text, subject, action, marks)
-            if fallback_ans:
-                return f"{fallback_ans}\n\n> ⚠️ *Notice: {user_msg}*", fallback_followups, "offline-fallback"
-            return user_msg, [], self.model
+            error_followups = [
+                "Try asking your question again",
+                "Explain in simpler words",
+                "Give me a short summary",
+                "What is the exam syllabus for this subject?"
+            ]
+            return user_msg, error_followups, "service-notice"
 
     def _extract_followups(self, text: str) -> Tuple[str, List[str]]:
         """Extracts follow-up suggestion chips from the AI response."""
@@ -247,7 +299,6 @@ class OpenAITutorService:
             if match:
                 section = match.group(0)
                 clean_text = text[:match.start()].strip()
-                # Extract bullet lines
                 lines = section.split('\n')
                 for line in lines:
                     line = line.strip()
@@ -258,75 +309,190 @@ class OpenAITutorService:
                             followups.append(cleaned_line)
                 break
 
-        # Fallback default suggestions if fewer than 2 found
         if len(followups) < 2:
             followups = [
-                "Can you give a real-world example?",
-                "How is this asked in technical interviews?",
+                "Can you give a practical exam example?",
+                "How is this asked in semester examinations?",
                 "Give me 5 practice MCQs on this topic.",
-                "Explain the time and space complexity."
+                "Summarize the key exam points."
             ]
 
         return clean_text, followups[:4]
+
+    def _find_matching_curriculum_topic(
+        self,
+        query: str,
+        subject: Optional[str] = None,
+        topic: Optional[str] = None
+    ) -> Optional[Tuple[str, Dict[str, Any]]]:
+        """Finds matching curriculum topic from curated datasets for offline fallback."""
+        try:
+            from curriculum import TOPIC_ACADEMIC_DATA
+            from app.services.retrieval_service import ACRONYM_MAP
+        except ImportError:
+            return None
+
+        clean = query.strip().lower()
+
+        # 1. Direct topic slug
+        if topic:
+            clean_topic = topic.strip().lower().replace(" ", "-")
+            if clean_topic in TOPIC_ACADEMIC_DATA:
+                return clean_topic, TOPIC_ACADEMIC_DATA[clean_topic]
+
+        # 2. Check acronym map
+        for acronym, slug in ACRONYM_MAP.items():
+            if acronym in clean:
+                if slug in TOPIC_ACADEMIC_DATA:
+                    return slug, TOPIC_ACADEMIC_DATA[slug]
+
+        # 3. Direct slug or title match
+        for slug, data in TOPIC_ACADEMIC_DATA.items():
+            slug_spaced = slug.replace("-", " ")
+            title_lower = data.get("title", "").lower()
+            if slug in clean or slug_spaced in clean or (title_lower and title_lower in clean):
+                if subject and data.get("subject", "").lower() == subject.lower():
+                    return slug, data
+                elif not subject:
+                    return slug, data
+
+        # 4. Token match for high-yield keywords
+        tokens = [t for t in re.split(r'[\s\-_,?.!]+', clean) if len(t) > 3]
+        for token in tokens:
+            for slug, data in TOPIC_ACADEMIC_DATA.items():
+                if token == slug or token in slug.split("-"):
+                    if subject and data.get("subject", "").lower() == subject.lower():
+                        return slug, data
+                    elif not subject:
+                        return slug, data
+
+        return None
 
     def _generate_intelligent_offline_response(
         self,
         query: str,
         subject: Optional[str] = None,
+        topic: Optional[str] = None,
         action: Optional[str] = None,
         marks: Optional[int] = None
     ) -> Tuple[str, List[str], str]:
         """
-        Provides a rich dynamic educational breakdown when OpenAI API key is
+        Provides a rich academic breakdown when OpenAI API key is
         not yet configured or during local offline testing.
-        Never says 'question not found'.
+        Never generates placeholder code or generic templates.
         """
         title = query.strip().rstrip('?').title()
         subj_name = subject or "Computer Science & Engineering"
 
-        # Provide a thorough, structured, pedagogical breakdown
+        # Check for verified academic curriculum data
+        match = self._find_matching_curriculum_topic(query, subject=subject, topic=topic)
+        if match:
+            matched_slug, academic_data = match
+            t_title = academic_data.get("title", title)
+            t_subj = academic_data.get("subject", subj_name).upper()
+
+            parts = [
+                f"### 📘 {t_title}\n\n",
+                f"*Academic Subject: {t_subj}*\n\n",
+                f"#### 📖 1. Concept Definition\n",
+                f"{academic_data.get('exam_definition', '')}\n\n",
+                f"#### 🎯 2. Why It Is Needed & Core Concept\n",
+                f"{academic_data.get('core_concept', '')}\n\n",
+            ]
+
+            # Key Points or Classification
+            classification = academic_data.get("classification")
+            if classification and classification.get("items"):
+                parts.append(f"#### 🔑 3. {classification.get('title', 'Key Forms & Classifications')}\n")
+                for item in classification["items"]:
+                    parts.append(f"- **{item['name']}**: {item['desc']}\n")
+                parts.append("\n")
+            elif academic_data.get("key_points"):
+                parts.append(f"#### 🔑 3. Key Concepts\n")
+                for kp in academic_data["key_points"][:5]:
+                    parts.append(f"- {kp}\n")
+                parts.append("\n")
+
+            # Example if available
+            example = academic_data.get("example")
+            if example:
+                scenario = example.get("scenario")
+                if scenario:
+                    parts.append(f"#### 💡 4. Academic Example ({example.get('title', 'Standard Relation')})\n")
+                    parts.append(f"{scenario}\n\n")
+                # Include code only if explicitly requested or if it's SQL / DSA
+                if (action in ("give_example", "explain_code") or "code" in query.lower() or "sql" in query.lower() or "program" in query.lower()) and example.get("code"):
+                    lang = "sql" if t_subj == "DBMS" else "python"
+                    parts.append(f"```{lang}\n{example.get('code')}\n```\n\n")
+
+            # Exam Tip / Remember
+            remember = academic_data.get("remember")
+            if remember:
+                parts.append(f"#### 📝 5. Important Exam Points\n")
+                parts.append(f"> **Exam Summary**: {remember}\n\n")
+            elif academic_data.get("exam_tip"):
+                parts.append(f"#### 📝 5. Important Exam Points\n")
+                parts.append(f"> **Exam Tip**: {academic_data.get('exam_tip')}\n\n")
+
+            # References if available from academic dataset or content service
+            references = academic_data.get("references")
+            if not references:
+                try:
+                    from app.services.content_service import get_topic_references
+                    references = get_topic_references(matched_slug, t_subj.lower())
+                except Exception:
+                    references = None
+
+            if references:
+                parts.append("#### 📚 Academic References\n")
+                for ref in references:
+                    parts.append(f"- [{ref.get('source_name', 'Reference')}: {ref.get('title', 'Curriculum Resource')}]({ref.get('source_url', '#')})\n")
+                parts.append("\n")
+
+            if not self.is_configured():
+                parts.append(
+                    "> 💡 **Setup Notice**: Live open-ended answers are powered by OpenAI. "
+                    "Configure `OPENAI_API_KEY` in your environment or Vercel project settings to enable dynamic AI responses.\n\n"
+                )
+
+            followups = [
+                f"Explain {t_title} for a 10-mark exam question.",
+                f"What are the main advantages and limitations of {t_title}?",
+                f"Give me practice exam questions on {t_title}.",
+                f"How is {t_title} related to other {t_subj} topics?"
+            ]
+            return "".join(parts), followups, "curriculum-academic"
+
+        # General clean academic fallback when no specific curriculum topic matches
         parts = [
-            f"### 🎯 {title} — Exam Prep Breakdown\n",
-            f"*Academic Domain: {subj_name}*\n",
+            f"### 📘 {title}\n\n",
+            f"*Academic Subject: {subj_name}*\n\n",
             f"#### 📖 1. Concept Definition\n",
-            f"In computer science engineering, **{query.strip()}** represents an essential architectural and theoretical foundation. "
-            f"Mastering this concept requires analyzing its formal definition, internal state transitions, and system design invariants.\n",
-            f"#### 🔑 2. Key High-Scoring Points\n",
-            f"- **System Invariant**: State transitions must be validated before mutation to avoid inconsistency, race conditions, or anomalies.\n"
-            f"- **Algorithmic Flow**: Operations execute in structured stages, optimizing throughput while ensuring correctness.\n"
-            f"- **Trade-off Analysis**: Balances time complexity vs space complexity, latency vs throughput, and consistency vs availability.\n",
-            f"#### 💻 3. Code Implementation & Step-by-Step Walkthrough\n",
-            f"```text\n// Conceptual Implementation Pattern for: {title}\n"
-            f"function solveConcept(inputData) {{\n"
-            f"    // 1. Validate boundary conditions & edge cases\n"
-            f"    if (!inputData) return null;\n\n"
-            f"    // 2. Execute optimal core transformation\n"
-            f"    let result = process(inputData);\n\n"
-            f"    // 3. Return verified invariant\n"
-            f"    return result;\n"
-            f"}}\n```\n",
-            f"#### 🎯 4. University Exam Tip\n",
-            f"> **High-Scoring Tip**: When answering questions on **{title}**, always define the mathematical/algorithmic invariant first, "
-            f"sketch the component architecture, and highlight time and space complexities ($O(1)$ to $O(N)$).\n",
-            f"#### 📚 Verified Academic References\n",
-            f"- [GeeksforGeeks: Computer Science Reference](https://www.geeksforgeeks.org/computer-science-projects/)\n",
-            f"- [TutorialsPoint: Computer Science Guide](https://www.tutorialspoint.com/computer_science_tutorials.htm)\n"
+            f"In university computer science examinations, **{query.strip()}** is an essential topic under **{subj_name}**.\n\n",
+            f"#### 🎯 2. Core Academic Framework\n",
+            f"When answering semester exam questions on this topic, structure your response as follows:\n",
+            f"1. **Definition**: State the standard syllabus definition and key terminology.\n",
+            f"2. **Why/Need**: Explain the problem this concept addresses and why it is essential in {subj_name}.\n",
+            f"3. **Working Principle**: Detail the steps, laws, or mechanisms governing it.\n",
+            f"4. **Academic Example**: Provide a concrete example (such as a relational schema, state diagram, or algorithm trace).\n",
+            f"5. **Exam Points**: Summarize key formulas, rules, and common semester exam pitfalls.\n\n",
         ]
 
         if not self.is_configured():
             parts.append(
-                "> 💡 **Setup Notice**: To enable live open-ended responses powered by OpenAI, "
-                "please configure `OPENAI_API_KEY` in your environment or Vercel Project Settings."
+                "> 💡 **Setup Notice**: Live open-ended answers are powered by OpenAI. "
+                "Configure `OPENAI_API_KEY` in your environment or Vercel project settings to enable dynamic AI responses.\n\n"
             )
 
         followups = [
-            f"Give me a real-world example of {title}.",
-            f"What are the top interview questions on {title}?",
-            f"Explain {title} for a 10-mark exam question.",
-            f"Give me 5 challenging MCQs on {title}."
+            f"Explain {title} in simple words.",
+            f"Give an exam-oriented example for {title}.",
+            f"What are the key points to remember for {title}?",
+            f"What are common mistakes students make on {title}?"
         ]
 
-        return "\n".join(parts), followups, "codeorbit-tutor-engine"
+        return "".join(parts), followups, "codeorbit-academic-tutor"
+
 
 # Singleton instance accessor
 _service_instance: Optional[OpenAITutorService] = None

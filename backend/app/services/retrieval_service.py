@@ -93,9 +93,11 @@ def search_educational_knowledge(
     Constructs high-yield educational context for AI responses.
     """
     clean_query = query.strip().lower()
-    terms = [t for t in clean_query.split() if len(t) > 2]
+    STOPWORDS = {"and", "the", "for", "with", "how", "what", "why", "can", "explain", "give", "tell", "about", "does", "from", "into", "that", "this", "which", "are", "was", "were", "been"}
+    raw_terms = [t for t in clean_query.split() if len(t) > 2]
+    terms = [t for t in raw_terms if t not in STOPWORDS]
     if not terms:
-        terms = [clean_query]
+        terms = raw_terms or [clean_query]
 
     # Check for direct alias hit
     target_slug = None
@@ -124,6 +126,13 @@ def search_educational_knowledge(
     
     matching_topics = topic_query.filter(or_(*topic_filters)).limit(limit).all()
 
+    # Prioritize exact target_slug if present
+    if target_slug:
+        target_topic = topic_query.filter(Topic.slug == target_slug).first()
+        if target_topic:
+            matching_topics = [target_topic] + [top for top in matching_topics if top.id != target_topic.id]
+            matching_topics = matching_topics[:limit]
+
     # 2. Search Lesson Steps (content sections)
     step_query = db.query(LessonStep).join(Lesson).join(Topic)
     if subject_obj:
@@ -151,7 +160,10 @@ def search_educational_knowledge(
     # Retrieve curated academic dataset for the primary matching topic
     primary_slug = None
     academic_data = None
-    if matching_topics:
+    if target_slug and target_slug in TOPIC_ACADEMIC_DATA:
+        primary_slug = target_slug
+        academic_data = TOPIC_ACADEMIC_DATA.get(primary_slug)
+    elif matching_topics:
         primary_slug = matching_topics[0].slug
         academic_data = TOPIC_ACADEMIC_DATA.get(primary_slug)
     elif target_slug:
@@ -218,8 +230,8 @@ def search_educational_knowledge(
                 "question": faq_item["q"],
                 "options": [
                     faq_item.get("a", "")[:80],
-                    "Violates architectural boundary constraint",
-                    "Requires unbounded recursive traversal",
+                    "Incorrect concept definition",
+                    "Applies to an unrelated system component",
                     "None of the above"
                 ],
                 "correct_answer": faq_item.get("a", "")[:80],

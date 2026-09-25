@@ -87,7 +87,7 @@ class RuleBasedSmartProvider(AIProvider):
                 )
 
             if sources:
-                parts.append("#### 📚 Verified Academic References")
+                parts.append("#### 📚 Academic References")
                 for s in sources:
                     parts.append(f"- [{s['source_name']}: {s['title']}]({s['source_url']})")
 
@@ -109,18 +109,18 @@ class RuleBasedSmartProvider(AIProvider):
             else:
                 response_parts.append(
                     f"**Core Concept**: {primary_topic} is a foundational building block in computer science engineering. "
-                    f"It enforces architectural invariants and optimizes algorithmic complexity.\n"
+                    f"It provides the core theoretical and practical mechanisms for university semester examinations.\n"
                 )
 
             response_parts.append(
                 "**Key Engineering Takeaways:**\n"
                 "- Understand the problem definition and theoretical mechanics.\n"
-                "- Analyze time and space complexity trade-offs.\n"
+                "- Analyze time and space complexity trade-offs where applicable.\n"
                 "- Verify understanding using the checkpoint question below.\n"
             )
 
             if sources:
-                response_parts.append("\n**📚 Verified Academic References:**")
+                response_parts.append("\n**📚 Academic References:**")
                 for s in sources:
                     response_parts.append(f"- [{s['source_name']}: {s['title']}]({s['source_url']})")
 
@@ -140,19 +140,16 @@ class RuleBasedSmartProvider(AIProvider):
             "question": "In computer systems architecture, what design principle ensures components communicate solely through well-defined interfaces?",
             "options": ["Abstraction / Modularity", "Tight Coupling", "Global State Mutation", "Unconstrained Inheritance"],
             "correct_answer": "Abstraction / Modularity",
-            "explanation": "Abstraction and modular encapsulation isolate implementation details and preserve system invariants across component boundaries."
+            "explanation": "Abstraction and modular encapsulation isolate implementation details and maintain clean component boundaries."
         }
-        fallback_sources = [
-            {"source_name": "GeeksforGeeks", "source_url": "https://www.geeksforgeeks.org/computer-science-projects/", "title": "Computer Science Reference Library"},
-            {"source_name": "TutorialsPoint", "source_url": "https://www.tutorialspoint.com/computer_science_tutorials.htm", "title": "TutorialsPoint Computer Science"}
-        ]
+        fallback_sources = []
         return response_text, generic_quick_check, fallback_sources
 
     def explain_mistake(self, question_prompt: str, user_answer: str, correct_answer: str, explanation: str) -> Dict[str, Any]:
         return {
             "why_wrong": f"You selected '{user_answer}'. While common, this choice does not satisfy the necessary conditions or represents an earlier/different architectural stage.",
             "core_concept": f"The verified correct answer is '{correct_answer}'. {explanation}",
-            "real_world_example": "Consider a database transaction or pipeline handshake: state transitions must adhere to strict invariant validation. If an invariant is violated, the transition is rejected.",
+            "real_world_example": "In semester examinations, always verify the formal definition and fundamental conditions before choosing an option.",
             "similar_question": {
                 "prompt": f"Related Concept Check: {question_prompt[:90]}...",
                 "options": [

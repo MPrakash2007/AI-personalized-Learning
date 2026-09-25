@@ -14,6 +14,8 @@ class ChatMessageRequest(BaseModel):
     session_id: Optional[int] = None
     subject: Optional[str] = None
     subject_id: Optional[int] = None
+    topic: Optional[str] = None
+    topic_id: Optional[int] = None
     action: Optional[str] = None  # explain_simply, exam_answer, give_example, mcqs, summarize, explain_code, interview_questions
     marks: Optional[int] = None   # 2, 5, 10
 
