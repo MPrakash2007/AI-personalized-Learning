@@ -129,8 +129,9 @@ def health_check():
     ai_configured = settings.is_ai_configured()
     ai_provider = settings.get_ai_provider()
     ai_model = settings.get_openai_model()
+    is_fully_healthy = is_healthy and ai_configured
     res = {
-        "status": "healthy" if is_healthy else "degraded",
+        "status": "healthy" if is_fully_healthy else "degraded",
         "service": "CodeOrbit API",
         "database": "connected" if is_healthy else "disconnected",
         "dialect": db_check.get("dialect", "unknown"),
