@@ -33,11 +33,17 @@ router = APIRouter(tags=["AI Tutor"])
 @router.get("/status")
 def get_ai_tutor_status():
     """Safe diagnostic endpoint reporting AI Tutor configuration status without secrets."""
+    import os
     service = get_ai_tutor_service()
+    ai_keys = [
+        k for k in os.environ.keys()
+        if any(term in k.upper() for term in ("OPENAI", "AI_", "GPT", "_AI"))
+    ]
     return {
         "configured": service.is_configured(),
         "provider": settings.get_ai_provider(),
         "model": service.model,
+        "detected_env_keys": sorted(ai_keys),
     }
 
 @router.get("/search")

@@ -80,13 +80,19 @@ class Settings(BaseSettings):
             or os.getenv("OpenAI_API_Key")
             or os.getenv("OPEN_AI_KEY")
             or os.getenv("OPENAI_KEY")
+            or os.getenv("OPENAI_APIKEY")
             or os.getenv("OPENAI_SECRET_KEY")
             or self.OPENAI_API_KEY
             or ""
         )
         if not val:
             for k, v in os.environ.items():
-                if k.upper() in ("OPENAI_API_KEY", "OPENAI_KEY", "OPENAI_SECRET_KEY", "OPEN_AI_KEY", "OPEN_AI_API_KEY"):
+                k_clean = k.upper().replace("-", "_").replace(" ", "")
+                if k_clean in (
+                    "OPENAI_API_KEY", "OPENAI_APIKEY", "OPEN_AI_API_KEY",
+                    "OPENAI_KEY", "OPEN_AI_KEY", "OPENAI_SECRET_KEY",
+                    "OPENAI_TOKEN", "OPENAI_API_TOKEN", "OPENAI"
+                ) or ("OPENAI" in k_clean and any(t in k_clean for t in ("KEY", "TOKEN", "SECRET"))):
                     val = v
                     break
         clean = str(val).strip()
