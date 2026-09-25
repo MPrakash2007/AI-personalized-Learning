@@ -97,7 +97,8 @@ app.include_router(attempts_router, prefix=settings.API_V1_STR)
 app.include_router(progress_router, prefix=settings.API_V1_STR)
 app.include_router(recommendations_router, prefix=settings.API_V1_STR)
 app.include_router(review_router, prefix=settings.API_V1_STR)
-app.include_router(ai_router, prefix=settings.API_V1_STR)
+app.include_router(ai_router, prefix=f"{settings.API_V1_STR}/ai-tutor")
+app.include_router(ai_router, prefix=f"{settings.API_V1_STR}/ai")
 app.include_router(quests_router, prefix=settings.API_V1_STR)
 app.include_router(challenges_router, prefix=settings.API_V1_STR)
 app.include_router(achievements_router, prefix=settings.API_V1_STR)
@@ -125,11 +126,13 @@ def health_check():
     """Safe diagnostic endpoint reporting health status without exposing sensitive credentials."""
     db_check = check_db_connection()
     is_healthy = db_check.get("database") == "connected" or db_check.get("status") == "connected"
+    ai_configured = bool(settings.OPENAI_API_KEY and settings.OPENAI_API_KEY.strip())
     res = {
         "status": "healthy" if is_healthy else "degraded",
         "service": "CodeOrbit API",
         "database": "connected" if is_healthy else "disconnected",
-        "dialect": db_check.get("dialect", "unknown")
+        "dialect": db_check.get("dialect", "unknown"),
+        "ai_configured": ai_configured
     }
     if not is_healthy and "detail" in db_check:
         res["detail"] = db_check["detail"]

@@ -250,8 +250,33 @@ class OllamaProvider(AIProvider):
         return self.fallback.review_interview_answer(prompt, student_answer)
 
 
+class OpenAIProvider(AIProvider):
+    """Integrates with OpenAI through the dedicated OpenAITutorService."""
+
+    def __init__(self):
+        from app.services.ai_tutor import get_ai_tutor_service
+        self.tutor_service = get_ai_tutor_service()
+        self.fallback = RuleBasedSmartProvider()
+
+    def chat_tutor(self, message: str, context: Optional[str] = None, retrieval_data: Optional[Dict[str, Any]] = None) -> Tuple[str, Optional[Dict[str, Any]], List[Dict[str, str]]]:
+        if self.tutor_service.is_configured():
+            ans, followups, model = self.tutor_service.generate_response(message, subject=context)
+            sources = retrieval_data.get("sources", []) if retrieval_data else []
+            quick_check = retrieval_data.get("quick_check") if retrieval_data else None
+            return ans, quick_check, sources
+        return self.fallback.chat_tutor(message, context, retrieval_data)
+
+    def explain_mistake(self, question_prompt: str, user_answer: str, correct_answer: str, explanation: str) -> Dict[str, Any]:
+        return self.fallback.explain_mistake(question_prompt, user_answer, correct_answer, explanation)
+
+    def review_interview_answer(self, prompt: str, student_answer: str) -> Dict[str, Any]:
+        return self.fallback.review_interview_answer(prompt, student_answer)
+
+
 def get_ai_provider() -> AIProvider:
     """Factory to return configured AI provider with seamless fallback."""
+    if settings.OPENAI_API_KEY or settings.AI_PROVIDER == "openai":
+        return OpenAIProvider()
     if settings.AI_PROVIDER == "ollama":
         provider = OllamaProvider(settings.OLLAMA_BASE_URL, settings.OLLAMA_MODEL)
         if provider._is_healthy():

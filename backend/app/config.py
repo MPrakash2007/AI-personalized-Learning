@@ -19,13 +19,14 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     
-    # AI Provider configuration
-    AI_PROVIDER: str = os.getenv("AI_PROVIDER", "rule-based")  # "ollama", "mock", "rule-based"
+    # AI Provider configuration (OpenAI First)
+    AI_PROVIDER: str = os.getenv("AI_PROVIDER", "openai")  # "openai", "rule-based", "ollama", "mock"
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
     OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     
     # CORS
     CORS_ORIGINS: Union[str, List[str]] = [

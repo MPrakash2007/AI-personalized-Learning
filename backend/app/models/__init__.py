@@ -9,7 +9,7 @@ from app.models.gamification import (
 )
 from app.models.analytics import StudyPlan, Note, AIRecommendation
 from app.models.career import CareerQuestion, InterviewAttempt
-from app.models.ai import ChatSession, ChatMessage
+from app.models.ai import ChatSession, ChatMessage, AIConversation, AIMessage
 
 __all__ = [
     "User",
@@ -40,5 +40,7 @@ __all__ = [
     "InterviewAttempt",
     "ChatSession",
     "ChatMessage",
+    "AIConversation",
+    "AIMessage",
 ]
 
