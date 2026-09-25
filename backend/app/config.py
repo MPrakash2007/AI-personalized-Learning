@@ -81,7 +81,10 @@ class Settings(BaseSettings):
             or os.getenv("OPEN_AI_KEY")
             or os.getenv("OPENAI_KEY")
             or os.getenv("OPENAI_APIKEY")
+            or os.getenv("OPEN_API_KEY")
             or os.getenv("OPENAI_SECRET_KEY")
+            or os.getenv("OPENAI_API")
+            or os.getenv("CHATGPT_API_KEY")
             or self.OPENAI_API_KEY
             or ""
         )
@@ -91,8 +94,10 @@ class Settings(BaseSettings):
                 if k_clean in (
                     "OPENAI_API_KEY", "OPENAI_APIKEY", "OPEN_AI_API_KEY",
                     "OPENAI_KEY", "OPEN_AI_KEY", "OPENAI_SECRET_KEY",
-                    "OPENAI_TOKEN", "OPENAI_API_TOKEN", "OPENAI"
-                ) or ("OPENAI" in k_clean and any(t in k_clean for t in ("KEY", "TOKEN", "SECRET"))):
+                    "OPENAI_TOKEN", "OPENAI_API_TOKEN", "OPENAI", "OPEN_API_KEY",
+                    "OPENAI_API", "CHATGPT_API_KEY"
+                ) or ("OPENAI" in k_clean and any(t in k_clean for t in ("KEY", "TOKEN", "SECRET", "API"))) \
+                  or ("OPEN" in k_clean and any(t in k_clean for t in ("KEY", "TOKEN", "SECRET"))):
                     val = v
                     break
         clean = str(val).strip()

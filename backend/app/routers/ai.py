@@ -35,15 +35,16 @@ def get_ai_tutor_status():
     """Safe diagnostic endpoint reporting AI Tutor configuration status without secrets."""
     import os
     service = get_ai_tutor_service()
-    ai_keys = [
-        k for k in os.environ.keys()
-        if any(term in k.upper() for term in ("OPENAI", "AI_", "GPT", "_AI"))
+    system_ignore = {"PATH", "PWD", "SHLVL", "HOME", "_", "LANG", "LD_LIBRARY_PATH", "TZ", "NODE_PATH"}
+    custom_keys = [
+        k for k in sorted(os.environ.keys())
+        if not k.startswith("AWS_") and not k.startswith("LAMBDA_") and not k.startswith("VERCEL_") and k not in system_ignore
     ]
     return {
         "configured": service.is_configured(),
         "provider": settings.get_ai_provider(),
         "model": service.model,
-        "detected_env_keys": sorted(ai_keys),
+        "detected_env_keys": custom_keys,
     }
 
 @router.get("/search")
