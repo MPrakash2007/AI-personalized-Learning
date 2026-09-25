@@ -120,8 +120,16 @@ def auth_diagnostic(db: Session = Depends(get_db)):
             "users_insert": perm_test[3] if perm_test else None,
             "users_update": perm_test[4] if perm_test else None,
         }
+    # 5d. Any procedures/functions in public or neon_auth?
+    try:
+        proc_rows = db.execute(text(
+            "SELECT proname, pronamespace::regnamespace::text, prosecdef "
+            "FROM pg_proc "
+            "WHERE pronamespace::regnamespace::text IN ('public', 'neon_auth');"
+        )).fetchall()
+        results["custom_functions"] = [{"name": r[0], "schema": r[1], "security_definer": r[2]} for r in proc_rows]
     except Exception as e:
-        results["authenticator_privileges_error"] = sanitize_db_log(str(e))
+        results["custom_functions_error"] = sanitize_db_log(str(e))
         db.rollback()
 
     # 6. Test db.query(User).first()
