@@ -234,6 +234,72 @@ def test_health_ai_configured_reporting():
     assert "database" in data
     assert "dialect" in data
     assert "ai_configured" in data
+    assert "ai_provider" in data
+    assert "ai_model" in data
     assert isinstance(data["ai_configured"], bool)
     assert "OPENAI_API_KEY" not in str(data)
     assert "sk-" not in str(data)
+
+
+def test_ai_tutor_status_endpoint():
+    """Verify GET /api/ai-tutor/status reports configuration safely without leaking secrets."""
+    res = client.get("/api/ai-tutor/status")
+    assert res.status_code == 200
+    data = res.json()
+    assert "configured" in data
+    assert "provider" in data
+    assert "model" in data
+    assert isinstance(data["configured"], bool)
+    assert "OPENAI_API_KEY" not in str(data)
+    assert "sk-" not in str(data)
+
+
+def test_ai_configuration_matrix(monkeypatch):
+    """
+    Automated verification of AI configuration states:
+    - OPENAI_API_KEY present -> configured = True
+    - OPENAI_API_KEY missing -> configured = False
+    - OPENAI_API_KEY whitespace -> configured = False
+    - AI_PROVIDER=openai -> provider recognized
+    - OPENAI_MODEL missing -> defaults to gpt-4o-mini
+    - No secret in health response or logs
+    """
+    from app.config import settings
+
+    # 1. Missing key
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("openai_api_key", raising=False)
+    assert settings.get_openai_api_key() == ""
+    assert settings.is_ai_configured() is False
+
+    # 2. Whitespace key
+    monkeypatch.setenv("OPENAI_API_KEY", "   ")
+    assert settings.get_openai_api_key() == ""
+    assert settings.is_ai_configured() is False
+
+    # 3. Present key
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-proj-mocktestkey12345")
+    assert settings.get_openai_api_key() == "sk-proj-mocktestkey12345"
+    assert settings.is_ai_configured() is True
+
+    # 4. Present key with accidental surrounding quotes
+    monkeypatch.setenv("OPENAI_API_KEY", '"sk-proj-quotedkey12345"')
+    assert settings.get_openai_api_key() == "sk-proj-quotedkey12345"
+    assert settings.is_ai_configured() is True
+
+    # 5. Missing model -> default fallback
+    monkeypatch.delenv("OPENAI_MODEL", raising=False)
+    monkeypatch.delenv("openai_model", raising=False)
+    assert settings.get_openai_model() == "gpt-4o-mini"
+
+    # 6. Provider recognition
+    monkeypatch.setenv("AI_PROVIDER", "openai")
+    assert settings.get_ai_provider() == "openai"
+
+    # 7. Health response has zero secret leakage
+    health_res = client.get("/api/health")
+    assert health_res.status_code == 200
+    h_data = health_res.json()
+    assert "sk-proj" not in str(h_data)
+    assert "OPENAI_API_KEY" not in str(h_data)
+

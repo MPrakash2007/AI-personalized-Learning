@@ -258,7 +258,7 @@ export default function AITutorPage() {
       setMessages(prev => [...prev, aiResponse]);
     } catch (err) {
       console.error('AI Tutor chat failed:', err);
-      const friendlyMsg = err.userFriendlyMessage || 'The AI Tutor is temporarily unavailable. Please try again.';
+      const friendlyMsg = err.response?.data?.detail || err.userFriendlyMessage || 'The AI Tutor is temporarily unavailable. Please try again.';
       toast.error(friendlyMsg);
       setMessages(prev => [
         ...prev,

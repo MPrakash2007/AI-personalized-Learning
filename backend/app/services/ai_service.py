@@ -275,11 +275,12 @@ class OpenAIProvider(AIProvider):
 
 def get_ai_provider() -> AIProvider:
     """Factory to return configured AI provider with seamless fallback."""
-    if settings.OPENAI_API_KEY or settings.AI_PROVIDER == "openai":
+    provider = settings.get_ai_provider()
+    if provider == "openai" or settings.get_openai_api_key():
         return OpenAIProvider()
-    if settings.AI_PROVIDER == "ollama":
-        provider = OllamaProvider(settings.OLLAMA_BASE_URL, settings.OLLAMA_MODEL)
-        if provider._is_healthy():
-            return provider
+    if provider == "ollama":
+        ollama_prov = OllamaProvider(settings.OLLAMA_BASE_URL, settings.OLLAMA_MODEL)
+        if ollama_prov._is_healthy():
+            return ollama_prov
     return RuleBasedSmartProvider()
 

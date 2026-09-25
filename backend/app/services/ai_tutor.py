@@ -57,9 +57,24 @@ class OpenAITutorService:
     """
 
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
-        self.api_key = (api_key or settings.OPENAI_API_KEY or "").strip()
-        self.model = (model or settings.OPENAI_MODEL or "gpt-4o-mini").strip()
+        self._explicit_api_key = (api_key or "").strip()
+        self._explicit_model = (model or "").strip()
         self._client = None
+        self._cached_key = None
+
+    @property
+    def api_key(self) -> str:
+        """Dynamically resolves the OpenAI API key."""
+        if self._explicit_api_key:
+            return self._explicit_api_key
+        return settings.get_openai_api_key()
+
+    @property
+    def model(self) -> str:
+        """Dynamically resolves the OpenAI model name."""
+        if self._explicit_model:
+            return self._explicit_model
+        return settings.get_openai_model()
 
     def is_configured(self) -> bool:
         """Returns True if a non-empty OpenAI API key is configured."""
@@ -67,14 +82,18 @@ class OpenAITutorService:
 
     def _get_client(self):
         """Lazily initializes and caches the OpenAI client instance."""
-        if self._client is None and self.is_configured():
+        current_key = self.api_key
+        if not current_key:
+            return None
+        if self._client is None or getattr(self, "_cached_key", None) != current_key:
             try:
                 from openai import OpenAI
                 self._client = OpenAI(
-                    api_key=self.api_key,
+                    api_key=current_key,
                     timeout=28.0,
                     max_retries=2
                 )
+                self._cached_key = current_key
             except Exception as e:
                 logger.error(f"Failed to initialize OpenAI client: {sanitize_ai_log(str(e))}")
                 self._client = None
@@ -194,22 +213,22 @@ class OpenAITutorService:
             clean_exc = sanitize_ai_log(str(exc))
             logger.error(f"OpenAI API call failed ({exc_name}): {clean_exc}")
 
-            # Specific handling for common error scenarios
-            if "AuthenticationError" in exc_name or "invalid_api_key" in clean_exc.lower():
-                user_msg = "The AI Tutor encountered an authentication issue with the configured OpenAI API key. Please check server environment settings."
-            elif "RateLimitError" in exc_name:
-                user_msg = "The AI Tutor is currently experiencing high demand (rate limit reached). Please wait a few moments and try again."
+            # Specific handling for common error scenarios per requirements
+            if "AuthenticationError" in exc_name or "invalid_api_key" in clean_exc.lower() or "401" in clean_exc:
+                user_msg = "AI service authentication failed. Please verify the OpenAI API configuration."
+            elif "RateLimitError" in exc_name or "429" in clean_exc:
+                user_msg = "AI service rate limit or quota reached. Please try again later."
             elif "APITimeoutError" in exc_name or "Timeout" in exc_name:
-                user_msg = "The AI Tutor request timed out. Please try asking again."
+                user_msg = "AI service timed out. Please try again."
             elif "APIConnectionError" in exc_name:
-                user_msg = "Unable to connect to the OpenAI service. Please verify server internet connectivity."
+                user_msg = "Unable to connect to the OpenAI service. Please try again shortly."
             else:
                 user_msg = "The AI Tutor is temporarily unavailable. Please try again shortly."
 
             # Return graceful educational fallback if available
             fallback_ans, fallback_followups, _ = self._generate_intelligent_offline_response(query_text, subject, action, marks)
             if fallback_ans:
-                return f"{fallback_ans}\n\n> ⚠️ *Note: {user_msg}*", fallback_followups, "offline-fallback"
+                return f"{fallback_ans}\n\n> ⚠️ *Notice: {user_msg}*", fallback_followups, "offline-fallback"
             return user_msg, [], self.model
 
     def _extract_followups(self, text: str) -> Tuple[str, List[str]]:

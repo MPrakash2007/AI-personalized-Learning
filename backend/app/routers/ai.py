@@ -22,12 +22,23 @@ from app.schemas.ai import (
 from app.auth.deps import get_current_user
 from app.services.ai_tutor import get_ai_tutor_service
 from app.services.ai_service import get_ai_provider
+from app.config import settings
 from app.services.gamification_service import unlock_achievement
 from app.services.retrieval_service import search_educational_knowledge
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["AI Tutor"])
+
+@router.get("/status")
+def get_ai_tutor_status():
+    """Safe diagnostic endpoint reporting AI Tutor configuration status without secrets."""
+    service = get_ai_tutor_service()
+    return {
+        "configured": service.is_configured(),
+        "provider": settings.get_ai_provider(),
+        "model": service.model,
+    }
 
 @router.get("/search")
 def search_ai_knowledge(

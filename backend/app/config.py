@@ -1,8 +1,7 @@
 import os
 import shutil
 from typing import List, Union
-from pydantic import ConfigDict
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "CodeOrbit"
@@ -69,6 +68,87 @@ class Settings(BaseSettings):
             return "codeorbit_super_secret_jwt_key_2026_engineering_students"
         return secret
 
+    def get_openai_api_key(self) -> str:
+        """
+        Dynamically resolves the OpenAI API key from environment variables or settings.
+        Handles variations in casing (OPENAI_API_KEY, openai_api_key) and cleans surrounding quotes.
+        Never returns secrets in logs or responses.
+        """
+        val = (
+            os.getenv("OPENAI_API_KEY")
+            or os.getenv("openai_api_key")
+            or os.getenv("OpenAI_API_Key")
+            or os.getenv("OPEN_AI_KEY")
+            or os.getenv("OPENAI_KEY")
+            or os.getenv("OPENAI_SECRET_KEY")
+            or self.OPENAI_API_KEY
+            or ""
+        )
+        if not val:
+            for k, v in os.environ.items():
+                if k.upper() in ("OPENAI_API_KEY", "OPENAI_KEY", "OPENAI_SECRET_KEY", "OPEN_AI_KEY", "OPEN_AI_API_KEY"):
+                    val = v
+                    break
+        clean = str(val).strip()
+        if (clean.startswith('"') and clean.endswith('"')) or (clean.startswith("'") and clean.endswith("'")):
+            clean = clean[1:-1].strip()
+        return clean
+
+    def get_openai_model(self) -> str:
+        """
+        Dynamically resolves the OpenAI model name. Defaults safely to 'gpt-4o-mini'.
+        """
+        val = (
+            os.getenv("OPENAI_MODEL")
+            or os.getenv("openai_model")
+            or os.getenv("OpenAI_Model")
+            or os.getenv("OPENAI_MODEL_NAME")
+            or self.OPENAI_MODEL
+            or "gpt-4o-mini"
+        )
+        if not val:
+            for k, v in os.environ.items():
+                if k.upper() in ("OPENAI_MODEL", "OPENAI_MODEL_NAME"):
+                    val = v
+                    break
+        clean = str(val).strip()
+        if (clean.startswith('"') and clean.endswith('"')) or (clean.startswith("'") and clean.endswith("'")):
+            clean = clean[1:-1].strip()
+        return clean or "gpt-4o-mini"
+
+    def get_ai_provider(self) -> str:
+        """
+        Dynamically resolves the AI provider name.
+        """
+        val = (
+            os.getenv("AI_PROVIDER")
+            or os.getenv("ai_provider")
+            or os.getenv("Ai_Provider")
+            or self.AI_PROVIDER
+            or "openai"
+        )
+        if not val:
+            for k, v in os.environ.items():
+                if k.upper() == "AI_PROVIDER":
+                    val = v
+                    break
+        clean = str(val).strip().lower()
+        if (clean.startswith('"') and clean.endswith('"')) or (clean.startswith("'") and clean.endswith("'")):
+            clean = clean[1:-1].strip().lower()
+        if clean in ("openai", "open-ai") or not clean:
+            return "openai"
+        if self.get_openai_api_key() and clean in ("rule-based", "mock"):
+            return "openai"
+        return clean
+
+    def is_ai_configured(self) -> bool:
+        """
+        Returns True if AI provider is openai and a non-empty OpenAI API key is present.
+        """
+        provider = self.get_ai_provider()
+        api_key = self.get_openai_api_key()
+        return provider == "openai" and bool(api_key)
+
     def get_cors_origins(self) -> List[str]:
         origins = [
             "http://localhost:5173",
@@ -93,6 +173,6 @@ class Settings(BaseSettings):
                     origins.append(clean)
         return origins
 
-    model_config = ConfigDict(case_sensitive=True, extra="ignore")
+    model_config = SettingsConfigDict(case_sensitive=False, extra="ignore")
 
 settings = Settings()

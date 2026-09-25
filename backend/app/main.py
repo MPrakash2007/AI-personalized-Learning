@@ -126,13 +126,17 @@ def health_check():
     """Safe diagnostic endpoint reporting health status without exposing sensitive credentials."""
     db_check = check_db_connection()
     is_healthy = db_check.get("database") == "connected" or db_check.get("status") == "connected"
-    ai_configured = bool(settings.OPENAI_API_KEY and settings.OPENAI_API_KEY.strip())
+    ai_configured = settings.is_ai_configured()
+    ai_provider = settings.get_ai_provider()
+    ai_model = settings.get_openai_model()
     res = {
         "status": "healthy" if is_healthy else "degraded",
         "service": "CodeOrbit API",
         "database": "connected" if is_healthy else "disconnected",
         "dialect": db_check.get("dialect", "unknown"),
-        "ai_configured": ai_configured
+        "ai_configured": ai_configured,
+        "ai_provider": ai_provider,
+        "ai_model": ai_model,
     }
     if not is_healthy and "detail" in db_check:
         res["detail"] = db_check["detail"]
