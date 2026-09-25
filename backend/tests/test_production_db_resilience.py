@@ -46,8 +46,28 @@ def test_sanitize_log_masks_sensitive_keys():
 def test_postgres_url_conversion():
     s = Settings(DATABASE_URL="postgres://user:pass@host/db")
     converted = s.get_database_url()
-    assert converted.startswith("postgresql://")
+    assert converted.startswith("postgresql+psycopg2://")
     assert not converted.startswith("postgres://")
+
+
+def test_psycopg_v3_url_normalized_to_psycopg2():
+    s = Settings(DATABASE_URL="postgresql+psycopg://user:pass@host/db")
+    converted = s.get_database_url()
+    assert converted.startswith("postgresql+psycopg2://")
+    assert "postgresql+psycopg://" not in converted
+
+
+def test_plain_postgresql_url_normalized_to_psycopg2():
+    s = Settings(DATABASE_URL="postgresql://user:pass@host/db")
+    converted = s.get_database_url()
+    assert converted.startswith("postgresql+psycopg2://")
+
+
+def test_postgresql_engine_driver_is_psycopg2():
+    from sqlalchemy import create_engine
+    eng = create_engine("postgresql+psycopg2://mockuser:mockpass@localhost:5432/mockdb")
+    assert eng.dialect.name == "postgresql"
+    assert eng.dialect.driver == "psycopg2"
 
 
 def test_vercel_production_fails_without_database_url(monkeypatch):
@@ -77,6 +97,28 @@ def test_health_check_endpoint_structure():
     assert data["database"] in ("connected", "disconnected")
 
 
+def test_health_check_reports_postgresql_when_connected(monkeypatch):
+    from unittest.mock import patch, MagicMock
+    mock_engine = MagicMock()
+    mock_engine.dialect.name = "postgresql"
+    mock_conn = MagicMock()
+    mock_engine.connect.return_value.__enter__.return_value = mock_conn
+
+    with patch("app.database.get_engine", return_value=mock_engine), \
+         patch("app.database.init_db", return_value=True):
+        diag = check_db_connection()
+        assert diag["database"] == "connected"
+        assert diag["dialect"] == "postgresql"
+
+    with patch("app.main.check_db_connection", return_value={"database": "connected", "dialect": "postgresql"}):
+        res = client.get("/api/health")
+        assert res.status_code == 200
+        body = res.json()
+        assert body["status"] == "healthy"
+        assert body["database"] == "connected"
+        assert body["dialect"] == "postgresql"
+
+
 def test_pg8000_url_sanitization():
     from urllib.parse import urlparse, parse_qs, urlencode
     url = "postgresql://usr:pwd@ep-xy-pooler.neon.tech/neondb?sslmode=require"
@@ -92,3 +134,4 @@ def test_check_db_connection_diagnostic():
     assert "database" in diag
     assert "dialect" in diag
     assert diag["database"] in ("connected", "disconnected")
+

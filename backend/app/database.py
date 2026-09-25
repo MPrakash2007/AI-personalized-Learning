@@ -99,8 +99,16 @@ def get_engine():
     is_remote = parsed.hostname not in ("localhost", "127.0.0.1", "::1", None)
 
     if has_psycopg2:
-        # Use psycopg2 driver
-        resolved_url = db_url
+        # Use psycopg2 driver explicitly to prevent SQLAlchemy attempting to load psycopg (v3)
+        if db_url.startswith("postgresql+psycopg://"):
+            resolved_url = db_url.replace("postgresql+psycopg://", "postgresql+psycopg2://", 1)
+        elif db_url.startswith("postgres://"):
+            resolved_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
+        elif db_url.startswith("postgresql://"):
+            resolved_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+        else:
+            resolved_url = db_url
+
         if is_remote:
             if "?" not in resolved_url:
                 resolved_url += "?sslmode=require"

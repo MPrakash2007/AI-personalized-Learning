@@ -41,9 +41,14 @@ class Settings(BaseSettings):
         
         # If PostgreSQL URL provided
         if raw_url:
-            # Handle Postgres dialect compatibility for SQLAlchemy (Neon, Supabase, Vercel Postgres provide postgres://)
-            if raw_url.startswith("postgres://"):
-                raw_url = raw_url.replace("postgres://", "postgresql://", 1)
+            # Handle Postgres dialect compatibility for SQLAlchemy (Neon, Supabase, Vercel Postgres)
+            # Ensure it consistently uses the installed psycopg2 driver
+            if raw_url.startswith("postgresql+psycopg://"):
+                raw_url = raw_url.replace("postgresql+psycopg://", "postgresql+psycopg2://", 1)
+            elif raw_url.startswith("postgres://"):
+                raw_url = raw_url.replace("postgres://", "postgresql+psycopg2://", 1)
+            elif raw_url.startswith("postgresql://"):
+                raw_url = raw_url.replace("postgresql://", "postgresql+psycopg2://", 1)
             return raw_url
 
         # In Vercel production: NEVER silently fall back to /tmp SQLite.
