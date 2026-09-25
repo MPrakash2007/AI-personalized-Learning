@@ -37,6 +37,27 @@ def auth_diagnostic(db: Session = Depends(get_db)):
         results["postgres_context_error"] = sanitize_db_log(str(e))
         db.rollback()
 
+    # 0b. Test SET ROLE neondb_owner
+    try:
+        db.execute(text("SET ROLE neondb_owner;"))
+        u_after = db.execute(text("SELECT current_user;")).scalar()
+        results["set_role_neondb_owner"] = f"success, current_user={u_after}"
+        # Test query users under neondb_owner!
+        u_test = db.execute(text("SELECT count(*) FROM users;")).scalar()
+        results["users_count_under_neondb_owner"] = u_test
+        db.rollback()
+    except Exception as e:
+        db.rollback()
+        results["set_role_error"] = sanitize_db_log(str(e))
+
+    # 0c. Role memberships
+    try:
+        members = db.execute(text("SELECT m.roleid::regrole::text, m.member::regrole::text FROM pg_auth_members m;")).fetchall()
+        results["role_memberships"] = [{"role": r[0], "member": r[1]} for r in members]
+    except Exception as e:
+        db.rollback()
+        results["role_memberships_error"] = sanitize_db_log(str(e))
+
     # 1. Existing tables from pg_catalog (bypasses information_schema permissions filter)
     try:
         pg_rows = db.execute(text("SELECT schemaname, tablename, tableowner FROM pg_catalog.pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema');")).fetchall()
