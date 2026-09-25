@@ -1,9 +1,11 @@
 import logging
+import sys
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, OperationalError, DatabaseError, ProgrammingError
 from datetime import datetime, timezone
-from app.database import get_db, init_db
+from app.database import get_db, init_db, Base, sanitize_db_log
 from app.models.user import User, UserPreferences, LearningStreak, XPTransaction
 from app.schemas.auth import (
     UserRegister, UserLogin, TokenResponse, UserResponse,
@@ -17,6 +19,63 @@ logger = logging.getLogger("uvicorn.error")
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+@router.get("/diagnostic")
+def auth_diagnostic(db: Session = Depends(get_db)):
+    """Safe diagnostic endpoint inspecting tables, columns, and query errors without secrets."""
+    results = {}
+    
+    # 1. Existing tables
+    try:
+        table_rows = db.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema='public';")).fetchall()
+        results["existing_tables"] = sorted([r[0] for r in table_rows])
+    except Exception as e:
+        results["tables_error"] = sanitize_db_log(str(e))
+        db.rollback()
+
+    # 2. Existing columns of users
+    try:
+        col_rows = db.execute(text("SELECT column_name, data_type FROM information_schema.columns WHERE table_name='users';")).fetchall()
+        results["users_columns"] = {r[0]: r[1] for r in col_rows}
+    except Exception as e:
+        results["users_columns_error"] = sanitize_db_log(str(e))
+        db.rollback()
+
+    # 3. Existing columns of user_preferences
+    try:
+        pref_cols = db.execute(text("SELECT column_name, data_type FROM information_schema.columns WHERE table_name='user_preferences';")).fetchall()
+        results["user_preferences_columns"] = {r[0]: r[1] for r in pref_cols}
+    except Exception as e:
+        results["user_preferences_columns_error"] = sanitize_db_log(str(e))
+        db.rollback()
+
+    # 4. Existing columns of learning_streaks
+    try:
+        streak_cols = db.execute(text("SELECT column_name, data_type FROM information_schema.columns WHERE table_name='learning_streaks';")).fetchall()
+        results["learning_streaks_columns"] = {r[0]: r[1] for r in streak_cols}
+    except Exception as e:
+        results["learning_streaks_columns_error"] = sanitize_db_log(str(e))
+        db.rollback()
+
+    # 5. Test db.query(User).first()
+    try:
+        u = db.query(User).first()
+        results["user_query"] = "success"
+        results["user_found"] = bool(u)
+    except Exception as e:
+        db.rollback()
+        orig = getattr(e, "orig", e)
+        results["user_query_error"] = sanitize_db_log(f"{type(e).__name__}: {orig}")
+
+    # 6. Test Base.metadata.create_all
+    try:
+        Base.metadata.create_all(bind=db.bind)
+        results["create_all"] = "success"
+    except Exception as e:
+        orig = getattr(e, "orig", e)
+        results["create_all_error"] = sanitize_db_log(f"{type(e).__name__}: {orig}")
+
+    return results
+
 @router.post("/register", response_model=TokenResponse)
 def register(user_in: UserRegister, db: Session = Depends(get_db)):
     if user_in.password != user_in.confirm_password:
@@ -28,25 +87,34 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
     # Query for existing user with table self-healing if needed
     try:
         existing_user = db.query(User).filter(User.email == email).first()
-    except ProgrammingError:
-        # Table may not exist yet in a fresh database
+    except ProgrammingError as e:
         db.rollback()
+        orig = getattr(e, "orig", e)
+        clean_msg = sanitize_db_log(str(orig))
+        sys.stderr.write(f"\n[REGISTER LOOKUP ERROR 1] ProgrammingError: {clean_msg}\n")
+        sys.stderr.flush()
         init_db(force=True)
         try:
             existing_user = db.query(User).filter(User.email == email).first()
-        except Exception as e:
+        except Exception as e2:
             db.rollback()
-            logger.error(f"Database lookup error after table creation: {type(e).__name__}")
+            orig2 = getattr(e2, "orig", e2)
+            clean_msg2 = sanitize_db_log(str(orig2))
+            sys.stderr.write(f"\n[REGISTER LOOKUP ERROR 2] {type(e2).__name__}: {clean_msg2}\n")
+            sys.stderr.flush()
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Database service is initializing. Please try again in a few moments."
+                detail=f"Database error during registration lookup ({type(e2).__name__}): {clean_msg2}"
             )
     except (OperationalError, DatabaseError) as e:
         db.rollback()
-        logger.error(f"Database connectivity error during registration lookup: {type(e).__name__}")
+        orig = getattr(e, "orig", e)
+        clean_msg = sanitize_db_log(str(orig))
+        sys.stderr.write(f"\n[REGISTER DB ERROR] {type(e).__name__}: {clean_msg}\n")
+        sys.stderr.flush()
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database service is temporarily unavailable. Please try again shortly."
+            detail=f"Database error during registration lookup ({type(e).__name__}): {clean_msg}"
         )
 
     if existing_user:
@@ -119,10 +187,14 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
         user = db.query(User).filter(User.email == email).first()
     except (OperationalError, DatabaseError) as e:
         db.rollback()
-        logger.error(f"Database error during login: {type(e).__name__}")
+        orig = getattr(e, "orig", e)
+        clean_msg = sanitize_db_log(str(orig))
+        sys.stderr.write(f"\n[LOGIN DB ERROR] {type(e).__name__}: {clean_msg}\n")
+        sys.stderr.flush()
+        logger.error(f"Database error during login: {type(e).__name__}: {clean_msg}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database service is temporarily unavailable. Please try again shortly."
+            detail=f"Database error during login ({type(e).__name__}): {clean_msg}"
         )
 
     if not user or not verify_password(login_in.password, user.hashed_password):

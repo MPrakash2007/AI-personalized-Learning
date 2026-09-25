@@ -20,7 +20,20 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user_id is None:
         raise credentials_exception
     
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    try:
+        user = db.query(User).filter(User.id == int(user_id)).first()
+    except Exception as e:
+        db.rollback()
+        from app.database import sanitize_db_log
+        import sys
+        orig = getattr(e, "orig", e)
+        clean_msg = sanitize_db_log(str(orig))
+        sys.stderr.write(f"\n[GET_CURRENT_USER DB ERROR] {type(e).__name__}: {clean_msg}\n")
+        sys.stderr.flush()
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Database error during user authentication ({type(e).__name__}): {clean_msg}"
+        )
     if user is None:
         raise credentials_exception
     return user
