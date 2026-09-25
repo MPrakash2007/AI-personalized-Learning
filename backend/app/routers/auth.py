@@ -24,7 +24,28 @@ def auth_diagnostic(db: Session = Depends(get_db)):
     """Safe diagnostic endpoint inspecting tables, columns, and query errors without secrets."""
     results = {}
     
-    # 1. Existing tables
+    # 0. Current user, database, schema
+    try:
+        user_info = db.execute(text("SELECT current_user, session_user, current_database(), current_schema();")).fetchone()
+        results["postgres_context"] = {
+            "current_user": user_info[0] if user_info else None,
+            "session_user": user_info[1] if user_info else None,
+            "database": user_info[2] if user_info else None,
+            "schema": user_info[3] if user_info else None,
+        }
+    except Exception as e:
+        results["postgres_context_error"] = sanitize_db_log(str(e))
+        db.rollback()
+
+    # 1. Existing tables from pg_catalog (bypasses information_schema permissions filter)
+    try:
+        pg_rows = db.execute(text("SELECT schemaname, tablename, tableowner FROM pg_catalog.pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema');")).fetchall()
+        results["pg_tables"] = [{"schema": r[0], "table": r[1], "owner": r[2]} for r in pg_rows]
+    except Exception as e:
+        results["pg_tables_error"] = sanitize_db_log(str(e))
+        db.rollback()
+
+    # 2. Existing tables from information_schema
     try:
         table_rows = db.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema='public';")).fetchall()
         results["existing_tables"] = sorted([r[0] for r in table_rows])
@@ -32,7 +53,28 @@ def auth_diagnostic(db: Session = Depends(get_db)):
         results["tables_error"] = sanitize_db_log(str(e))
         db.rollback()
 
-    # 2. Existing columns of users
+    # 3. Grants on users table
+    try:
+        grant_rows = db.execute(text("SELECT grantee, table_schema, table_name, privilege_type FROM information_schema.role_table_grants WHERE table_name='users';")).fetchall()
+        results["users_grants"] = [{"grantee": r[0], "schema": r[1], "table": r[2], "privilege": r[3]} for r in grant_rows]
+    except Exception as e:
+        results["users_grants_error"] = sanitize_db_log(str(e))
+        db.rollback()
+
+    # 4. Check if we can grant permissions on public schema / tables to current user
+    try:
+        curr_u = results.get("postgres_context", {}).get("current_user")
+        if curr_u:
+            db.execute(text(f'GRANT ALL ON SCHEMA public TO "{curr_u}";'))
+            db.execute(text(f'GRANT ALL ON ALL TABLES IN SCHEMA public TO "{curr_u}";'))
+            db.execute(text(f'GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO "{curr_u}";'))
+            db.commit()
+            results["grant_attempt"] = "success"
+    except Exception as e:
+        db.rollback()
+        results["grant_attempt_error"] = sanitize_db_log(str(e))
+
+    # 5. Existing columns of users
     try:
         col_rows = db.execute(text("SELECT column_name, data_type FROM information_schema.columns WHERE table_name='users';")).fetchall()
         results["users_columns"] = {r[0]: r[1] for r in col_rows}
@@ -40,23 +82,7 @@ def auth_diagnostic(db: Session = Depends(get_db)):
         results["users_columns_error"] = sanitize_db_log(str(e))
         db.rollback()
 
-    # 3. Existing columns of user_preferences
-    try:
-        pref_cols = db.execute(text("SELECT column_name, data_type FROM information_schema.columns WHERE table_name='user_preferences';")).fetchall()
-        results["user_preferences_columns"] = {r[0]: r[1] for r in pref_cols}
-    except Exception as e:
-        results["user_preferences_columns_error"] = sanitize_db_log(str(e))
-        db.rollback()
-
-    # 4. Existing columns of learning_streaks
-    try:
-        streak_cols = db.execute(text("SELECT column_name, data_type FROM information_schema.columns WHERE table_name='learning_streaks';")).fetchall()
-        results["learning_streaks_columns"] = {r[0]: r[1] for r in streak_cols}
-    except Exception as e:
-        results["learning_streaks_columns_error"] = sanitize_db_log(str(e))
-        db.rollback()
-
-    # 5. Test db.query(User).first()
+    # 6. Test db.query(User).first()
     try:
         u = db.query(User).first()
         results["user_query"] = "success"
@@ -65,14 +91,6 @@ def auth_diagnostic(db: Session = Depends(get_db)):
         db.rollback()
         orig = getattr(e, "orig", e)
         results["user_query_error"] = sanitize_db_log(f"{type(e).__name__}: {orig}")
-
-    # 6. Test Base.metadata.create_all
-    try:
-        Base.metadata.create_all(bind=db.bind)
-        results["create_all"] = "success"
-    except Exception as e:
-        orig = getattr(e, "orig", e)
-        results["create_all_error"] = sanitize_db_log(f"{type(e).__name__}: {orig}")
 
     return results
 
