@@ -223,12 +223,14 @@ def init_db(force: bool = False) -> bool:
             with eng.connect() as conn:
                 dialect = eng.dialect.name
                 if "postgres" in dialect:
-                    # Check if column exists first to avoid unnecessary ALTER TABLE
+                    # Check if column exists first using pg_catalog to avoid unnecessary ALTER TABLE and permission errors
                     has_subject = False
                     try:
                         has_subject = bool(conn.execute(text(
-                            "SELECT 1 FROM information_schema.columns "
-                            "WHERE table_schema = 'public' AND table_name = 'chat_sessions' AND column_name = 'subject';"
+                            "SELECT 1 FROM pg_catalog.pg_attribute a "
+                            "JOIN pg_catalog.pg_class c ON a.attrelid = c.oid "
+                            "JOIN pg_catalog.pg_namespace n ON c.relnamespace = n.oid "
+                            "WHERE n.nspname = 'public' AND c.relname = 'chat_sessions' AND a.attname = 'subject' AND NOT a.attisdropped;"
                         )).scalar())
                     except Exception:
                         conn.rollback()

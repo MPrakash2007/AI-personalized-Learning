@@ -80,12 +80,48 @@ def auth_diagnostic(db: Session = Depends(get_db)):
         db.rollback()
 
 
-    # 5. Existing columns of users
+    # 5. Existing columns of users from pg_catalog (bypasses information_schema permissions)
     try:
-        col_rows = db.execute(text("SELECT column_name, data_type FROM information_schema.columns WHERE table_name='users';")).fetchall()
-        results["users_columns"] = {r[0]: r[1] for r in col_rows}
+        col_rows = db.execute(text(
+            "SELECT a.attname, format_type(a.atttypid, a.atttypmod) "
+            "FROM pg_catalog.pg_attribute a "
+            "JOIN pg_catalog.pg_class c ON a.attrelid = c.oid "
+            "JOIN pg_catalog.pg_namespace n ON c.relnamespace = n.oid "
+            "WHERE n.nspname = 'public' AND c.relname = 'users' AND a.attnum > 0 AND NOT a.attisdropped "
+            "ORDER BY a.attnum;"
+        )).fetchall()
+        results["users_columns_pg_catalog"] = {r[0]: r[1] for r in col_rows}
     except Exception as e:
-        results["users_columns_error"] = sanitize_db_log(str(e))
+        results["users_columns_pg_catalog_error"] = sanitize_db_log(str(e))
+        db.rollback()
+
+    # 5b. pg_roles inspection
+    try:
+        role_rows = db.execute(text("SELECT rolname, rolsuper, rolinherit, rolcreaterole, rolcreatedb, rolcanlogin FROM pg_roles;")).fetchall()
+        results["pg_roles"] = [{"name": r[0], "super": r[1], "inherit": r[2], "create_role": r[3], "create_db": r[4], "can_login": r[5]} for r in role_rows]
+    except Exception as e:
+        results["pg_roles_error"] = sanitize_db_log(str(e))
+        db.rollback()
+
+    # 5c. Permissions on public schema and users table
+    try:
+        perm_test = db.execute(text("""
+            SELECT
+                has_schema_privilege('public', 'USAGE') as public_usage,
+                has_schema_privilege('public', 'CREATE') as public_create,
+                has_table_privilege('public.users', 'SELECT') as users_select,
+                has_table_privilege('public.users', 'INSERT') as users_insert,
+                has_table_privilege('public.users', 'UPDATE') as users_update
+        """)).fetchone()
+        results["authenticator_privileges"] = {
+            "public_usage": perm_test[0] if perm_test else None,
+            "public_create": perm_test[1] if perm_test else None,
+            "users_select": perm_test[2] if perm_test else None,
+            "users_insert": perm_test[3] if perm_test else None,
+            "users_update": perm_test[4] if perm_test else None,
+        }
+    except Exception as e:
+        results["authenticator_privileges_error"] = sanitize_db_log(str(e))
         db.rollback()
 
     # 6. Test db.query(User).first()
