@@ -21,133 +21,6 @@ logger = logging.getLogger("uvicorn.error")
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-@router.get("/diagnostic")
-def auth_diagnostic(db: Session = Depends(get_db)):
-    """Safe diagnostic endpoint inspecting tables, columns, and query errors without secrets."""
-    results = {}
-    
-    # 0. Current user, database, schema
-    try:
-        user_info = db.execute(text("SELECT current_user, session_user, current_database(), current_schema();")).fetchone()
-        results["postgres_context"] = {
-            "current_user": user_info[0] if user_info else None,
-            "session_user": user_info[1] if user_info else None,
-            "database": user_info[2] if user_info else None,
-            "schema": user_info[3] if user_info else None,
-        }
-    except Exception as e:
-        results["postgres_context_error"] = sanitize_db_log(str(e))
-        db.rollback()
-
-    # 0b. What tables CAN authenticator/authenticated/PUBLIC access?
-    try:
-        grants = db.execute(text("SELECT grantee, table_schema, table_name, privilege_type FROM information_schema.role_table_grants WHERE grantee IN ('authenticator', 'authenticated', 'anonymous', 'PUBLIC');")).fetchall()
-        results["grants_for_current_role"] = [{"grantee": r[0], "schema": r[1], "table": r[2], "privilege": r[3]} for r in grants]
-    except Exception as e:
-        db.rollback()
-        results["grants_error"] = sanitize_db_log(str(e))
-
-    # 0c. Role memberships
-    try:
-        members = db.execute(text("SELECT m.roleid::regrole::text, m.member::regrole::text FROM pg_auth_members m;")).fetchall()
-        results["role_memberships"] = [{"role": r[0], "member": r[1]} for r in members]
-    except Exception as e:
-        db.rollback()
-        results["role_memberships_error"] = sanitize_db_log(str(e))
-
-    # 1. Existing tables from pg_catalog (bypasses information_schema permissions filter)
-    try:
-        pg_rows = db.execute(text("SELECT schemaname, tablename, tableowner FROM pg_catalog.pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema');")).fetchall()
-        results["pg_tables"] = [{"schema": r[0], "table": r[1], "owner": r[2]} for r in pg_rows]
-    except Exception as e:
-        results["pg_tables_error"] = sanitize_db_log(str(e))
-        db.rollback()
-
-    # 2. Existing tables from information_schema
-    try:
-        table_rows = db.execute(text("SELECT table_name FROM information_schema.tables WHERE table_schema='public';")).fetchall()
-        results["existing_tables"] = sorted([r[0] for r in table_rows])
-    except Exception as e:
-        results["tables_error"] = sanitize_db_log(str(e))
-        db.rollback()
-
-    # 3. Grants on users table
-    try:
-        grant_rows = db.execute(text("SELECT grantee, table_schema, table_name, privilege_type FROM information_schema.role_table_grants WHERE table_name='users';")).fetchall()
-        results["users_grants"] = [{"grantee": r[0], "schema": r[1], "table": r[2], "privilege": r[3]} for r in grant_rows]
-    except Exception as e:
-        results["users_grants_error"] = sanitize_db_log(str(e))
-        db.rollback()
-
-
-    # 5. Existing columns of users from pg_catalog (bypasses information_schema permissions)
-    try:
-        col_rows = db.execute(text(
-            "SELECT a.attname, format_type(a.atttypid, a.atttypmod) "
-            "FROM pg_catalog.pg_attribute a "
-            "JOIN pg_catalog.pg_class c ON a.attrelid = c.oid "
-            "JOIN pg_catalog.pg_namespace n ON c.relnamespace = n.oid "
-            "WHERE n.nspname = 'public' AND c.relname = 'users' AND a.attnum > 0 AND NOT a.attisdropped "
-            "ORDER BY a.attnum;"
-        )).fetchall()
-        results["users_columns_pg_catalog"] = {r[0]: r[1] for r in col_rows}
-    except Exception as e:
-        results["users_columns_pg_catalog_error"] = sanitize_db_log(str(e))
-        db.rollback()
-
-    # 5b. pg_roles inspection
-    try:
-        role_rows = db.execute(text("SELECT rolname, rolsuper, rolinherit, rolcreaterole, rolcreatedb, rolcanlogin FROM pg_roles;")).fetchall()
-        results["pg_roles"] = [{"name": r[0], "super": r[1], "inherit": r[2], "create_role": r[3], "create_db": r[4], "can_login": r[5]} for r in role_rows]
-    except Exception as e:
-        results["pg_roles_error"] = sanitize_db_log(str(e))
-        db.rollback()
-
-    # 5c. Permissions on public schema and users table
-    try:
-        perm_test = db.execute(text("""
-            SELECT
-                has_schema_privilege('public', 'USAGE') as public_usage,
-                has_schema_privilege('public', 'CREATE') as public_create,
-                has_table_privilege('public.users', 'SELECT') as users_select,
-                has_table_privilege('public.users', 'INSERT') as users_insert,
-                has_table_privilege('public.users', 'UPDATE') as users_update
-        """)).fetchone()
-        results["authenticator_privileges"] = {
-            "public_usage": perm_test[0] if perm_test else None,
-            "public_create": perm_test[1] if perm_test else None,
-            "users_select": perm_test[2] if perm_test else None,
-            "users_insert": perm_test[3] if perm_test else None,
-            "users_update": perm_test[4] if perm_test else None,
-        }
-    except Exception as e:
-        results["authenticator_privileges_error"] = sanitize_db_log(str(e))
-        db.rollback()
-
-    # 5d. Any procedures/functions in public or neon_auth?
-    try:
-        proc_rows = db.execute(text(
-            "SELECT proname, pronamespace::regnamespace::text, prosecdef "
-            "FROM pg_proc "
-            "WHERE pronamespace::regnamespace::text IN ('public', 'neon_auth');"
-        )).fetchall()
-        results["custom_functions"] = [{"name": r[0], "schema": r[1], "security_definer": r[2]} for r in proc_rows]
-    except Exception as e:
-        results["custom_functions_error"] = sanitize_db_log(str(e))
-        db.rollback()
-
-    # 6. Test db.query(User).first()
-    try:
-        u = db.query(User).first()
-        results["user_query"] = "success"
-        results["user_found"] = bool(u)
-    except Exception as e:
-        db.rollback()
-        orig = getattr(e, "orig", e)
-        results["user_query_error"] = sanitize_db_log(f"{type(e).__name__}: {orig}")
-
-    return results
-
 @router.post("/register", response_model=TokenResponse)
 def register(user_in: UserRegister, db: Session = Depends(get_db)):
     if user_in.password != user_in.confirm_password:
@@ -236,10 +109,14 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
         )
     except (OperationalError, DatabaseError) as e:
         db.rollback()
-        logger.error(f"Database error during user persistence: {type(e).__name__}")
+        orig = getattr(e, "orig", e)
+        clean_msg = sanitize_db_log(str(orig))
+        sys.stderr.write(f"\n[REGISTER PERSISTENCE DB ERROR] {type(e).__name__}: {clean_msg}\n")
+        sys.stderr.flush()
+        logger.error(f"Database error during user persistence: {type(e).__name__}: {clean_msg}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database service is temporarily unavailable. Please try again shortly."
+            detail=f"Database service is temporarily unavailable. Error during user persistence ({type(e).__name__}): {clean_msg}"
         )
     except Exception as e:
         db.rollback()
