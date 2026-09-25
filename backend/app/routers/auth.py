@@ -120,6 +120,10 @@ def auth_diagnostic(db: Session = Depends(get_db)):
             "users_insert": perm_test[3] if perm_test else None,
             "users_update": perm_test[4] if perm_test else None,
         }
+    except Exception as e:
+        results["authenticator_privileges_error"] = sanitize_db_log(str(e))
+        db.rollback()
+
     # 5d. Any procedures/functions in public or neon_auth?
     try:
         proc_rows = db.execute(text(
